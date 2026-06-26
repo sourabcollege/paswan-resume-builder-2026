@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ job.title }} - Paswan Resume Builder</title>
+  <style>
+    :root{--ink:#17202a;--muted:#637083;--line:rgba(23,32,42,.12);--panel:rgba(255,255,255,.78);--accent:#1f6f78;--good:#1f8a5c;--warn:#c47f17;--low:#b54747;--critical:#8b1e1e}
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;background:linear-gradient(135deg,#f8fffc,#eef4ff 62%,#fbf7ff);color:var(--ink);font:15px/1.5 Inter,Arial,sans-serif}
+    .shell{width:min(1080px,calc(100% - 32px));margin:0 auto;padding:30px 0}
+    .top{align-items:flex-start;display:flex;justify-content:space-between;gap:16px;margin-bottom:22px;flex-wrap:wrap}
+    h1{font-size:34px;margin:0 0 8px;letter-spacing:0}
+    h2{font-size:20px;margin:0 0 12px}
+    .btn{border:1px solid var(--line);border-radius:8px;color:var(--ink);cursor:pointer;display:inline-flex;font-weight:800;padding:10px 14px;text-decoration:none;background:rgba(255,255,255,.72)}
+    .btn.primary{background:linear-gradient(135deg,var(--accent),#2e9a8d);border-color:transparent;color:#fff}
+    .btn[disabled]{opacity:.55;cursor:not-allowed}
+    .meta,.empty{color:var(--muted)}
+    .layout{display:grid;grid-template-columns:1.2fr .8fr;gap:16px}
+    .card{background:var(--panel);border:1px solid var(--line);border-radius:8px;box-shadow:0 20px 70px rgba(32,48,73,.10);backdrop-filter:blur(18px);padding:18px}
+    .score-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:14px 0}
+    .score{border:1px solid var(--line);border-radius:8px;padding:12px;background:rgba(255,255,255,.55)}
+    .score strong{display:block;font-size:24px}
+    .badge{align-items:center;border-radius:999px;color:#fff;display:inline-flex;font-size:13px;font-weight:800;padding:6px 10px}
+    .badge.good{background:var(--good)} .badge.warn{background:var(--warn)} .badge.low{background:var(--low)}
+    .list{display:grid;gap:10px;margin:0;padding:0;list-style:none}
+    .item{border:1px solid var(--line);border-radius:8px;padding:12px;background:rgba(255,255,255,.52)}
+    .priority{font-size:12px;font-weight:800;letter-spacing:.04em;text-transform:uppercase}
+    .priority.critical{color:var(--critical)} .priority.high{color:var(--low)} .priority.medium{color:var(--warn)} .priority.low{color:var(--muted)}
+    .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    .chip{border:1px solid var(--line);border-radius:999px;padding:4px 9px;background:rgba(255,255,255,.7);font-size:13px}
+    .chip.good{border-color:rgba(31,138,92,.35);color:var(--good)}
+    .chip.missing{border-color:rgba(181,71,71,.35);color:var(--low)}
+    .notice{background:rgba(31,111,120,.08);border:1px solid rgba(31,111,120,.18);border-radius:8px;padding:12px 14px;margin-bottom:16px}
+    .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+    @media (max-width:900px){.layout,.score-grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="top">
+      <div>
+        <a class="btn" href="{{ url_for('jobs.list_jobs') }}">← All jobs</a>
+        <h1>{{ job.title }}</h1>
+        <div class="meta">{{ job.company_name }}{% if job.location %} · {{ job.location }}{% endif %} · {{ job.workplace_type|replace('_', ' ')|title }} · {{ job.experience_level|title }}</div>
+      </div>
+      {% if match %}
+        {% set score = match.match_score %}
+        <span class="badge {% if score >= 75 %}good{% elif score >= 50 %}warn{% else %}low{% endif %}">{{ '%.1f'|format(score) }}% match</span>
+      {% endif %}
+    </header>
+
+    {% if message %}
+      <p class="notice">{{ message }}</p>
+    {% endif %}
+
+    <section class="layout">
+      <div class="stack">
+        <article class="card">
+          <h2>Job description</h2>
+          <p>{{ job.description }}</p>
+          {% if job.responsibilities %}
+            <h2>Responsibilities</h2>
+            <p>{{ job.responsibilities }}</p>
+          {% endif %}
+          {% if job.requirements %}
+            <h2>Requirements</h2>
+            <p>{{ job.requirements }}</p>
+          {% endif %}
+        </article>
+
+        {% if match %}
+          <article class="card">
+            <h2>Match breakdown</h2>
+            <div class="score-grid">
+              <div class="score"><span class="meta">Skills</span><strong>{{ '%.0f'|format(match.skill_score) }}</strong></div>
+              <div class="score"><span class="meta">Keywords</span><strong>{{ '%.0f'|format(match.keyword_score) }}</strong></div>
+              <div class="score"><span class="meta">Experience</span><strong>{{ '%.0f'|format(match.experience_score) }}</strong></div>
+              <div class="score"><span class="meta">Education</span><strong>{{ '%.0f'|format(match.education_score) }}</strong></div>
+            </div>
+            {% if match.explanation %}
+              <ul class="list">
+                {% for line in match.explanation %}
+                  <li class="item">{{ line }}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+          </article>
+        {% endif %}
+      </div>
+
+      <aside class="stack">
+        <article class="card">
+          <h2>Skill alignment</h2>
+          {% if resume_context %}
+            <p class="meta">Compared against {{ resume_context.title }}.</p>
+          {% else %}
+            <p class="empty">Upload a resume to see skill gap analysis.</p>
+          {% endif %}
+
+          {% if match and match.matched_skills %}
+            <h2>Matched skills</h2>
+            <div class="chips">
+              {% for skill in match.matched_skills %}
+                <span class="chip good">{{ skill }}</span>
+              {% endfor %}
+            </div>
+          {% endif %}
+
+          {% if match and match.priority_gaps %}
+            <h2 style="margin-top:18px">Priority gaps</h2>
+            <ul class="list">
+              {% for gap in match.priority_gaps %}
+                <li class="item">
+                  <strong>{{ gap.skill }}</strong>
+                  <div class="priority {{ gap.priority }}">{{ gap.priority }} · {{ gap.category|replace('_', ' ') }}</div>
+                  <div class="meta">{{ gap.reason }}</div>
+                </li>
+              {% endfor %}
+            </ul>
+          {% elif match and match.missing_skills %}
+            <h2 style="margin-top:18px">Missing skills</h2>
+            <div class="chips">
+              {% for skill in match.missing_skills %}
+                <span class="chip missing">{{ skill }}</span>
+              {% endfor %}
+            </div>
+          {% endif %}
+
+          {% if resume_context %}
+            <div class="actions">
+              {% if tracking_status == 'applied' %}
+                <button class="btn" type="button" disabled>Applied</button>
+              {% else %}
+                <form method="post" action="{{ url_for('jobs.apply_to_job', job_id=job.id) }}">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                  <input type="hidden" name="resume_id" value="{{ resume_context.resume_id }}">
+                  <input type="hidden" name="version_id" value="{{ resume_context.version_id }}">
+                  <button class="btn primary" type="submit">Apply with this resume</button>
+                </form>
+              {% endif %}
+              {% if job.external_url %}
+                <a class="btn" href="{{ job.external_url }}" target="_blank" rel="noopener noreferrer">External posting</a>
+              {% endif %}
+            </div>
+          {% endif %}
+        </article>
+
+        {% if job.required_skills or job.preferred_skills %}
+          <article class="card">
+            <h2>Required skills</h2>
+            <div class="chips">
+              {% for skill in job.required_skills %}
+                <span class="chip">{{ skill }}</span>
+              {% else %}
+                <span class="meta">Not specified</span>
+              {% endfor %}
+            </div>
+            {% if job.preferred_skills %}
+              <h2 style="margin-top:16px">Preferred skills</h2>
+              <div class="chips">
+                {% for skill in job.preferred_skills %}
+                  <span class="chip">{{ skill }}</span>
+                {% endfor %}
+              </div>
+            {% endif %}
+          </article>
+        {% endif %}
+      </aside>
+    </section>
+  </main>
+</body>
+</html>

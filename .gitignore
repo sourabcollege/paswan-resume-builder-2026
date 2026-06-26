@@ -1,0 +1,11 @@
+.env
+__pycache__/
+*.pyc
+instance/
+logs/
+uploads/
+generated_resumes/
+*.sqlite3
+.venv/
+venv/
+tmp_*.pdf

@@ -1,0 +1,1041 @@
+{% extends "base.html" %}
+
+{% block title %}Job Listings - Paswan Resume Builder{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* ═══════════════════════════════════════════════════════════════
+     🌑 PASWAN RESUME BUILDER - DARK PREMIUM JOBS THEME v3.0
+     ═══════════════════════════════════════════════════════════════ */
+
+  :root {
+    --dark-bg: #0a0a1a;
+    --dark-bg-2: #12122a;
+    --dark-bg-3: #1a1a3e;
+    --dark-surface: rgba(20, 20, 50, 0.7);
+    --dark-surface-hover: rgba(30, 30, 70, 0.85);
+    --dark-text: #e8e8ff;
+    --dark-text-secondary: #8b8bb5;
+    --dark-border: rgba(139, 92, 246, 0.2);
+    --dark-border-strong: rgba(139, 92, 246, 0.4);
+
+    /* Neon Accents */
+    --neon-purple: #a855f7;
+    --neon-purple-light: #c084fc;
+    --neon-purple-glow: rgba(168, 85, 247, 0.35);
+    --neon-cyan: #06b6d4;
+    --neon-cyan-light: #67e8f9;
+    --neon-cyan-glow: rgba(6, 182, 212, 0.35);
+    --neon-pink: #ec4899;
+    --neon-pink-light: #f9a8d4;
+    --neon-pink-glow: rgba(236, 72, 153, 0.35);
+    --neon-green: #10b981;
+    --neon-green-light: #34d399;
+    --neon-green-glow: rgba(16, 185, 129, 0.35);
+    --neon-amber: #f59e0b;
+    --neon-amber-glow: rgba(245, 158, 11, 0.35);
+    --neon-red: #ef4444;
+    --neon-red-glow: rgba(239, 68, 68, 0.35);
+
+    --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.4);
+    --shadow-medium: 0 8px 40px rgba(0, 0, 0, 0.5);
+    --shadow-glow-purple: 0 0 40px rgba(168, 85, 247, 0.25);
+    --shadow-glow-cyan: 0 0 40px rgba(6, 182, 212, 0.25);
+  }
+
+  /* ── Page Background ── */
+  .jobs-page-bg {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: -2;
+    background: 
+      radial-gradient(ellipse at 15% 20%, rgba(168, 85, 247, 0.06) 0%, transparent 50%),
+      radial-gradient(ellipse at 85% 80%, rgba(6, 182, 212, 0.05) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 50%, var(--dark-bg) 0%, var(--dark-bg-2) 100%);
+  }
+
+  /* ── Animated Grid Background ── */
+  .jobs-grid-bg {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: -1;
+    background-image: 
+      linear-gradient(rgba(139, 92, 246, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(139, 92, 246, 0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    animation: gridMove 20s linear infinite;
+  }
+
+  @keyframes gridMove {
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(60px, 60px); }
+  }
+
+  /* ── Floating Orbs ── */
+  .jobs-orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(80px);
+    z-index: -1;
+    opacity: 0.35;
+    animation: orbFloat 10s ease-in-out infinite;
+  }
+
+  .jobs-orb-1 {
+    width: 350px; height: 350px;
+    background: radial-gradient(circle, var(--neon-purple), transparent 70%);
+    top: -80px; right: -80px;
+    animation-delay: 0s;
+  }
+
+  .jobs-orb-2 {
+    width: 280px; height: 280px;
+    background: radial-gradient(circle, var(--neon-cyan), transparent 70%);
+    bottom: -40px; left: -40px;
+    animation-delay: -5s;
+  }
+
+  .jobs-orb-3 {
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, var(--neon-pink), transparent 70%);
+    top: 40%; left: 60%;
+    animation-delay: -3s;
+  }
+
+  @keyframes orbFloat {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(15px, -25px) scale(1.08); }
+  }
+
+  /* ── Main Container ── */
+  .jobs-container {
+    position: relative;
+    z-index: 1;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 40px 24px 60px;
+    animation: fadeInUp 0.8s ease-out;
+  }
+
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(40px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Header ── */
+  .jobs-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
+
+  .jobs-header-left {
+    flex: 1;
+    min-width: 280px;
+  }
+
+  .jobs-header-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(6, 182, 212, 0.2));
+    color: var(--neon-cyan-light);
+    border: 1px solid rgba(168, 85, 247, 0.3);
+    margin-bottom: 12px;
+    animation: pulseGlow 3s ease-in-out infinite;
+  }
+
+  @keyframes pulseGlow {
+    0%, 100% { box-shadow: 0 0 15px rgba(168, 85, 247, 0.2); }
+    50% { box-shadow: 0 0 25px rgba(6, 182, 212, 0.3); }
+  }
+
+  .jobs-header h1 {
+    font-size: 2.6rem;
+    font-weight: 800;
+    color: var(--dark-text);
+    margin: 0;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    background: linear-gradient(135deg, var(--dark-text) 0%, var(--neon-purple-light) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .jobs-header-meta {
+    font-size: 1rem;
+    color: var(--dark-text-secondary);
+    margin-top: 8px;
+  }
+
+  .jobs-header-meta .count {
+    font-weight: 700;
+    color: var(--neon-cyan);
+  }
+
+  .jobs-header-actions {
+    display: flex;
+    gap: 12px;
+  }
+
+  /* ── Buttons ── */
+  .jobs-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 22px;
+    border-radius: 14px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .jobs-btn::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+    transition: left 0.5s ease;
+  }
+
+  .jobs-btn:hover::before {
+    left: 100%;
+  }
+
+  .jobs-btn:hover {
+    transform: translateY(-3px);
+  }
+
+  .jobs-btn-secondary {
+    background: var(--dark-surface);
+    color: var(--dark-text);
+    border: 1px solid var(--dark-border);
+    backdrop-filter: blur(10px);
+  }
+
+  .jobs-btn-secondary:hover {
+    border-color: var(--neon-cyan);
+    box-shadow: 0 0 20px var(--neon-cyan-glow);
+    color: var(--neon-cyan-light);
+  }
+
+  .jobs-btn-primary {
+    background: linear-gradient(135deg, var(--neon-purple), var(--neon-cyan));
+    color: white;
+    box-shadow: 0 8px 25px var(--neon-purple-glow);
+  }
+
+  .jobs-btn-primary:hover {
+    box-shadow: 0 12px 35px var(--neon-purple-glow), 0 0 40px var(--neon-cyan-glow);
+    filter: brightness(1.1);
+  }
+
+  .jobs-btn-external {
+    background: linear-gradient(135deg, #f59e0b, #ec4899);
+    color: white;
+    box-shadow: 0 8px 25px rgba(245, 158, 11, 0.3);
+    font-size: 0.8rem;
+    padding: 8px 16px;
+  }
+
+  .jobs-btn-external:hover {
+    box-shadow: 0 12px 35px rgba(245, 158, 11, 0.4);
+    filter: brightness(1.1);
+  }
+
+  /* ── Notice Banner ── */
+  .jobs-notice {
+    padding: 16px 20px;
+    border-radius: 16px;
+    margin-bottom: 24px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    border: 1px solid;
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    animation: fadeInUp 0.6s ease-out 0.2s both;
+  }
+
+  .jobs-notice.info {
+    background: rgba(6, 182, 212, 0.08);
+    color: var(--neon-cyan-light);
+    border-color: rgba(6, 182, 212, 0.25);
+  }
+
+  .jobs-notice.warning {
+    background: rgba(245, 158, 11, 0.08);
+    color: var(--neon-amber);
+    border-color: rgba(245, 158, 11, 0.25);
+  }
+
+  .jobs-notice.external {
+    background: rgba(168, 85, 247, 0.08);
+    color: var(--neon-purple-light);
+    border-color: rgba(168, 85, 247, 0.25);
+  }
+
+  .jobs-notice i {
+    font-size: 1.1rem;
+  }
+
+  .jobs-notice strong {
+    color: var(--dark-text);
+  }
+
+  /* ── Filter Card ── */
+  .jobs-filters {
+    background: var(--dark-surface);
+    border: 1px solid var(--dark-border);
+    border-radius: 24px;
+    padding: 28px;
+    backdrop-filter: blur(24px) saturate(1.2);
+    box-shadow: var(--shadow-medium), inset 0 1px 0 rgba(255,255,255,0.05);
+    margin-bottom: 28px;
+    position: relative;
+    overflow: hidden;
+    animation: fadeInUp 0.6s ease-out 0.3s both;
+  }
+
+  .jobs-filters::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--neon-purple), var(--neon-cyan), var(--neon-pink), var(--neon-purple));
+    background-size: 300% 100%;
+    animation: gradientShift 3s ease infinite;
+  }
+
+  @keyframes gradientShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  .jobs-filters-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 14px;
+    align-items: end;
+  }
+
+  .jobs-filter-field {
+    display: grid;
+    gap: 8px;
+  }
+
+  .jobs-filter-field label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--dark-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .jobs-filter-input {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 14px;
+    border: 1px solid var(--dark-border);
+    background: rgba(10, 10, 30, 0.5);
+    color: var(--dark-text);
+    font-size: 0.9rem;
+    font-family: inherit;
+    transition: all 0.3s ease;
+    outline: none;
+  }
+
+  .jobs-filter-input::placeholder {
+    color: rgba(139, 139, 181, 0.4);
+  }
+
+  .jobs-filter-input:focus {
+    border-color: var(--neon-purple);
+    box-shadow: 0 0 0 4px var(--neon-purple-glow), 0 0 20px rgba(168, 85, 247, 0.1);
+    background: rgba(20, 20, 50, 0.6);
+  }
+
+  select.jobs-filter-input {
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238b8bb5' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
+  }
+
+  @media (max-width: 900px) {
+    .jobs-filters-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .jobs-filters-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* ── Job Cards Grid ── */
+  .jobs-grid {
+    display: grid;
+    gap: 18px;
+  }
+
+  /* ── Job Card ── */
+  .jobs-card {
+    background: var(--dark-surface);
+    border: 1px solid var(--dark-border);
+    border-radius: 24px;
+    padding: 28px;
+    backdrop-filter: blur(20px);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: cardEnter 0.6s ease-out backwards;
+    cursor: pointer;
+  }
+
+  .jobs-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--neon-purple), var(--neon-cyan));
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .jobs-card:hover {
+    transform: translateY(-6px) scale(1.01);
+    background: var(--dark-surface-hover);
+    border-color: var(--dark-border-strong);
+    box-shadow: var(--shadow-medium), var(--shadow-glow-purple);
+  }
+
+  .jobs-card:hover::before {
+    opacity: 1;
+  }
+
+  @keyframes cardEnter {
+    from {
+      opacity: 0;
+      transform: translateY(40px) scale(0.96);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  .jobs-card:nth-child(1) { animation-delay: 0.1s; }
+  .jobs-card:nth-child(2) { animation-delay: 0.2s; }
+  .jobs-card:nth-child(3) { animation-delay: 0.3s; }
+  .jobs-card:nth-child(4) { animation-delay: 0.4s; }
+  .jobs-card:nth-child(5) { animation-delay: 0.5s; }
+
+  /* ── Card Header ── */
+  .jobs-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 14px;
+  }
+
+  .jobs-card-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .jobs-card-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--dark-text);
+    margin: 0 0 8px;
+    line-height: 1.3;
+  }
+
+  .jobs-card-title a {
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .jobs-card-title a:hover {
+    color: var(--neon-purple-light);
+  }
+
+  .jobs-card-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    font-size: 0.85rem;
+    color: var(--dark-text-secondary);
+  }
+
+  .jobs-card-meta .dot {
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--dark-text-secondary);
+    opacity: 0.4;
+  }
+
+  .jobs-card-meta .company {
+    font-weight: 600;
+    color: var(--neon-cyan-light);
+  }
+
+  .jobs-card-meta .external-badge {
+    color: var(--neon-amber);
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  .jobs-card-desc {
+    color: var(--dark-text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    margin: 0 0 16px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* ── Match Badge ── */
+  .jobs-match {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    border: 1px solid;
+    backdrop-filter: blur(10px);
+  }
+
+  .jobs-match.good {
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--neon-green-light);
+    border-color: rgba(16, 185, 129, 0.3);
+    box-shadow: 0 0 15px var(--neon-green-glow);
+  }
+
+  .jobs-match.warn {
+    background: rgba(245, 158, 11, 0.15);
+    color: var(--neon-amber);
+    border-color: rgba(245, 158, 11, 0.3);
+    box-shadow: 0 0 15px var(--neon-amber-glow);
+  }
+
+  .jobs-match.low {
+    background: rgba(239, 68, 68, 0.15);
+    color: var(--neon-red);
+    border-color: rgba(239, 68, 68, 0.3);
+    box-shadow: 0 0 15px var(--neon-red-glow);
+  }
+
+  .jobs-match.muted {
+    background: rgba(139, 139, 181, 0.1);
+    color: var(--dark-text-secondary);
+    border-color: rgba(139, 139, 181, 0.2);
+  }
+
+  .jobs-match i {
+    font-size: 0.75rem;
+  }
+
+  /* ── Skills Tags ── */
+  .jobs-skills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 14px;
+  }
+
+  .jobs-chip {
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    background: rgba(168, 85, 247, 0.1);
+    color: var(--neon-purple-light);
+    border: 1px solid rgba(168, 85, 247, 0.2);
+    transition: all 0.2s ease;
+    cursor: default;
+  }
+
+  .jobs-chip:hover {
+    background: rgba(168, 85, 247, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px var(--neon-purple-glow);
+  }
+
+  .jobs-chip.matched {
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--neon-green-light);
+    border-color: rgba(16, 185, 129, 0.3);
+  }
+
+  .jobs-chip.matched:hover {
+    box-shadow: 0 4px 12px var(--neon-green-glow);
+  }
+
+  /* ── Empty State ── */
+  .jobs-empty {
+    text-align: center;
+    padding: 80px 40px;
+    background: var(--dark-surface);
+    border: 1px solid var(--dark-border);
+    border-radius: 28px;
+    backdrop-filter: blur(20px);
+    animation: fadeInUp 0.8s ease-out;
+  }
+
+  .jobs-empty-illustration {
+    width: 160px;
+    height: 160px;
+    margin: 0 auto 28px;
+    position: relative;
+  }
+
+  .jobs-empty-illustration .circle {
+    position: absolute;
+    border-radius: 50%;
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .jobs-empty-illustration .circle-1 {
+    width: 120px; height: 120px;
+    background: linear-gradient(135deg, var(--neon-purple-light), var(--neon-purple));
+    opacity: 0.15;
+    top: 10px; left: 20px;
+  }
+
+  .jobs-empty-illustration .circle-2 {
+    width: 80px; height: 80px;
+    background: linear-gradient(135deg, var(--neon-cyan-light), var(--neon-cyan));
+    opacity: 0.2;
+    top: 50px; left: 60px;
+    animation-delay: -2s;
+  }
+
+  .jobs-empty-illustration .circle-3 {
+    width: 60px; height: 60px;
+    background: linear-gradient(135deg, var(--neon-pink-light), var(--neon-pink));
+    opacity: 0.25;
+    top: 30px; left: 10px;
+    animation-delay: -4s;
+  }
+
+  .jobs-empty-illustration .icon {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 3rem;
+    color: var(--neon-purple);
+    opacity: 0.6;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+  }
+
+  .jobs-empty h2 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--dark-text);
+    margin: 0 0 10px;
+  }
+
+  .jobs-empty p {
+    color: var(--dark-text-secondary);
+    font-size: 1rem;
+    margin: 0 0 28px;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .jobs-header h1 { font-size: 2rem; }
+    .jobs-card { padding: 20px; }
+    .jobs-card-header { flex-direction: column; }
+    .jobs-filters { padding: 20px; }
+  }
+
+  /* ── Particle Canvas ── */
+  #jobs-particles {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── Loading Skeleton ── */
+  .jobs-skeleton {
+    background: linear-gradient(90deg, var(--dark-surface) 25%, var(--dark-surface-hover) 50%, var(--dark-surface) 75%);
+    background-size: 200% 100%;
+    animation: skeleton 1.5s ease-in-out infinite;
+    border-radius: 12px;
+  }
+
+  @keyframes skeleton {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Background Effects -->
+<div class="jobs-page-bg"></div>
+<div class="jobs-grid-bg"></div>
+<div class="jobs-orb jobs-orb-1"></div>
+<div class="jobs-orb jobs-orb-2"></div>
+<div class="jobs-orb jobs-orb-3"></div>
+<canvas id="jobs-particles"></canvas>
+
+<div class="jobs-container">
+  <!-- Header -->
+  <header class="jobs-header">
+    <div class="jobs-header-left">
+      <div class="jobs-header-badge">
+        <i class="fas fa-briefcase"></i>
+        Job Board
+      </div>
+      <h1>Job Listings</h1>
+      <div class="jobs-header-meta">
+        <span class="count">{{ jobs|length }}</span> open role{% if jobs|length != 1 %}s{% endif %} available
+        {% if source == 'external' %}
+        <span style="color: var(--neon-purple); font-size: 0.8rem; margin-left: 8px;">
+          <i class="fas fa-satellite-dish"></i> Powered by Adzuna
+        </span>
+        {% endif %}
+      </div>
+    </div>
+    <div class="jobs-header-actions">
+      <a href="{{ url_for('main.dashboard') }}" class="jobs-btn jobs-btn-secondary">
+        <i class="fas fa-th-large"></i>
+        Dashboard
+      </a>
+    </div>
+  </header>
+
+  <!-- Notice -->
+  {% if source == 'external' %}
+  <div class="jobs-notice external">
+    <i class="fas fa-info-circle"></i>
+    <span>Showing <strong>real-time jobs</strong> from Adzuna API. Apply directly on the company's website.</span>
+  </div>
+  {% elif resume_context %}
+  <div class="jobs-notice info">
+    <i class="fas fa-sparkles"></i>
+    <span>Match scores use your latest resume: <strong>{{ resume_context.title }}</strong></span>
+  </div>
+  {% else %}
+  <div class="jobs-notice warning">
+    <i class="fas fa-upload"></i>
+    <span>Upload a resume to see personalized match scores for each role</span>
+  </div>
+  {% endif %}
+
+  <!-- Filters -->
+  <form class="jobs-filters" method="get" action="{{ url_for('jobs.list_jobs') }}">
+    <div class="jobs-filters-grid">
+      <div class="jobs-filter-field">
+        <label for="q"><i class="fas fa-search" style="margin-right:4px;"></i>Search</label>
+        <input type="search" id="q" name="q" class="jobs-filter-input" 
+               value="{{ filters.q or '' }}" placeholder="Title, company, skills">
+      </div>
+      <div class="jobs-filter-field">
+        <label for="location"><i class="fas fa-map-marker-alt" style="margin-right:4px;"></i>Location</label>
+        <input type="text" id="location" name="location" class="jobs-filter-input"
+               value="{{ filters.location or '' }}" placeholder="City or remote">
+      </div>
+      <div class="jobs-filter-field">
+        <label for="experience_level"><i class="fas fa-chart-line" style="margin-right:4px;"></i>Experience</label>
+        <select id="experience_level" name="experience_level" class="jobs-filter-input">
+          {% for value, label in form.experience_level.choices %}
+            <option value="{{ value }}"{% if filters.experience_level == value %} selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="jobs-filter-field">
+        <label for="workplace_type"><i class="fas fa-building" style="margin-right:4px;"></i>Workplace</label>
+        <select id="workplace_type" name="workplace_type" class="jobs-filter-input">
+          {% for value, label in form.workplace_type.choices %}
+            <option value="{{ value }}"{% if filters.workplace_type == value %} selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="jobs-filter-field">
+        <button type="submit" class="jobs-btn jobs-btn-primary" style="width:100%; justify-content:center;">
+          <i class="fas fa-filter"></i>
+          Filter Jobs
+        </button>
+      </div>
+    </div>
+  </form>
+
+  <!-- Job Cards -->
+  {% if jobs %}
+  <section class="jobs-grid" id="jobsGrid">
+    {% for entry in jobs %}
+    {% set job = entry.job %}
+    {% set match = entry.match %}
+    <article class="jobs-card" data-title="{{ job.title|lower }}" data-company="{{ job.company_name|lower }}" data-skills="{{ job.required_skills|join(' ')|lower }}">
+      <div class="jobs-card-header">
+        <div class="jobs-card-info">
+          <h2 class="jobs-card-title">
+            {% if job.source == 'external' %}
+            <a href="{{ job.external_url }}" target="_blank" rel="noopener">{{ job.title }}</a>
+            {% else %}
+            <a href="{{ url_for('jobs.job_detail', job_id=job.id) }}">{{ job.title }}</a>
+            {% endif %}
+          </h2>
+          <div class="jobs-card-meta">
+            <span class="company">{{ job.company_name }}</span>
+            {% if job.source == 'external' %}
+            <span class="dot"></span>
+            <span class="external-badge"><i class="fas fa-external-link-alt"></i> External</span>
+            {% endif %}
+            {% if job.location %}
+            <span class="dot"></span>
+            <span><i class="fas fa-map-marker-alt" style="font-size:0.7rem; margin-right:3px;"></i>{{ job.location }}</span>
+            {% endif %}
+            <span class="dot"></span>
+            <span>{{ job.workplace_type|replace('_', ' ')|title }}</span>
+            <span class="dot"></span>
+            <span>{{ job.employment_type|replace('_', ' ')|title }}</span>
+            {% if job.salary_min_cents and job.salary_max_cents %}
+            <span class="dot"></span>
+            <span style="color:var(--neon-green-light); font-weight:600;">
+              <i class="fas fa-money-bill-wave" style="font-size:0.7rem; margin-right:3px;"></i>
+              ₹{{ "{:,.0f}".format(job.salary_min_cents/100) }} - ₹{{ "{:,.0f}".format(job.salary_max_cents/100) }}
+            </span>
+            {% endif %}
+          </div>
+        </div>
+        <div>
+          {% if job.source == 'external' and job.external_url %}
+            <a href="{{ job.external_url }}" target="_blank" rel="noopener" class="jobs-btn jobs-btn-external">
+              <i class="fas fa-external-link-alt"></i>
+              Apply Externally
+            </a>
+          {% elif match %}
+            {% set score = match.match_score %}
+            <span class="jobs-match {% if score >= 75 %}good{% elif score >= 50 %}warn{% else %}low{% endif %}">
+              {% if score >= 75 %}
+                <i class="fas fa-check-circle"></i>
+              {% elif score >= 50 %}
+                <i class="fas fa-exclamation-circle"></i>
+              {% else %}
+                <i class="fas fa-times-circle"></i>
+              {% endif %}
+              {{ '%.0f'|format(score) }}% match
+            </span>
+          {% else %}
+            <span class="jobs-match muted">
+              <i class="fas fa-question-circle"></i>
+              No resume
+            </span>
+          {% endif %}
+        </div>
+      </div>
+
+      <p class="jobs-card-desc">{{ job.description[:200] }}{% if job.description|length > 200 %}…{% endif %}</p>
+
+      {% if job.required_skills %}
+      <div class="jobs-skills">
+        {% for skill in job.required_skills[:8] %}
+          {% if match and skill in match.matched_skills %}
+            <span class="jobs-chip matched"><i class="fas fa-check" style="font-size:0.6rem; margin-right:4px;"></i>{{ skill }}</span>
+          {% else %}
+            <span class="jobs-chip">{{ skill }}</span>
+          {% endif %}
+        {% endfor %}
+        {% if job.required_skills|length > 8 %}
+          <span class="jobs-chip" style="background:rgba(139,139,181,0.1); color:var(--dark-text-secondary);">+{{ job.required_skills|length - 8 }} more</span>
+        {% endif %}
+      </div>
+      {% endif %}
+    </article>
+    {% endfor %}
+  </section>
+  {% else %}
+  <!-- Empty State -->
+  <section class="jobs-empty">
+    <div class="jobs-empty-illustration">
+      <div class="circle circle-1"></div>
+      <div class="circle circle-2"></div>
+      <div class="circle circle-3"></div>
+      <div class="icon"><i class="fas fa-search"></i></div>
+    </div>
+    <h2>No Jobs Found</h2>
+    <p>No published jobs match your filters right now. Try adjusting your search criteria or check back later.</p>
+    <div style="display: flex; gap: 12px; justify-content: center;">
+      <a href="{{ url_for('jobs.list_jobs') }}" class="jobs-btn jobs-btn-secondary">
+        <i class="fas fa-redo"></i>
+        Clear Filters
+      </a>
+      <a href="https://www.adzuna.in" target="_blank" rel="noopener" class="jobs-btn jobs-btn-primary">
+        <i class="fas fa-external-link-alt"></i>
+        Browse Adzuna
+      </a>
+    </div>
+  </section>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // ═══════════════════════════════════════════════════════════════
+  // 🌑 DARK PREMIUM JOBS INTERACTIVITY
+  // ═══════════════════════════════════════════════════════════════
+
+  // ── Particle System ──
+  (function() {
+    const canvas = document.getElementById('jobs-particles');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    let animId;
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    class Particle {
+      constructor() {
+        this.reset();
+      }
+      reset() {
+        this.x = Math.random() * canvas.width;
+        this.y = canvas.height + 10;
+        this.size = Math.random() * 2 + 0.5;
+        this.speedY = Math.random() * 0.5 + 0.2;
+        this.speedX = Math.random() * 0.4 - 0.2;
+        this.opacity = Math.random() * 0.5 + 0.1;
+        const colors = ['#a855f7', '#06b6d4', '#ec4899', '#10b981'];
+        this.color = colors[Math.floor(Math.random() * colors.length)];
+      }
+      update() {
+        this.y -= this.speedY;
+        this.x += this.speedX + Math.sin(this.y * 0.01) * 0.3;
+        if (this.y < -10) this.reset();
+      }
+      draw() {
+        ctx.save();
+        ctx.globalAlpha = this.opacity;
+        ctx.fillStyle = this.color;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    for (let i = 0; i < 35; i++) {
+      const p = new Particle();
+      p.y = Math.random() * canvas.height;
+      particles.push(p);
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => { p.update(); p.draw(); });
+      animId = requestAnimationFrame(animate);
+    }
+    animate();
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) cancelAnimationFrame(animId);
+      else animate();
+    });
+  })();
+
+  // ── Card Click (Entire card clickable) ──
+  (function() {
+    document.querySelectorAll('.jobs-card').forEach(card => {
+      card.addEventListener('click', (e) => {
+        if (e.target.closest('a') || e.target.closest('button')) return;
+        const link = card.querySelector('.jobs-card-title a');
+        if (link) link.click();
+      });
+    });
+  })();
+
+  // ── Filter Input Focus Effects ──
+  (function() {
+    document.querySelectorAll('.jobs-filter-input').forEach(input => {
+      input.addEventListener('focus', () => {
+        input.parentElement.style.transform = 'scale(1.02)';
+        input.parentElement.style.transition = 'transform 0.3s ease';
+      });
+      input.addEventListener('blur', () => {
+        input.parentElement.style.transform = '';
+      });
+    });
+  })();
+
+  // ── Magnetic Button Effect ──
+  (function() {
+    const buttons = document.querySelectorAll('.jobs-btn-primary, .jobs-btn-external');
+    buttons.forEach(btn => {
+      btn.addEventListener('mousemove', (e) => {
+        const rect = btn.getBoundingClientRect();
+        const x = e.clientX - rect.left - rect.width / 2;
+        const y = e.clientY - rect.top - rect.height / 2;
+        btn.style.transform = `translate(${x * 0.08}px, ${y * 0.08}px) scale(1.02)`;
+      });
+      btn.addEventListener('mouseleave', () => {
+        btn.style.transform = '';
+      });
+    });
+  })();
+
+  // ── Live Search (optional enhancement) ──
+  (function() {
+    const searchInput = document.getElementById('q');
+    if (!searchInput) return;
+
+    let debounceTimer;
+    searchInput.addEventListener('input', (e) => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        // Optional: Auto-submit after typing stops
+        // document.querySelector('.jobs-filters').submit();
+      }, 800);
+    });
+  })();
+</script>
+{% endblock %}

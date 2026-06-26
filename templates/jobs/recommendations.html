@@ -1,0 +1,32 @@
+<section class="panel" aria-label="Top job recommendations">
+  <div class="section-head">
+    <h2>Top job matches</h2>
+    {% if resume_context %}
+      <p class="meta">Based on {{ resume_context.title }}</p>
+    {% endif %}
+  </div>
+
+  {% if recommendations %}
+    <ul class="list">
+      {% for entry in recommendations %}
+        {% set job = entry.job %}
+        {% set match = entry.match %}
+        <li class="item rec-item">
+          <div class="rec-row">
+            <div>
+              <strong><a href="{{ url_for('jobs.job_detail', job_id=job.id) }}">{{ job.title }}</a></strong>
+              <span class="meta">{{ job.company_name }}{% if job.location %} · {{ job.location }}{% endif %}</span>
+            </div>
+            {% if match %}
+              {% set score = match.match_score %}
+              <span class="match-badge {% if score >= 75 %}good{% elif score >= 50 %}warn{% else %}low{% endif %}">{{ '%.0f'|format(score) }}%</span>
+            {% endif %}
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+    <p class="section-foot"><a class="btn" href="{{ url_for('jobs.list_jobs') }}">Browse all jobs</a></p>
+  {% else %}
+    <p class="empty">Upload and parse a resume to unlock personalized job recommendations.</p>
+  {% endif %}
+</section>

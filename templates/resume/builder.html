@@ -1,0 +1,934 @@
+{% extends "base.html" %}
+
+{% block title %}Resume Builder — {{ resume.title|default('New Resume') }}{% endblock %}
+
+{% block extra_css %}
+<style>
+  :root {
+    --glass-bg: rgba(30, 41, 59, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --accent: #38bdf8;
+    --accent-glow: rgba(56, 189, 248, 0.3);
+    --success: #22c55e;
+    --danger: #ef4444;
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --bg-dark: #0f172a;
+    --bg-card: #1e293b;
+  }
+
+  .builder-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    height: calc(100vh - 140px);
+    min-height: 600px;
+  }
+
+  @media (max-width: 1024px) {
+    .builder-container {
+      grid-template-columns: 1fr;
+      height: auto;
+    }
+  }
+
+  /* ── Editor Panel ── */
+  .editor-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 1.5rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .editor-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.25rem;
+    flex-shrink: 0;
+  }
+
+  .editor-header h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  /* ── Section Card — GRID TRICK for smooth expand ── */
+  .section-card {
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    flex-shrink: 0;
+  }
+
+  .section-card:hover {
+    border-color: rgba(56, 189, 248, 0.4);
+  }
+
+  .section-card.expanded {
+    border-color: var(--accent);
+    box-shadow: 0 0 20px var(--accent-glow);
+    flex-shrink: 0;
+  }
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.875rem 1.25rem;
+    background: rgba(56, 189, 248, 0.05);
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.2s;
+  }
+
+  .section-card.expanded .section-header {
+    background: rgba(56, 189, 248, 0.1);
+    border-bottom: 1px solid var(--glass-border);
+  }
+
+  .section-header:hover {
+    background: rgba(56, 189, 248, 0.08);
+  }
+
+  .section-header h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+  }
+
+  .section-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: var(--accent-glow);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.875rem;
+    flex-shrink: 0;
+  }
+
+  .section-toggle {
+    color: var(--accent);
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 0.75rem;
+    flex-shrink: 0;
+  }
+
+  .section-card.expanded .section-toggle {
+    transform: rotate(180deg);
+  }
+
+  /* ── THE FIX: CSS Grid row trick — smooth expand to full content height ── */
+  .section-body-wrapper {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .section-card.expanded .section-body-wrapper {
+    grid-template-rows: 1fr;
+  }
+
+  .section-body-inner {
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  .section-body {
+    padding: 0 1.25rem;
+    max-height: 0;
+    overflow: hidden;
+    transition: padding 0.35s ease, max-height 0s 0.35s;
+  }
+
+  .section-card.expanded .section-body {
+    padding: 1.25rem;
+    max-height: none;
+    overflow: visible;
+    transition: padding 0.35s ease;
+  }
+
+  /* ── Textarea — grows with content, no manual scroll ── */
+  .section-body textarea {
+    width: 100%;
+    background: rgba(15, 23, 42, 0.8);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    padding: 0.875rem;
+    color: var(--text-primary);
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 0.875rem;
+    line-height: 1.7;
+    resize: none;
+    min-height: 100px;
+    overflow: hidden;           /* hide scrollbar — JS handles height */
+    display: block;
+    box-sizing: border-box;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+  }
+
+  .section-body textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+
+  .section-hint {
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  /* ── Meta form ── */
+  .meta-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  @media (max-width: 640px) {
+    .meta-row { grid-template-columns: 1fr; }
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+  }
+
+  .form-group label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .form-group input,
+  .form-group select {
+    background: rgba(15, 23, 42, 0.8);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    padding: 0.625rem 0.875rem;
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    transition: all 0.2s;
+  }
+
+  .form-group input:focus,
+  .form-group select:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+
+  /* ── Template grid ── */
+  .template-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+  }
+
+  @media (max-width: 640px) {
+    .template-grid { grid-template-columns: 1fr; }
+  }
+
+  .template-option {
+    position: relative;
+    padding: 0.75rem;
+    background: rgba(15, 23, 42, 0.6);
+    border: 2px solid var(--glass-border);
+    border-radius: 10px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+  }
+
+  .template-option:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+
+  .template-option.active {
+    border-color: var(--accent);
+    background: var(--accent-glow);
+  }
+
+  .template-option input { display: none; }
+
+  .template-name {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  /* ── Preview Panel ── */
+  .preview-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--glass-border);
+    background: rgba(15, 23, 42, 0.4);
+    flex-shrink: 0;
+  }
+
+  .preview-header h2 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .preview-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .btn-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: 1px solid var(--glass-border);
+    background: rgba(15, 23, 42, 0.6);
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.875rem;
+  }
+
+  .btn-icon:hover {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+  }
+
+  .preview-frame {
+    flex: 1;
+    overflow-y: auto;
+    padding: 2rem;
+    background: white;
+  }
+
+  .preview-frame.dark-preview {
+    background: #1a1a2e;
+    color: #eee;
+  }
+
+  /* ── Resume Preview ── */
+  .resume-preview {
+    max-width: 800px;
+    margin: 0 auto;
+    font-family: 'Georgia', 'Times New Roman', serif;
+    line-height: 1.6;
+    color: #1a1a2e;
+  }
+
+  .dark-preview .resume-preview { color: #eee; }
+
+  .resume-preview .r-header {
+    text-align: center;
+    border-bottom: 2px solid #1a1a2e;
+    padding-bottom: 0.875rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .dark-preview .resume-preview .r-header {
+    border-bottom-color: #38bdf8;
+  }
+
+  .resume-preview .r-name {
+    font-size: 1.5rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 0.35rem;
+  }
+
+  .resume-preview .r-contact {
+    font-size: 0.82rem;
+    color: #555;
+  }
+
+  .dark-preview .resume-preview .r-contact { color: #aaa; }
+
+  .resume-preview .r-section {
+    margin-bottom: 1.1rem;
+  }
+
+  .resume-preview .r-section-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 0.2rem;
+    margin-bottom: 0.6rem;
+    color: #1a1a2e;
+  }
+
+  .dark-preview .resume-preview .r-section-title {
+    color: #38bdf8;
+    border-bottom-color: #38bdf8;
+  }
+
+  .resume-preview .r-text {
+    font-size: 0.875rem;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    line-height: 1.6;
+  }
+
+  /* ── Action bar ── */
+  .action-bar {
+    display: flex;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--glass-border);
+    background: rgba(15, 23, 42, 0.4);
+    flex-shrink: 0;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    padding: 0.625rem 1.25rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: none;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: white;
+    box-shadow: 0 4px 14px var(--accent-glow);
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px var(--accent-glow);
+  }
+
+  .btn-secondary {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-secondary);
+    border: 1px solid var(--glass-border);
+  }
+
+  .btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+  }
+
+  .btn-success {
+    background: var(--success);
+    color: white;
+  }
+
+  .save-status {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+  }
+
+  .save-status.saving { color: var(--accent); }
+  .save-status.saved  { color: var(--success); }
+
+  /* ── Scrollbars ── */
+  .editor-panel::-webkit-scrollbar,
+  .preview-frame::-webkit-scrollbar { width: 5px; }
+  .editor-panel::-webkit-scrollbar-track,
+  .preview-frame::-webkit-scrollbar-track { background: transparent; }
+  .editor-panel::-webkit-scrollbar-thumb,
+  .preview-frame::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 3px; }
+  .editor-panel::-webkit-scrollbar-thumb:hover,
+  .preview-frame::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+  /* ── Animations ── */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .section-card { animation: fadeIn 0.4s ease forwards; }
+  .section-card:nth-child(1) { animation-delay: 0.04s; }
+  .section-card:nth-child(2) { animation-delay: 0.08s; }
+  .section-card:nth-child(3) { animation-delay: 0.12s; }
+  .section-card:nth-child(4) { animation-delay: 0.16s; }
+  .section-card:nth-child(5) { animation-delay: 0.20s; }
+  .section-card:nth-child(6) { animation-delay: 0.24s; }
+  .section-card:nth-child(7) { animation-delay: 0.28s; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+  <div class="builder-container">
+
+    <!-- ═══ LEFT: Editor ═══ -->
+    <div class="editor-panel">
+      <div class="editor-header">
+        <h2>
+          <span style="color: var(--accent);">✏️</span>
+          Edit Resume
+        </h2>
+        <span class="badge" style="background: var(--accent-glow); color: var(--accent); padding: 0.35rem 0.75rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600;">
+          {{ version.label|default('Latest') }}
+        </span>
+      </div>
+
+      <!-- Resume Meta -->
+      <div class="section-card" id="card-meta">
+        <div class="section-header" onclick="toggleSection('meta')">
+          <h3><span class="section-icon">📄</span> Resume Details</h3>
+          <span class="section-toggle">▼</span>
+        </div>
+        <div class="section-body-wrapper">
+          <div class="section-body-inner">
+            <div class="section-body">
+              <div class="meta-row">
+                <div class="form-group">
+                  <label>Resume Title</label>
+                  <input type="text" id="meta-title" value="{{ resume.title|default('') }}" placeholder="e.g. Software Engineer Resume">
+                </div>
+                <div class="form-group">
+                  <label>Version Label</label>
+                  <input type="text" id="meta-label" value="{{ version.label|default('') }}" placeholder="e.g. v2.0">
+                </div>
+              </div>
+              <div class="form-group" style="margin-top: 1rem;">
+                <label>Template</label>
+                <div class="template-grid">
+                  <label class="template-option {% if resume.template|default('classic') == 'classic' %}active{% endif %}" onclick="selectTemplate(this, 'classic')">
+                    <input type="radio" name="template" value="classic" {% if resume.template|default('classic') == 'classic' %}checked{% endif %}>
+                    <div class="template-name">Classic</div>
+                    <div style="font-size: 0.7rem; color: var(--text-secondary); margin-top: 0.25rem;">Professional</div>
+                  </label>
+                  <label class="template-option {% if resume.template|default('classic') == 'modern' %}active{% endif %}" onclick="selectTemplate(this, 'modern')">
+                    <input type="radio" name="template" value="modern" {% if resume.template|default('classic') == 'modern' %}checked{% endif %}>
+                    <div class="template-name">Modern</div>
+                    <div style="font-size: 0.7rem; color: var(--text-secondary); margin-top: 0.25rem;">Clean & Minimal</div>
+                  </label>
+                  <label class="template-option {% if resume.template|default('classic') == 'creative' %}active{% endif %}" onclick="selectTemplate(this, 'creative')">
+                    <input type="radio" name="template" value="creative" {% if resume.template|default('classic') == 'creative' %}checked{% endif %}>
+                    <div class="template-name">Creative</div>
+                    <div style="font-size: 0.7rem; color: var(--text-secondary); margin-top: 0.25rem;">Bold Design</div>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Header & Contact -->
+      <div class="section-card" id="card-body">
+        <div class="section-header" onclick="toggleSection('body')">
+          <h3><span class="section-icon">👤</span> Header & Contact</h3>
+          <span class="section-toggle">▼</span>
+        </div>
+        <div class="section-body-wrapper">
+          <div class="section-body-inner">
+            <div class="section-body">
+              <textarea id="sec-body" placeholder="Your Name&#10;City, State | Phone | Email | LinkedIn | GitHub"></textarea>
+              <div class="section-hint">💡 Name on first line, contact info on second</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Professional Summary -->
+      <div class="section-card" id="card-summary">
+        <div class="section-header" onclick="toggleSection('summary')">
+          <h3><span class="section-icon">📝</span> Professional Summary</h3>
+          <span class="section-toggle">▼</span>
+        </div>
+        <div class="section-body-wrapper">
+          <div class="section-body-inner">
+            <div class="section-body">
+              <textarea id="sec-summary" placeholder="Write a compelling 2-3 sentence summary..."></textarea>
+              <div class="section-hint">💡 Focus on key strengths and what makes you unique</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Education -->
+      <div class="section-card" id="card-education">
+        <div class="section-header" onclick="toggleSection('education')">
+          <h3><span class="section-icon">🎓</span> Education</h3>
+          <span class="section-toggle">▼</span>
+        </div>
+        <div class="section-body-wrapper">
+          <div class="section-body-inner">
+            <div class="section-body">
+              <textarea id="sec-education" placeholder="Degree & Major&#10;University Name&#10;Graduation Year | GPA&#10;Relevant coursework or achievements"></textarea>
+              <div class="section-hint">💡 Use new lines to separate entries</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Work Experience -->
+      <div class="section-card" id="card-experience">
+        <div class="section-header" onclick="toggleSection('experience')">
+          <h3><span class="section-icon">💼</span> Work Experience</h3>
+          <span class="section-toggle">▼</span>
+        </div>
+        <div class="section-body-wrapper">
+          <div class="section-body-inner">
+            <div class="section-body">
+              <textarea id="sec-experience" placeholder="Job Title | Company | Dates&#10;• Achievement 1 with metrics&#10;• Achievement 2 with metrics"></textarea>
+              <div class="section-hint">💡 Start bullets with • and use numbers (e.g. increased sales by 40%)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Projects -->
+      <div class="section-card" id="card-projects">
+        <div class="section-header" onclick="toggleSection('projects')">
+          <h3><span class="section-icon">🚀</span> Projects</h3>
+          <span class="section-toggle">▼</span>
+        </div>
+        <div class="section-body-wrapper">
+          <div class="section-body-inner">
+            <div class="section-body">
+              <textarea id="sec-projects" placeholder="Project Name — Brief description&#10;• Technologies used&#10;• Key features or impact&#10;• Link if available"></textarea>
+              <div class="section-hint">💡 Mention tech stack and quantifiable impact</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Skills -->
+      <div class="section-card" id="card-skills">
+        <div class="section-header" onclick="toggleSection('skills')">
+          <h3><span class="section-icon">⚡</span> Skills & More</h3>
+          <span class="section-toggle">▼</span>
+        </div>
+        <div class="section-body-wrapper">
+          <div class="section-body-inner">
+            <div class="section-body">
+              <textarea id="sec-skills" placeholder="Technical Skills: Python, JavaScript, React...&#10;Soft Skills: Leadership, Communication...&#10;Certifications or Achievements"></textarea>
+              <div class="section-hint">💡 Separate categories with line breaks</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <!-- end editor-panel -->
+
+    <!-- ═══ RIGHT: Live Preview ═══ -->
+    <div class="preview-panel">
+      <div class="preview-header">
+        <h2>
+          <span style="color: var(--accent);">👁️</span>
+          Live Preview
+        </h2>
+        <div class="preview-actions">
+          <button class="btn-icon" onclick="togglePreviewTheme()" title="Toggle Dark/Light">🌓</button>
+          <button class="btn-icon" onclick="zoomPreview(-0.1)" title="Zoom Out">−</button>
+          <button class="btn-icon" onclick="zoomPreview(0.1)"  title="Zoom In">+</button>
+        </div>
+      </div>
+
+      <div class="preview-frame" id="preview-frame">
+        <div class="resume-preview" id="resume-preview"></div>
+      </div>
+
+      <div class="action-bar">
+        <button class="btn btn-secondary" onclick="window.location.href='{{ url_for('resume.list_resumes') }}'">
+          ← Back
+        </button>
+        <button class="btn btn-primary" onclick="saveResume()">
+          💾 Save Changes
+        </button>
+        <button class="btn btn-success" onclick="downloadResume()">
+          ⬇ Export
+        </button>
+        <div class="save-status" id="save-status">
+          <span>Auto-updating preview…</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// ── Initial data from backend ──
+{% if version and version.content %}
+const initialContent = {{ version.content | tojson | safe }};
+{% else %}
+const initialContent = {};
+{% endif %}
+let resumeId = "{{ resume.id|default('') }}";
+const sections = ['body', 'summary', 'education', 'experience', 'projects', 'skills'];
+
+// ── Auto-resize textarea to fit content exactly ──
+function autoResize(ta) {
+  ta.style.height = 'auto';                        // reset
+  ta.style.height = (ta.scrollHeight + 2) + 'px'; // grow to content
+}
+
+// ── Toggle accordion — one section open at a time ──
+function toggleSection(id) {
+  const clickedCard = document.getElementById('card-' + id);
+  const isAlreadyOpen = clickedCard.classList.contains('expanded');
+
+  // Close all sections
+  document.querySelectorAll('.section-card').forEach(card => {
+    card.classList.remove('expanded');
+  });
+
+  // If it wasn't open before, open it now
+  if (!isAlreadyOpen) {
+    clickedCard.classList.add('expanded');
+    // After CSS grid transition (~350ms), resize the textarea inside
+    setTimeout(() => {
+      const ta = clickedCard.querySelector('textarea');
+      if (ta) autoResize(ta);
+    }, 360);
+  }
+}
+
+// ── Template selection ──
+function selectTemplate(el, val) {
+  document.querySelectorAll('.template-option').forEach(o => o.classList.remove('active'));
+  el.classList.add('active');
+  el.querySelector('input').checked = true;
+  updatePreview();
+}
+
+// ── Init on DOM ready ──
+document.addEventListener('DOMContentLoaded', function () {
+
+  // Populate textareas + listen for input
+  sections.forEach(sec => {
+    const ta = document.getElementById('sec-' + sec);
+    if (!ta) return;
+
+    if (initialContent && initialContent[sec] && initialContent[sec].text) {
+      ta.value = initialContent[sec].text;
+    }
+
+    ta.addEventListener('input', function () {
+      autoResize(this);
+      updatePreview();
+    });
+  });
+
+  document.getElementById('meta-title').addEventListener('input', updatePreview);
+  document.getElementById('meta-label').addEventListener('input', updatePreview);
+  document.querySelectorAll('input[name="template"]').forEach(r => {
+    r.addEventListener('change', updatePreview);
+  });
+
+  // Open first section that has content (or meta by default)
+  const firstWithContent = sections.find(
+    sec => initialContent && initialContent[sec] && initialContent[sec].text
+  );
+  const firstCard = firstWithContent ? 'card-' + firstWithContent : 'card-meta';
+  document.getElementById(firstCard).classList.add('expanded');
+
+  // Resize its textarea after mount
+  setTimeout(() => {
+    const openCard = document.querySelector('.section-card.expanded');
+    if (openCard) {
+      const ta = openCard.querySelector('textarea');
+      if (ta) autoResize(ta);
+    }
+  }, 100);
+
+  updatePreview();
+});
+
+// ── Build preview HTML ──
+function escapeHtml(text) {
+  const d = document.createElement('div');
+  d.textContent = text;
+  return d.innerHTML;
+}
+
+function updatePreview() {
+  const content = {};
+  sections.forEach(sec => {
+    const el = document.getElementById('sec-' + sec);
+    content[sec] = { text: el ? el.value.trim() : '' };
+  });
+
+  let html = '';
+
+  if (content.body.text) {
+    const lines   = content.body.text.split('\n');
+    const name    = lines[0] || 'Your Name';
+    const contact = lines.slice(1).join(' | ') || '';
+    html += `
+      <div class="r-header">
+        <div class="r-name">${escapeHtml(name)}</div>
+        ${contact ? `<div class="r-contact">${escapeHtml(contact)}</div>` : ''}
+      </div>`;
+  }
+
+  const titles = {
+    summary:    'Professional Summary',
+    education:  'Education',
+    experience: 'Experience',
+    projects:   'Projects',
+    skills:     'Skills & Certifications'
+  };
+
+  ['summary', 'education', 'experience', 'projects', 'skills'].forEach(sec => {
+    if (content[sec].text) {
+      html += `
+        <div class="r-section">
+          <div class="r-section-title">${titles[sec]}</div>
+          <div class="r-text">${escapeHtml(content[sec].text).replace(/\n/g, '<br>')}</div>
+        </div>`;
+    }
+  });
+
+  const preview = document.getElementById('resume-preview');
+  preview.innerHTML = html || `
+    <div style="text-align:center; padding:3rem; color:#888;">
+      <div style="font-size:3rem; margin-bottom:1rem;">📄</div>
+      <div>Start editing to see preview</div>
+    </div>`;
+
+  // Save-status badge
+  const status = document.getElementById('save-status');
+  status.innerHTML = '<span style="color: var(--accent);">●</span> Unsaved changes';
+  status.className = 'save-status saving';
+  clearTimeout(window._saveTimeout);
+  window._saveTimeout = setTimeout(() => {
+    status.innerHTML = '<span style="color: var(--success);">✓</span> Preview updated';
+    status.className = 'save-status saved';
+  }, 800);
+}
+
+// ── Preview theme toggle ──
+let previewDark = false;
+function togglePreviewTheme() {
+  previewDark = !previewDark;
+  document.getElementById('preview-frame').classList.toggle('dark-preview', previewDark);
+}
+
+// ── Zoom ──
+let previewZoom = 1;
+function zoomPreview(delta) {
+  previewZoom = Math.max(0.5, Math.min(1.5, previewZoom + delta));
+  const pr = document.getElementById('resume-preview');
+  pr.style.transform       = `scale(${previewZoom})`;
+  pr.style.transformOrigin = 'top center';
+}
+
+// ── Save to backend ──
+function saveResume() {
+  const status = document.getElementById('save-status');
+  status.innerHTML = '<span style="color: var(--accent);">⟳</span> Saving…';
+  status.className = 'save-status saving';
+
+  const payload = {
+    title:        document.getElementById('meta-title').value,
+    template_key: document.querySelector('input[name="template"]:checked').value,
+    label:        document.getElementById('meta-label').value,
+    content:      {}
+  };
+
+  sections.forEach(sec => {
+    payload.content[sec] = { text: document.getElementById('sec-' + sec).value };
+  });
+
+  // FIX: Use correct URL — create new if no resumeId, else edit existing
+  const saveUrl = resumeId ? `/resume/${resumeId}/builder` : '/resume/builder';
+
+  fetch(saveUrl, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': '{{ csrf_token() }}'
+    },
+    body: JSON.stringify(payload)
+  })
+  .then(r => { if (!r.ok) throw new Error('Save failed'); return r.json(); })
+  .then(data => {
+    // FIX: If new resume was created, grab its ID and update URL for subsequent saves
+    const newId = (data && data.resume && data.resume.id) || (data && data.id);
+    if (newId && !resumeId) {
+      resumeId = newId;
+      history.replaceState(null, '', `/resume/${newId}/builder`);
+    }
+    status.innerHTML = '<span style="color: var(--success);">✓</span> Saved!';
+    status.className = 'save-status saved';
+    setTimeout(() => {
+      status.innerHTML = '<span>Auto-updating preview…</span>';
+      status.className = 'save-status';
+    }, 2000);
+  })
+  .catch(err => {
+    status.innerHTML = '<span style="color: var(--danger);">✗</span> Save failed — check console';
+    status.className = 'save-status';
+    console.error(err);
+  });
+}
+
+// ── FIXED: Export URL matches route pattern /export/pdf ──
+function downloadResume() {
+  if (!resumeId) {
+    alert('Please save the resume first before exporting.');
+    return;
+  }
+  window.open(`/resume/${resumeId}/export/pdf`, '_blank');
+}
+</script>
+{% endblock %}

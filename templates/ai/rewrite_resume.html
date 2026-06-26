@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block title %}AI Resume Rewrite | Paswan Resume{% endblock %}
+{% block extra_css %}
+<style>
+  .ai-container { max-width: 800px; margin: 0 auto; }
+  .resume-select { width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font-size: 0.95rem; }
+  .resume-select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+  .result-box { margin-top: 20px; padding: 20px; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; display: none; animation: fadeInUp 0.4s ease; }
+  .result-box.show { display: block; }
+  .result-text { padding: 14px; background: var(--bg); border-radius: 10px; font-size: 0.95rem; line-height: 1.6; color: var(--text); border: 1px solid var(--border); white-space: pre-wrap; }
+  .btn-rewrite { background: linear-gradient(135deg, var(--sakura), var(--lavender)); color: white; border: none; padding: 12px 24px; border-radius: 12px; font-weight: 600; font-size: 0.9rem; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
+  .btn-rewrite:disabled { opacity: 0.6; cursor: not-allowed; }
+  .btn-secondary { background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 12px 24px; border-radius: 12px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; margin-left: 10px; }
+  .spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; display: none; }
+  .btn-rewrite.loading .spinner { display: inline-block; }
+  .btn-rewrite.loading .btn-text { display: none; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+  .error-msg { color: var(--danger); font-size: 0.85rem; margin-top: 10px; padding: 10px 14px; background: rgba(239,68,68,0.1); border-radius: 8px; display: none; }
+  .error-msg.show { display: block; }
+  .empty-state { text-align: center; padding: 40px; color: var(--text-muted); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="ai-container">
+  <div class="card">
+    <div class="card-title"><i class="fas fa-magic" style="margin-right:8px; color:var(--sakura);"></i>AI Resume Rewrite</div>
+    <p style="color:var(--text-secondary); margin-bottom:20px;">Select one of your resumes and let AI rewrite it with stronger language, better structure, and impactful metrics.</p>
+
+    {% if resumes %}
+    <form id="rewriteForm">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div style="margin-bottom:16px;">
+        <label style="display:block; font-size:0.85rem; font-weight:600; margin-bottom:8px;">Select Resume</label>
+        <select name="resume_id" id="resumeSelect" class="resume-select" required>
+          <option value="">-- Choose a resume --</option>
+          {% for resume in resumes %}
+          <option value="{{ resume.id }}">{{ resume.title or 'Untitled Resume' }} ({{ resume.created_at.strftime('%b %d, %Y') if resume.created_at else 'N/A' }})</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div style="display:flex; align-items:center; flex-wrap:wrap; gap:10px;">
+        <button type="submit" class="btn-rewrite" id="rewriteBtn"><span class="spinner"></span><span class="btn-text"><i class="fas fa-wand-magic-sparkles"></i> Rewrite with AI</span></button>
+        <a href="{{ url_for('main.dashboard') }}" class="btn-secondary"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+      </div>
+      <div class="error-msg" id="errorMsg"></div>
+    </form>
+
+    <div class="result-box" id="resultBox">
+      <h4><i class="fas fa-sparkles"></i> Rewritten Resume</h4>
+      <div class="result-text" id="resultText"></div>
+      <div style="margin-top:14px; display:flex; gap:10px;">
+        <button class="btn-secondary" onclick="copyResult()" style="margin-left:0; font-size:0.85rem; padding:8px 16px;"><i class="fas fa-copy"></i> Copy</button>
+        <button class="btn-secondary" onclick="downloadResult()" style="font-size:0.85rem; padding:8px 16px;"><i class="fas fa-download"></i> Download</button>
+      </div>
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <i class="fas fa-file-alt" style="font-size:3rem; margin-bottom:16px;"></i>
+      <h3 style="font-size:1.1rem; font-weight:600;">No Resumes Found</h3>
+      <p style="font-size:0.9rem; margin-bottom:20px;">Upload or create a resume first.</p>
+      <a href="{{ url_for('resume.create_builder_resume') }}" class="btn-primary" style="text-decoration:none;"><i class="fas fa-plus"></i> Create New Resume</a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  const form = document.getElementById('rewriteForm');
+  const btn = document.getElementById('rewriteBtn');
+  const resultBox = document.getElementById('resultBox');
+  const resultText = document.getElementById('resultText');
+  const errorMsg = document.getElementById('errorMsg');
+
+  form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const resumeId = document.getElementById('resumeSelect').value;
+    if (!resumeId) { showError('Please select a resume.'); return; }
+
+    btn.classList.add('loading');
+    btn.disabled = true;
+    errorMsg.classList.remove('show');
+    resultBox.classList.remove('show');
+
+    try {
+      const response = await fetch('{{ url_for("ai.rewrite_resume") }}', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value },
+        body: JSON.stringify({ resume_id: parseInt(resumeId) })
+      });
+
+      const data = await response.json();
+      console.log("AI Response:", data);
+
+      if (!response.ok) throw new Error(data.error || 'Request failed');
+
+      const text = data.rewritten || data.result || data.text || data.enhanced || data.message;
+      if (text) {
+        resultText.textContent = text;
+        resultBox.classList.add('show');
+        resultBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      } else {
+        throw new Error('No content. Keys: ' + Object.keys(data).join(', '));
+      }
+    } catch (err) {
+      showError(err.message || 'Failed to rewrite.');
+    } finally {
+      btn.classList.remove('loading');
+      btn.disabled = false;
+    }
+  });
+
+  function showError(msg) { errorMsg.textContent = msg; errorMsg.classList.add('show'); }
+  function copyResult() { navigator.clipboard.writeText(resultText.textContent).then(() => { const btn = event.target.closest('button'); btn.innerHTML = '<i class="fas fa-check"></i> Copied!'; setTimeout(() => btn.innerHTML = '<i class="fas fa-copy"></i> Copy', 1500); }); }
+  function downloadResult() { const blob = new Blob([resultText.textContent], { type: 'text/plain' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'rewritten-resume.txt'; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); }
+</script>
+{% endblock %}

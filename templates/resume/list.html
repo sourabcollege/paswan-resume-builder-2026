@@ -1,0 +1,1521 @@
+﻿{% extends "base.html" %}
+
+{% block title %}My Resumes - Paswan Resume Builder{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* ═══════════════════════════════════════════════════════════════
+     🌸 PASWAN RESUME BUILDER - ANIME PREMIUM THEME v2.0
+     ═══════════════════════════════════════════════════════════════ */
+
+  /* ── Anime Color Palette ── */
+  :root {
+    --anime-bg: #faf8ff;
+    --anime-bg-2: #f0f4ff;
+    --anime-bg-3: #fff5f8;
+    --anime-surface: rgba(255, 255, 255, 0.72);
+    --anime-surface-hover: rgba(255, 255, 255, 0.88);
+    --anime-text: #1a1a2e;
+    --anime-text-secondary: #6b7280;
+    --anime-border: rgba(180, 160, 220, 0.25);
+    --anime-border-strong: rgba(180, 160, 220, 0.45);
+
+    /* Sakura Pink */
+    --sakura: #ff6b9d;
+    --sakura-light: #ffb8d0;
+    --sakura-glow: rgba(255, 107, 157, 0.25);
+
+    /* Sky Blue */
+    --sky: #4facfe;
+    --sky-light: #a8d8ff;
+    --sky-glow: rgba(79, 172, 254, 0.25);
+
+    /* Lavender */
+    --lavender: #a78bfa;
+    --lavender-light: #ddd6fe;
+    --lavender-glow: rgba(167, 139, 250, 0.25);
+
+    /* Mint */
+    --mint: #34d399;
+    --mint-light: #a7f3d0;
+    --mint-glow: rgba(52, 211, 153, 0.25);
+
+    /* Amber */
+    --amber: #fbbf24;
+    --amber-light: #fde68a;
+    --amber-glow: rgba(251, 191, 36, 0.25);
+
+    /* Rose */
+    --rose: #f43f5e;
+    --rose-light: #fda4af;
+    --rose-glow: rgba(244, 63, 94, 0.25);
+
+    --shadow-soft: 0 4px 20px rgba(139, 92, 246, 0.08);
+    --shadow-medium: 0 8px 40px rgba(139, 92, 246, 0.12);
+    --shadow-heavy: 0 20px 60px rgba(139, 92, 246, 0.18);
+    --shadow-glow: 0 0 40px rgba(167, 139, 250, 0.3);
+  }
+
+  [data-theme="dark"] {
+    --anime-bg: #0f0c1a;
+    --anime-bg-2: #1a1625;
+    --anime-bg-3: #1a0f1a;
+    --anime-surface: rgba(30, 25, 50, 0.72);
+    --anime-surface-hover: rgba(40, 35, 65, 0.88);
+    --anime-text: #f0e6ff;
+    --anime-text-secondary: #a89bb8;
+    --anime-border: rgba(139, 92, 246, 0.2);
+    --anime-border-strong: rgba(139, 92, 246, 0.4);
+    --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.3);
+    --shadow-medium: 0 8px 40px rgba(0, 0, 0, 0.4);
+    --shadow-heavy: 0 20px 60px rgba(0, 0, 0, 0.5);
+    --shadow-glow: 0 0 40px rgba(167, 139, 250, 0.2);
+  }
+
+  /* ── Animated Background ── */
+  .anime-page-bg {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: -1;
+    background: 
+      radial-gradient(ellipse at 20% 20%, var(--anime-bg-2) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 80%, var(--anime-bg-3) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 50%, var(--anime-bg) 0%, transparent 70%);
+    transition: background 0.5s ease;
+  }
+
+  /* ── Floating Particles Canvas ── */
+  #particles-canvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.6;
+  }
+
+  /* ── Main Container ── */
+  .anime-container {
+    position: relative;
+    z-index: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 24px 60px;
+    animation: fadeInUp 0.8s ease-out;
+  }
+
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Header Section ── */
+  .anime-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+  }
+
+  .anime-header-left {
+    flex: 1;
+    min-width: 280px;
+  }
+
+  .anime-header-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    background: linear-gradient(135deg, var(--sakura), var(--lavender));
+    color: white;
+    margin-bottom: 12px;
+    box-shadow: 0 4px 15px var(--sakura-glow);
+    animation: pulseGlow 3s ease-in-out infinite;
+  }
+
+  @keyframes pulseGlow {
+    0%, 100% { box-shadow: 0 4px 15px var(--sakura-glow); }
+    50% { box-shadow: 0 4px 25px var(--sakura-glow), 0 0 30px var(--lavender-glow); }
+  }
+
+  .anime-header h1 {
+    font-size: 2.8rem;
+    font-weight: 800;
+    color: var(--anime-text);
+    margin: 0;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    background: linear-gradient(135deg, var(--anime-text) 0%, var(--lavender) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .anime-header-subtitle {
+    font-size: 1rem;
+    color: var(--anime-text-secondary);
+    margin-top: 8px;
+    font-weight: 400;
+  }
+
+  .anime-header-subtitle .count {
+    font-weight: 700;
+    color: var(--sakura);
+  }
+
+  .anime-header-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  /* ── Anime Buttons ── */
+  .anime-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border-radius: 14px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .anime-btn::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s ease;
+  }
+
+  .anime-btn:hover::before {
+    left: 100%;
+  }
+
+  .anime-btn:hover {
+    transform: translateY(-3px) scale(1.02);
+  }
+
+  .anime-btn:active {
+    transform: translateY(-1px) scale(0.98);
+  }
+
+  .anime-btn-secondary {
+    background: var(--anime-surface);
+    color: var(--anime-text);
+    border: 1px solid var(--anime-border);
+    backdrop-filter: blur(10px);
+  }
+
+  .anime-btn-secondary:hover {
+    background: var(--anime-surface-hover);
+    border-color: var(--anime-border-strong);
+    box-shadow: var(--shadow-medium);
+  }
+
+  .anime-btn-primary {
+    background: linear-gradient(135deg, var(--sakura) 0%, var(--lavender) 50%, var(--sky) 100%);
+    color: white;
+    box-shadow: 0 8px 25px var(--sakura-glow);
+  }
+
+  .anime-btn-primary:hover {
+    box-shadow: 0 12px 35px var(--sakura-glow), 0 0 40px var(--lavender-glow);
+    filter: brightness(1.1);
+  }
+
+  .anime-btn-mint {
+    background: linear-gradient(135deg, var(--mint), var(--sky));
+    color: white;
+    box-shadow: 0 8px 25px var(--mint-glow);
+  }
+
+  .anime-btn-mint:hover {
+    box-shadow: 0 12px 35px var(--mint-glow);
+    filter: brightness(1.1);
+  }
+
+  /* ── Delete Button (Rose Outline) ── */
+  .anime-btn-delete {
+    background: transparent;
+    color: var(--rose);
+    border: 1.5px solid var(--rose);
+    box-shadow: 0 0 0 rgba(244, 63, 94, 0);
+  }
+
+  .anime-btn-delete:hover {
+    background: var(--rose);
+    color: white;
+    box-shadow: 0 8px 25px var(--rose-glow);
+    border-color: var(--rose);
+  }
+
+  /* ── Search & Filter Bar ── */
+  .anime-toolbar {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .anime-search {
+    flex: 1;
+    min-width: 260px;
+    position: relative;
+  }
+
+  .anime-search input {
+    width: 100%;
+    padding: 14px 18px 14px 48px;
+    border-radius: 16px;
+    border: 1px solid var(--anime-border);
+    background: var(--anime-surface);
+    color: var(--anime-text);
+    font-size: 0.95rem;
+    font-family: inherit;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    outline: none;
+  }
+
+  .anime-search input::placeholder {
+    color: var(--anime-text-secondary);
+  }
+
+  .anime-search input:focus {
+    border-color: var(--lavender);
+    box-shadow: 0 0 0 4px var(--lavender-glow), var(--shadow-soft);
+    background: var(--anime-surface-hover);
+  }
+
+  .anime-search i {
+    position: absolute;
+    left: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--anime-text-secondary);
+    font-size: 1rem;
+    pointer-events: none;
+    transition: color 0.3s;
+  }
+
+  .anime-search input:focus + i {
+    color: var(--lavender);
+  }
+
+  .anime-sort {
+    position: relative;
+  }
+
+  .anime-sort select {
+    padding: 14px 40px 14px 18px;
+    border-radius: 16px;
+    border: 1px solid var(--anime-border);
+    background: var(--anime-surface);
+    color: var(--anime-text);
+    font-size: 0.95rem;
+    font-family: inherit;
+    backdrop-filter: blur(10px);
+    cursor: pointer;
+    appearance: none;
+    transition: all 0.3s ease;
+    outline: none;
+  }
+
+  .anime-sort select:focus {
+    border-color: var(--lavender);
+    box-shadow: 0 0 0 4px var(--lavender-glow);
+  }
+
+  .anime-sort i {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--anime-text-secondary);
+    font-size: 0.8rem;
+    pointer-events: none;
+  }
+
+  /* ── Resume Grid ── */
+  .anime-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 24px;
+  }
+
+  @media (max-width: 480px) {
+    .anime-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* ── Resume Card ── */
+  .anime-card {
+    background: var(--anime-surface);
+    border: 1px solid var(--anime-border);
+    border-radius: 24px;
+    padding: 28px;
+    backdrop-filter: blur(20px);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: cardEnter 0.6s ease-out backwards;
+    cursor: pointer;
+  }
+
+  .anime-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--sakura), var(--lavender), var(--sky), var(--mint));
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .anime-card:hover {
+    transform: translateY(-8px) scale(1.01);
+    background: var(--anime-surface-hover);
+    border-color: var(--anime-border-strong);
+    box-shadow: var(--shadow-heavy), var(--shadow-glow);
+  }
+
+  .anime-card:hover::before {
+    opacity: 1;
+  }
+
+  @keyframes cardEnter {
+    from {
+      opacity: 0;
+      transform: translateY(40px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  /* Staggered animation delays */
+  .anime-card:nth-child(1) { animation-delay: 0.1s; }
+  .anime-card:nth-child(2) { animation-delay: 0.2s; }
+  .anime-card:nth-child(3) { animation-delay: 0.3s; }
+  .anime-card:nth-child(4) { animation-delay: 0.4s; }
+  .anime-card:nth-child(5) { animation-delay: 0.5s; }
+  .anime-card:nth-child(6) { animation-delay: 0.6s; }
+
+  /* ── Card Header ── */
+  .anime-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .anime-card-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    display: grid;
+    place-items: center;
+    font-size: 1.4rem;
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  .anime-card-icon::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 19px;
+    background: linear-gradient(135deg, var(--sakura), var(--lavender));
+    opacity: 0.3;
+    z-index: -1;
+    filter: blur(8px);
+  }
+
+  .anime-card-icon.pdf {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a5a);
+    color: white;
+  }
+
+  .anime-card-icon.builder {
+    background: linear-gradient(135deg, var(--sky), var(--mint));
+    color: white;
+  }
+
+  .anime-card-icon.uploaded {
+    background: linear-gradient(135deg, var(--lavender), var(--sakura));
+    color: white;
+  }
+
+  .anime-card-title-section {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .anime-card-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--anime-text);
+    margin: 0 0 6px;
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .anime-card-title a {
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .anime-card-title a:hover {
+    color: var(--sakura);
+  }
+
+  .anime-card-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    font-size: 0.8rem;
+    color: var(--anime-text-secondary);
+  }
+
+  .anime-card-meta .dot {
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--anime-text-secondary);
+    opacity: 0.5;
+  }
+
+  /* ── Status Badge ── */
+  .anime-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+
+  .anime-status.parsed {
+    background: rgba(52, 211, 153, 0.15);
+    color: #059669;
+    border: 1px solid rgba(52, 211, 153, 0.3);
+  }
+
+  .anime-status.processing {
+    background: rgba(251, 191, 36, 0.15);
+    color: #d97706;
+    border: 1px solid rgba(251, 191, 36, 0.3);
+    animation: statusPulse 2s ease-in-out infinite;
+  }
+
+  .anime-status.error {
+    background: rgba(244, 63, 94, 0.15);
+    color: #e11d48;
+    border: 1px solid rgba(244, 63, 94, 0.3);
+  }
+
+  .anime-status.pending {
+    background: rgba(167, 139, 250, 0.15);
+    color: #7c3aed;
+    border: 1px solid rgba(167, 139, 250, 0.3);
+  }
+
+  @keyframes statusPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+
+  /* ── Score Rings ── */
+  .anime-scores {
+    display: flex;
+    gap: 20px;
+    margin: 20px 0;
+    padding: 16px;
+    background: rgba(139, 92, 246, 0.04);
+    border-radius: 16px;
+    border: 1px solid var(--anime-border);
+  }
+
+  .anime-score-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+  }
+
+  .anime-ring {
+    position: relative;
+    width: 56px;
+    height: 56px;
+    flex-shrink: 0;
+  }
+
+  .anime-ring svg {
+    transform: rotate(-90deg);
+    width: 100%; height: 100%;
+  }
+
+  .anime-ring-bg {
+    fill: none;
+    stroke: var(--anime-border);
+    stroke-width: 5;
+  }
+
+  .anime-ring-fill {
+    fill: none;
+    stroke-width: 5;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .anime-ring-fill.ats {
+    stroke: url(#gradient-ats);
+  }
+
+  .anime-ring-fill.complete {
+    stroke: url(#gradient-complete);
+  }
+
+  .anime-ring-text {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--anime-text);
+  }
+
+  .anime-score-label {
+    font-size: 0.8rem;
+    color: var(--anime-text-secondary);
+    font-weight: 500;
+  }
+
+  .anime-score-value {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--anime-text);
+    line-height: 1.2;
+  }
+
+  /* ── Skills Chips ── */
+  .anime-skills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 16px;
+  }
+
+  .anime-chip {
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    background: rgba(139, 92, 246, 0.08);
+    color: var(--lavender);
+    border: 1px solid rgba(139, 92, 246, 0.15);
+    transition: all 0.2s ease;
+    cursor: default;
+  }
+
+  .anime-chip:hover {
+    background: rgba(139, 92, 246, 0.15);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px var(--lavender-glow);
+  }
+
+  .anime-chip.more {
+    background: rgba(100, 116, 139, 0.08);
+    color: var(--anime-text-secondary);
+    border-color: rgba(100, 116, 139, 0.15);
+  }
+
+  /* ── Card Actions ── */
+  .anime-card-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--anime-border);
+  }
+
+  .anime-card-actions .anime-btn {
+    padding: 10px 18px;
+    font-size: 0.85rem;
+    border-radius: 12px;
+    flex: 1;
+    justify-content: center;
+  }
+
+  /* ── Delete Modal ── */
+  .anime-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+  }
+
+  .anime-modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .anime-modal {
+    background: var(--anime-surface);
+    border: 1px solid var(--anime-border);
+    border-radius: 24px;
+    padding: 32px;
+    max-width: 420px;
+    width: 90%;
+    backdrop-filter: blur(24px);
+    box-shadow: var(--shadow-heavy);
+    transform: scale(0.9) translateY(20px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .anime-modal-overlay.active .anime-modal {
+    transform: scale(1) translateY(0);
+  }
+
+  .anime-modal-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .anime-modal-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--rose), var(--amber));
+    display: grid;
+    place-items: center;
+    color: white;
+    font-size: 1.3rem;
+    box-shadow: 0 4px 15px var(--rose-glow);
+  }
+
+  .anime-modal-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--anime-text);
+    margin: 0;
+  }
+
+  .anime-modal-body {
+    color: var(--anime-text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: 24px;
+  }
+
+  .anime-modal-body strong {
+    color: var(--anime-text);
+  }
+
+  .anime-modal-footer {
+    display: flex;
+    gap: 12px;
+  }
+
+  .anime-modal-footer .anime-btn {
+    flex: 1;
+    justify-content: center;
+  }
+
+  /* ── Toast Notification ── */
+  .anime-toast {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    padding: 16px 24px;
+    border-radius: 16px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    z-index: 1001;
+    backdrop-filter: blur(20px);
+    border: 1px solid;
+    box-shadow: var(--shadow-heavy);
+    transform: translateX(120%);
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .anime-toast.show {
+    transform: translateX(0);
+  }
+
+  .anime-toast.success {
+    background: rgba(52, 211, 153, 0.15);
+    color: #059669;
+    border-color: rgba(52, 211, 153, 0.3);
+  }
+
+  .anime-toast.error {
+    background: rgba(244, 63, 94, 0.15);
+    color: #e11d48;
+    border-color: rgba(244, 63, 94, 0.3);
+  }
+
+  /* ── Empty State ── */
+  .anime-empty {
+    text-align: center;
+    padding: 80px 40px;
+    background: var(--anime-surface);
+    border: 1px solid var(--anime-border);
+    border-radius: 28px;
+    backdrop-filter: blur(20px);
+    animation: cardEnter 0.8s ease-out;
+  }
+
+  .anime-empty-illustration {
+    width: 160px;
+    height: 160px;
+    margin: 0 auto 28px;
+    position: relative;
+  }
+
+  .anime-empty-illustration .circle {
+    position: absolute;
+    border-radius: 50%;
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .anime-empty-illustration .circle-1 {
+    width: 120px; height: 120px;
+    background: linear-gradient(135deg, var(--sakura-light), var(--sakura));
+    opacity: 0.15;
+    top: 10px; left: 20px;
+    animation-delay: 0s;
+  }
+
+  .anime-empty-illustration .circle-2 {
+    width: 80px; height: 80px;
+    background: linear-gradient(135deg, var(--sky-light), var(--sky));
+    opacity: 0.2;
+    top: 50px; left: 60px;
+    animation-delay: -2s;
+  }
+
+  .anime-empty-illustration .circle-3 {
+    width: 60px; height: 60px;
+    background: linear-gradient(135deg, var(--lavender-light), var(--lavender));
+    opacity: 0.25;
+    top: 30px; left: 10px;
+    animation-delay: -4s;
+  }
+
+  .anime-empty-illustration .icon {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 3rem;
+    color: var(--lavender);
+    opacity: 0.6;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+  }
+
+  .anime-empty h2 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--anime-text);
+    margin: 0 0 10px;
+  }
+
+  .anime-empty p {
+    color: var(--anime-text-secondary);
+    font-size: 1rem;
+    margin: 0 0 28px;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .anime-empty-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  /* ── Floating Action Button (Mobile) ── */
+  .anime-fab {
+    display: none;
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--sakura), var(--lavender));
+    color: white;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    box-shadow: 0 8px 30px var(--sakura-glow);
+    z-index: 100;
+    transition: all 0.3s ease;
+  }
+
+  .anime-fab:hover {
+    transform: scale(1.1) rotate(90deg);
+    box-shadow: 0 12px 40px var(--sakura-glow);
+  }
+
+  @media (max-width: 768px) {
+    .anime-fab { display: grid; place-items: center; }
+    .anime-header-actions { display: none; }
+    .anime-header h1 { font-size: 2rem; }
+    .anime-container { padding: 24px 16px 40px; }
+    .anime-grid { grid-template-columns: 1fr; gap: 16px; }
+    .anime-card { padding: 20px; }
+    .anime-scores { gap: 12px; padding: 12px; }
+    .anime-ring { width: 48px; height: 48px; }
+  }
+
+  /* ── No Results State ── */
+  .anime-no-results {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--anime-text-secondary);
+    font-size: 1rem;
+    display: none;
+  }
+
+  .anime-no-results.show {
+    display: block;
+    animation: fadeInUp 0.5s ease-out;
+  }
+
+  /* ── Tooltip ── */
+  .anime-tooltip {
+    position: relative;
+  }
+
+  .anime-tooltip::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-8px);
+    padding: 6px 12px;
+    background: var(--anime-text);
+    color: white;
+    font-size: 0.75rem;
+    border-radius: 8px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+    pointer-events: none;
+  }
+
+  .anime-tooltip:hover::after {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(-4px);
+  }
+
+  /* ── Card Removing Animation ── */
+  .anime-card.removing {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- SVG Gradients for Rings -->
+<svg width="0" height="0" style="position:absolute;">
+  <defs>
+    <linearGradient id="gradient-ats" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:var(--sakura)" />
+      <stop offset="100%" style="stop-color:var(--lavender)" />
+    </linearGradient>
+    <linearGradient id="gradient-complete" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:var(--sky)" />
+      <stop offset="100%" style="stop-color:var(--mint)" />
+    </linearGradient>
+  </defs>
+</svg>
+
+<!-- Background -->
+<div class="anime-page-bg"></div>
+<canvas id="particles-canvas"></canvas>
+
+<!-- Toast Notification -->
+<div id="deleteToast" class="anime-toast success">
+  <i class="fas fa-check-circle"></i>
+  <span id="deleteToastMsg">Resume deleted successfully</span>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="anime-modal-overlay">
+  <div class="anime-modal">
+    <div class="anime-modal-header">
+      <div class="anime-modal-icon">
+        <i class="fas fa-exclamation-triangle"></i>
+      </div>
+      <h3 class="anime-modal-title">Delete Resume?</h3>
+    </div>
+    <div class="anime-modal-body">
+      <p>Are you sure you want to permanently delete <strong id="modalResumeTitle">this resume</strong>?</p>
+      <p>This will remove all versions, ATS scores, parsed data, and uploaded files. This action <strong>cannot be undone</strong>.</p>
+    </div>
+    <div class="anime-modal-footer">
+      <button type="button" class="anime-btn anime-btn-secondary" onclick="closeDeleteModal()">
+        <i class="fas fa-times"></i>
+        Cancel
+      </button>
+      <form id="deleteForm" method="POST" style="flex: 1; display: flex;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="anime-btn anime-btn-delete" id="confirmDeleteBtn" style="width: 100%;">
+          <i class="fas fa-trash-alt"></i>
+          Delete Permanently
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="anime-container">
+  <!-- Header -->
+  <header class="anime-header">
+    <div class="anime-header-left">
+      <div class="anime-header-badge">
+        <i class="fas fa-sparkles"></i>
+        My Workspace
+      </div>
+      <h1>My Resumes</h1>
+      <div class="anime-header-subtitle">
+        <span class="count" id="resumeCount">{{ resumes|length }}</span> resume{% if resumes|length != 1 %}s{% endif %} in your workspace
+      </div>
+    </div>
+    <div class="anime-header-actions">
+      <a href="{{ url_for('main.dashboard') }}" class="anime-btn anime-btn-secondary">
+        <i class="fas fa-th-large"></i>
+        Dashboard
+      </a>
+      <a href="{{ url_for('resume.upload_resume') }}" class="anime-btn anime-btn-primary">
+        <i class="fas fa-cloud-upload-alt"></i>
+        Upload Resume
+      </a>
+    </div>
+  </header>
+
+  {% if resumes %}
+  <!-- Toolbar -->
+  <div class="anime-toolbar">
+    <div class="anime-search">
+      <input type="text" id="resumeSearch" placeholder="Search your resumes..." autocomplete="off">
+      <i class="fas fa-search"></i>
+    </div>
+    <div class="anime-sort">
+      <select id="resumeSort">
+        <option value="newest">Newest First</option>
+        <option value="oldest">Oldest First</option>
+        <option value="ats-high">ATS Score: High to Low</option>
+        <option value="ats-low">ATS Score: Low to High</option>
+        <option value="name">Name A-Z</option>
+      </select>
+      <i class="fas fa-chevron-down"></i>
+    </div>
+  </div>
+
+  <!-- Grid -->
+  <div class="anime-grid" id="resumeGrid">
+    {% for resume in resumes %}
+    <article class="anime-card" data-resume-id="{{ resume.id }}" data-title="{{ resume.title|lower }}" data-ats="{{ resume.current_version.ats_score_snapshot or 0 }}" data-date="{{ resume.created_at or '' }}" data-status="{{ resume.parsing_status }}">
+      <!-- Card Header -->
+      <div class="anime-card-header">
+        <div class="anime-card-icon {{ resume.source_type|lower if resume.source_type else 'uploaded' }}">
+          {% if resume.source_type|lower == 'pdf' %}
+            <i class="fas fa-file-pdf"></i>
+          {% elif resume.source_type|lower == 'builder' %}
+            <i class="fas fa-hammer"></i>
+          {% else %}
+            <i class="fas fa-file-alt"></i>
+          {% endif %}
+        </div>
+        <div class="anime-card-title-section">
+          <h2 class="anime-card-title">
+            <a href="{{ url_for('resume.resume_detail', resume_id=resume.id) }}">{{ resume.title }}</a>
+          </h2>
+          <div class="anime-card-meta">
+            <span>{{ resume.source_type|title }}</span>
+            <span class="dot"></span>
+            <span class="anime-status {{ resume.parsing_status|lower|replace(' ', '-') }}">
+              {% if resume.parsing_status|lower == 'parsed' %}
+                <i class="fas fa-check-circle" style="font-size:0.65rem;"></i>
+              {% elif resume.parsing_status|lower == 'processing' %}
+                <i class="fas fa-spinner fa-spin" style="font-size:0.65rem;"></i>
+              {% elif resume.parsing_status|lower == 'error' %}
+                <i class="fas fa-exclamation-circle" style="font-size:0.65rem;"></i>
+              {% else %}
+                <i class="fas fa-clock" style="font-size:0.65rem;"></i>
+              {% endif %}
+              {{ resume.parsing_status|replace('_', ' ')|title }}
+            </span>
+            {% if resume.created_at %}
+            <span class="dot"></span>
+            <span>{{ resume.created_at[:10] }}</span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Scores -->
+      {% if resume.current_version %}
+      <div class="anime-scores">
+        <div class="anime-score-item">
+          <div class="anime-ring">
+            <svg viewBox="0 0 56 56">
+              <circle class="anime-ring-bg" cx="28" cy="28" r="24"/>
+              <circle class="anime-ring-fill ats" cx="28" cy="28" r="24"
+                stroke-dasharray="150.8"
+                stroke-dashoffset="150.8"
+                data-score="{{ resume.current_version.ats_score_snapshot or 0 }}"/>
+            </svg>
+            <div class="anime-ring-text">{{ '%.0f'|format(resume.current_version.ats_score_snapshot or 0) }}</div>
+          </div>
+          <div>
+            <div class="anime-score-label">ATS Score</div>
+            <div class="anime-score-value">{{ '%.0f'|format(resume.current_version.ats_score_snapshot or 0) }}/100</div>
+          </div>
+        </div>
+        <div class="anime-score-item">
+          <div class="anime-ring">
+            <svg viewBox="0 0 56 56">
+              <circle class="anime-ring-bg" cx="28" cy="28" r="24"/>
+              <circle class="anime-ring-fill complete" cx="28" cy="28" r="24"
+                stroke-dasharray="150.8"
+                stroke-dashoffset="150.8"
+                data-score="{{ resume.current_version.completeness_snapshot or 0 }}"/>
+            </svg>
+            <div class="anime-ring-text">{{ '%.0f'|format(resume.current_version.completeness_snapshot or 0) }}%</div>
+          </div>
+          <div>
+            <div class="anime-score-label">Complete</div>
+            <div class="anime-score-value">{{ '%.0f'|format(resume.current_version.completeness_snapshot or 0) }}%</div>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Skills -->
+      {% if resume.extracted_skills %}
+      <div class="anime-skills">
+        {% for skill in resume.extracted_skills[:8] %}
+          <span class="anime-chip">{{ skill }}</span>
+        {% endfor %}
+        {% if resume.extracted_skills|length > 8 %}
+          <span class="anime-chip more">+{{ resume.extracted_skills|length - 8 }} more</span>
+        {% endif %}
+      </div>
+      {% endif %}
+
+      <!-- Actions -->
+      <div class="anime-card-actions">
+        <a href="{{ url_for('resume.edit_builder_resume', resume_id=resume.id) }}" class="anime-btn anime-btn-secondary anime-tooltip" data-tooltip="Open in Builder">
+          <i class="fas fa-edit"></i>
+          Open
+        </a>
+        <a href="{{ url_for('resume.list_versions', resume_id=resume.id) }}" class="anime-btn anime-btn-secondary anime-tooltip" data-tooltip="View Versions">
+          <i class="fas fa-code-branch"></i>
+          Versions
+        </a>
+        <a href="{{ url_for('resume.resume_detail', resume_id=resume.id) }}" class="anime-btn anime-btn-mint anime-tooltip" data-tooltip="View Details">
+          <i class="fas fa-eye"></i>
+          View
+        </a>
+        <button type="button" class="anime-btn anime-btn-delete anime-tooltip" data-tooltip="Delete Resume"
+                onclick="event.stopPropagation(); confirmDeleteResume('{{ resume.id }}', '{{ resume.title|default('Untitled')|forceescape }}')">
+          <i class="fas fa-trash-alt"></i>
+          Delete
+        </button>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+
+  <div class="anime-no-results" id="noResults">
+    <i class="fas fa-search" style="font-size:2rem; margin-bottom:12px; color:var(--lavender);"></i>
+    <p>No resumes found matching your search.</p>
+  </div>
+
+  {% else %}
+  <!-- Empty State -->
+  <section class="anime-empty">
+    <div class="anime-empty-illustration">
+      <div class="circle circle-1"></div>
+      <div class="circle circle-2"></div>
+      <div class="circle circle-3"></div>
+      <div class="icon"><i class="fas fa-file-alt"></i></div>
+    </div>
+    <h2>No Resumes Yet</h2>
+    <p>Your workspace is empty. Upload your first resume or create one from scratch to get started on your career journey.</p>
+    <div class="anime-empty-actions">
+      <a href="{{ url_for('resume.upload_resume') }}" class="anime-btn anime-btn-primary">
+        <i class="fas fa-cloud-upload-alt"></i>
+        Upload Resume
+      </a>
+      <a href="{{ url_for('resume.create_builder_resume') }}" class="anime-btn anime-btn-mint">
+        <i class="fas fa-hammer"></i>
+        Build from Scratch
+      </a>
+    </div>
+  </section>
+  {% endif %}
+</div>
+
+<!-- Mobile FAB -->
+<a href="{{ url_for('resume.upload_resume') }}" class="anime-fab anime-tooltip" data-tooltip="Upload Resume">
+  <i class="fas fa-plus"></i>
+</a>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // ═══════════════════════════════════════════════════════════════
+  // 🌸 ANIME PREMIUM INTERACTIVITY
+  // ═══════════════════════════════════════════════════════════════
+
+  let deleteResumeId = null;
+
+  // ── Delete Modal Functions ──
+  function confirmDeleteResume(id, title) {
+    deleteResumeId = id;
+    document.getElementById('modalResumeTitle').textContent = title;
+    document.getElementById('deleteForm').action = `/resume/${id}/delete`;
+    document.getElementById('deleteModal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeDeleteModal() {
+    document.getElementById('deleteModal').classList.remove('active');
+    document.body.style.overflow = '';
+    deleteResumeId = null;
+  }
+
+  // Close modal on overlay click
+  document.getElementById('deleteModal').addEventListener('click', function(e) {
+    if (e.target === this) closeDeleteModal();
+  });
+
+  // Close modal on Escape key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeDeleteModal();
+  });
+
+  // ── AJAX Delete Handler ──
+  document.getElementById('deleteForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const btn = document.getElementById('confirmDeleteBtn');
+    const originalHTML = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
+
+    try {
+      const response = await fetch(this.action, {
+        method: 'POST',
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+          'Accept': 'application/json',
+        },
+        body: new FormData(this)
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Close modal
+        closeDeleteModal();
+
+        // Animate card removal
+        const card = document.querySelector(`[data-resume-id="${deleteResumeId}"]`);
+        if (card) {
+          card.classList.add('removing');
+          setTimeout(() => {
+            card.remove();
+
+            // Update resume count
+            const countEl = document.getElementById('resumeCount');
+            if (countEl) {
+              let current = parseInt(countEl.textContent) || 0;
+              if (current > 0) {
+                countEl.textContent = current - 1;
+              }
+            }
+
+            // Check if no resumes left
+            const remaining = document.querySelectorAll('.anime-card');
+            if (remaining.length === 0) {
+              location.reload();
+            }
+          }, 500);
+        }
+
+        // Show success toast
+        showToast(data.message || 'Resume deleted successfully', 'success');
+      } else {
+        throw new Error(data.error?.message || data.message || 'Failed to delete resume');
+      }
+    } catch (err) {
+      btn.disabled = false;
+      btn.innerHTML = originalHTML;
+      closeDeleteModal();
+      showToast(err.message, 'error');
+    }
+  });
+
+  // ── Toast Notification ──
+  function showToast(message, type) {
+    const toast = document.getElementById('deleteToast');
+    const msgEl = document.getElementById('deleteToastMsg');
+
+    toast.className = `anime-toast ${type}`;
+    msgEl.textContent = message;
+
+    // Update icon based on type
+    const icon = toast.querySelector('i');
+    if (type === 'success') {
+      icon.className = 'fas fa-check-circle';
+    } else {
+      icon.className = 'fas fa-exclamation-circle';
+    }
+
+    toast.classList.add('show');
+    setTimeout(() => {
+      toast.classList.remove('show');
+    }, 3000);
+  }
+
+  // ── Particle System (Sakura Petals) ──
+  (function() {
+    const canvas = document.getElementById('particles-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    let animationId;
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    class Particle {
+      constructor() {
+        this.reset();
+      }
+      reset() {
+        this.x = Math.random() * canvas.width;
+        this.y = -10;
+        this.size = Math.random() * 4 + 2;
+        this.speedY = Math.random() * 0.8 + 0.3;
+        this.speedX = Math.random() * 1 - 0.5;
+        this.rotation = Math.random() * 360;
+        this.rotationSpeed = Math.random() * 2 - 1;
+        this.opacity = Math.random() * 0.4 + 0.1;
+        const colors = ['#ff6b9d', '#a78bfa', '#4facfe', '#34d399', '#fbbf24'];
+        this.color = colors[Math.floor(Math.random() * colors.length)];
+      }
+      update() {
+        this.y += this.speedY;
+        this.x += this.speedX + Math.sin(this.y * 0.01) * 0.5;
+        this.rotation += this.rotationSpeed;
+        if (this.y > canvas.height + 10) this.reset();
+      }
+      draw() {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.rotation * Math.PI / 180);
+        ctx.globalAlpha = this.opacity;
+        ctx.fillStyle = this.color;
+        ctx.beginPath();
+        // Draw petal shape
+        ctx.moveTo(0, -this.size);
+        ctx.bezierCurveTo(this.size, -this.size, this.size, this.size, 0, this.size);
+        ctx.bezierCurveTo(-this.size, this.size, -this.size, -this.size, 0, -this.size);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    // Create particles
+    const particleCount = window.innerWidth < 768 ? 15 : 30;
+    for (let i = 0; i < particleCount; i++) {
+      const p = new Particle();
+      p.y = Math.random() * canvas.height;
+      particles.push(p);
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => { p.update(); p.draw(); });
+      animationId = requestAnimationFrame(animate);
+    }
+    animate();
+
+    // Pause when tab hidden
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        cancelAnimationFrame(animationId);
+      } else {
+        animate();
+      }
+    });
+  })();
+
+  // ── Animate Score Rings on Scroll ──
+  (function() {
+    const rings = document.querySelectorAll('.anime-ring-fill');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const ring = entry.target;
+          const score = parseFloat(ring.dataset.score) || 0;
+          const circumference = 2 * Math.PI * 24; // r=24
+          const offset = circumference - (score / 100) * circumference;
+          setTimeout(() => {
+            ring.style.strokeDashoffset = offset;
+          }, 300);
+          observer.unobserve(ring);
+        }
+      });
+    }, { threshold: 0.5 });
+
+    rings.forEach(ring => observer.observe(ring));
+  })();
+
+  // ── Search Functionality ──
+  (function() {
+    const searchInput = document.getElementById('resumeSearch');
+    const grid = document.getElementById('resumeGrid');
+    const noResults = document.getElementById('noResults');
+    if (!searchInput || !grid) return;
+
+    const cards = grid.querySelectorAll('.anime-card');
+
+    searchInput.addEventListener('input', (e) => {
+      const query = e.target.value.toLowerCase().trim();
+      let visibleCount = 0;
+
+      cards.forEach(card => {
+        const title = card.dataset.title;
+        const skills = card.textContent.toLowerCase();
+        const match = title.includes(query) || skills.includes(query);
+        card.style.display = match ? '' : 'none';
+        if (match) visibleCount++;
+      });
+
+      if (noResults) {
+        noResults.classList.toggle('show', visibleCount === 0 && query !== '');
+      }
+    });
+  })();
+
+  // ── Sort Functionality ──
+  (function() {
+    const sortSelect = document.getElementById('resumeSort');
+    const grid = document.getElementById('resumeGrid');
+    if (!sortSelect || !grid) return;
+
+    sortSelect.addEventListener('change', (e) => {
+      const sortType = e.target.value;
+      const cards = Array.from(grid.querySelectorAll('.anime-card'));
+
+      cards.sort((a, b) => {
+        switch(sortType) {
+          case 'newest':
+            return (b.dataset.date || '').localeCompare(a.dataset.date || '');
+          case 'oldest':
+            return (a.dataset.date || '').localeCompare(b.dataset.date || '');
+          case 'ats-high':
+            return parseFloat(b.dataset.ats || 0) - parseFloat(a.dataset.ats || 0);
+          case 'ats-low':
+            return parseFloat(a.dataset.ats || 0) - parseFloat(b.dataset.ats || 0);
+          case 'name':
+            return (a.dataset.title || '').localeCompare(b.dataset.title || '');
+          default:
+            return 0;
+        }
+      });
+
+      cards.forEach(card => grid.appendChild(card));
+    });
+  })();
+
+  // ── Card Click (Entire card clickable) ──
+  (function() {
+    document.querySelectorAll('.anime-card').forEach(card => {
+      card.addEventListener('click', (e) => {
+        if (e.target.closest('a') || e.target.closest('button') || e.target.closest('form')) return;
+        const link = card.querySelector('.anime-card-title a');
+        if (link) link.click();
+      });
+    });
+  })();
+
+  // ── Magnetic Button Effect ──
+  (function() {
+    const buttons = document.querySelectorAll('.anime-btn-primary, .anime-btn-mint');
+    buttons.forEach(btn => {
+      btn.addEventListener('mousemove', (e) => {
+        const rect = btn.getBoundingClientRect();
+        const x = e.clientX - rect.left - rect.width / 2;
+        const y = e.clientY - rect.top - rect.height / 2;
+        btn.style.transform = `translate(${x * 0.1}px, ${y * 0.1}px) scale(1.02)`;
+      });
+      btn.addEventListener('mouseleave', () => {
+        btn.style.transform = '';
+      });
+    });
+  })();
+</script>
+{% endblock %}

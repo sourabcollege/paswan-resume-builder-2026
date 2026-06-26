@@ -1,0 +1,146 @@
+paswan-resume-builder-main/
+│
+├── .github/
+│   └── workflows/
+│       └── ci.yml
+├── app/
+│   ├── admin/
+│   │   ├── __init__.py
+│   │   └── routes.py
+│   ├── ai/
+│   │   ├── __init__.py
+│   │   └── routes.py
+│   ├── analytics/
+│   │   ├── __init__.py
+│   │   └── routes.py
+│   ├── auth/
+│   │   ├── __init__.py
+│   │   ├── decorators.py
+│   │   ├── forms.py
+│   │   ├── routes.py
+│   │   └── utils.py
+│   ├── generated_resumes/
+│   ├── instance/
+│   │   └── paswan_resume_builder_dev.sqlite3
+│   ├── jobs/
+│   │   ├── __init__.py
+│   │   ├── forms.py
+│   │   └── routes.py
+│   ├── logs/
+│   ├── main/
+│   │   ├── __init__.py
+│   │   └── routes.py
+│   ├── models/
+│   │   ├── __init__.py
+│   │   ├── activity.py
+│   │   ├── analytics.py
+│   │   ├── base.py
+│   │   ├── job.py
+│   │   ├── payment.py
+│   │   ├── resume.py
+│   │   ├── subscription.py
+│   │   └── user.py
+│   ├── payment/
+│   │   ├── tests/
+│   │   │   └── __init__.py
+│   │   ├── __init__.py
+│   │   └── routes.py
+│   ├── profile/
+│   │   ├── __init__.py
+│   │   └── routes.py
+│   ├── recruiter/
+│   │   ├── __init__.py
+│   │   └── routes.py
+│   ├── repositories/
+│   │   ├── __init__.py
+│   │   ├── jobs.py
+│   │   ├── resumes.py
+│   │   └── users.py
+│   ├── resume/
+│   │   ├── __init__.py
+│   │   ├── forms.py
+│   │   ├── routes.py
+│   │   └── utils.py
+│   ├── services/
+│   │   ├── __init__.py
+│   │   ├── admin_service.py
+│   │   ├── ai_service.py
+│   │   ├── analytics_service.py
+│   │   ├── auth_service.py
+│   │   ├── job_service.py
+│   │   ├── payment_service.py
+│   │   ├── recruiter_service.py
+│   │   └── resume_service.py
+│   ├── uploads/
+│   │   ├── avatars/
+│   │   └── resumes/
+│   │       └── Sourab_Paswan_Resume_19b63a28.docx
+│   ├── utils/
+│   │   ├── __init__.py
+│   │   ├── offline_engines.py
+│   │   └── resume_utils.py
+│   ├── __init__.py
+│   ├── config.py
+│   ├── extensions.py
+│   ├── logging_config.py
+│   ├── security.py
+│   └── tasks.py
+├── docs/
+│   └── ARCHITECTURE.md
+├── generated_resumes/
+├── instance/
+│   └── paswan_resume_builder_dev.sqlite3
+├── logs/
+├── templates/
+│   ├── admin/
+│   │   └── dashboard.html
+│   ├── ai/
+│   │   └── improve_bullet.html
+│   ├── analytics/
+│   │   └── overview.html
+│   ├── auth/
+│   │   ├── forgot_password.html
+│   │   ├── login.html
+│   │   ├── register.html
+│   │   ├── resend_verification.html
+│   │   └── verify_email.html
+│   ├── jobs/
+│   │   ├── detail.html
+│   │   ├── list.html
+│   │   └── recommendations.html
+│   ├── payment/
+│   │   └── checkout.html
+│   ├── profile/
+│   │   └── edit.html
+│   ├── recruiter/
+│   │   └── search.html
+│   ├── resume/
+│   │   ├── builder.html
+│   │   ├── detail.html
+│   │   ├── list.html
+│   │   ├── upload.html
+│   │   ├── version_detail.html
+│   │   └── versions.html
+│   ├── base.html
+│   ├── dashboard.html
+│   └── index.html
+├── tests/
+│   ├── __init__.py
+│   ├── conftest.py
+│   ├── test_auth.py
+│   └── test_offline_engines.py
+├── uploads/
+│   ├── avatars/
+│   └── resumes/
+│       ├── 1/
+│       └── Sourab_Paswan_Resume_19b63a28.docx
+├── .env
+├── .env.example
+├── .gitignore
+├── Dockerfile
+├── Procfile
+├── app.py
+├── combined_files.txt
+├── docker-compose.yml
+├── nginx.conf
+├── requirements.txt

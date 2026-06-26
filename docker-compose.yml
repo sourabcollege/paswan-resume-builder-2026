@@ -1,0 +1,43 @@
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    env_file: .env
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - ./uploads:/app/uploads
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: paswan
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: resume_builder
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+
+  worker:
+    build: .
+    command: celery -A app.tasks.celery worker --loglevel=info
+    env_file: .env
+    depends_on:
+      - redis
+      - db
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - web
+
+volumes:
+  postgres_data:

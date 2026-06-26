@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resend Verification | Paswan Resume</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0b1120;
+      --surface: rgba(21, 30, 50, 0.8);
+      --text: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --accent: #14b8a6;
+      --accent-light: #5eead4;
+      --accent-glow: rgba(20, 184, 166, 0.15);
+      --border: rgba(148, 163, 184, 0.1);
+      --danger: #ef4444;
+      --success: #10b981;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 48px 40px;
+      max-width: 440px;
+      width: 100%;
+      text-align: center;
+      backdrop-filter: blur(10px);
+    }
+
+    .icon {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: var(--accent-glow);
+      display: grid;
+      place-items: center;
+      margin: 0 auto 24px;
+      font-size: 2rem;
+    }
+
+    h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 12px; }
+    p { color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6; margin-bottom: 28px; }
+
+    .form-group {
+      text-align: left;
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(15, 23, 42, 0.6);
+      color: var(--text);
+      font-size: 1rem;
+      transition: all 0.2s;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 14px 24px;
+      border-radius: 12px;
+      border: none;
+      background: var(--accent);
+      color: white;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(20, 184, 166, 0.3);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      margin-top: 12px;
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--accent);
+      color: var(--accent-light);
+      box-shadow: none;
+    }
+
+    .message {
+      font-size: 0.85rem;
+      margin-bottom: 16px;
+      padding: 12px;
+      border-radius: 10px;
+    }
+
+    .success {
+      background: rgba(16, 185, 129, 0.08);
+      color: var(--success);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .error {
+      background: rgba(239, 68, 68, 0.08);
+      color: var(--danger);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .error-list {
+      list-style: none;
+      font-size: 0.8rem;
+      color: var(--danger);
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="icon">📧</div>
+    <h1>Resend Verification Email</h1>
+    <p>Enter your email address and we'll send you a new verification link.</p>
+
+    {% if success_message %}
+      <div class="message success">{{ success_message }}</div>
+    {% endif %}
+    {% if message and not success_message %}
+      <div class="message error">{{ message }}</div>
+    {% endif %}
+
+    <form method="POST" action="">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input type="email" id="email" name="email" placeholder="you@example.com" required value="{{ form.email.data or '' }}">
+        {% if form.email.errors %}
+          <ul class="error-list">
+            {% for error in form.email.errors %}
+              <li>{{ error }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </div>
+      <button type="submit" class="btn">Send Verification Email</button>
+      <a href="{{ url_for('auth.login') }}" class="btn btn-secondary">← Back to Login</a>
+    </form>
+  </div>
+</body>
+</html>

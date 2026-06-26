@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Checkout{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-dark text-white">
+                    <h4 class="mb-0">Complete Your Purchase</h4>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <h5>Plan: <span id="plan-name" class="text-primary">{{ plan|capitalize }}</span></h5>
+                        <p class="text-muted" id="plan-description">Access all premium features and AI tools.</p>
+                        <h3 id="plan-price">₹499.00</h3>
+                    </div>
+
+                    <hr>
+
+                    <div class="d-grid gap-2">
+                        <button id="razorpay-btn" class="btn btn-primary btn-lg">Pay with Razorpay</button>
+                        <button id="stripe-btn" class="btn btn-outline-primary">Pay with Stripe (International)</button>
+                    </div>
+                </div>
+                <div class="card-footer text-center small text-muted">
+                    Secure payment powered by Razorpay & Stripe
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('razorpay-btn').addEventListener('click', function() {
+    fetch('/payments/create-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan: '{{ plan }}', provider: 'razorpay' })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Redirecting to Razorpay... (Demo: Using Order ID ' + data.order_id + ')');
+            // Mocking verification
+            fetch('/payments/verify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    provider: 'razorpay',
+                    razorpay_order_id: data.order_id,
+                    razorpay_payment_id: 'pay_demo_123',
+                    razorpay_signature: 'demo_sig'
+                })
+            }).then(() => window.location.href = '/dashboard');
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ resume.title if resume else 'Resume' }} - Paswan Resume Builder</title>
+  <style>
+    body{margin:0;min-height:100vh;background:linear-gradient(135deg,#f8fffc,#eef4ff);color:#17202a;font:15px/1.5 Inter,Arial,sans-serif}
+    .shell{width:min(980px,calc(100% - 32px));margin:0 auto;padding:30px 0}
+    .panel{background:rgba(255,255,255,.8);border:1px solid rgba(23,32,42,.12);border-radius:8px;box-shadow:0 20px 70px rgba(32,48,73,.10);padding:20px}
+    a{color:#1f6f78;font-weight:800;text-decoration:none}
+    .nav{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+    h1{font-size:36px;margin:0 0 8px}
+    .meta{color:#637083}
+    .section{border-top:1px solid rgba(23,32,42,.12);margin-top:16px;padding-top:16px;white-space:pre-wrap}
+    .badge{display:inline-block;background:#e8f5f0;color:#1f6f78;border-radius:6px;padding:3px 10px;font-size:13px;font-weight:700;margin-left:8px}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <nav class="nav">
+      <a href="{{ url_for('main.dashboard') }}">← Dashboard</a>
+      <a href="{{ url_for('resume.list_resumes') }}">My Resumes</a>
+      {% if resume %}<a href="{{ url_for('resume.edit_builder_resume', resume_id=resume.id) }}">✏️ Open Builder</a>{% endif %}
+    </nav>
+
+    <article class="panel">
+      {% if resume %}
+        <h1>{{ resume.title }}</h1>
+        <div class="meta">
+          {{ resume.source_type | title }}
+          <span class="badge">{{ resume.parsing_status | replace('_', ' ') | title }}</span>
+        </div>
+
+        {% if version %}
+          <div class="meta" style="margin-top:8px">
+            Version {{ version.version_number }} — {{ version.label }}
+            {% if version.ats_score_snapshot is not none %}
+              <span class="badge">ATS {{ '%.0f'|format(version.ats_score_snapshot) }}</span>
+            {% endif %}
+            {% if version.completeness_snapshot is not none %}
+              <span class="badge">{{ '%.0f'|format(version.completeness_snapshot) }}% Complete</span>
+            {% endif %}
+          </div>
+
+          {% if version.content %}
+            {% for name, value in version.content.items() %}
+              <section class="section">
+                <strong>{{ name | replace('_', ' ') | title }}</strong>
+                <div style="margin-top:6px">
+                  {% if value is mapping %}
+                    {% for k, v in value.items() %}
+                      <div><em>{{ k | replace('_',' ') | title }}:</em> {{ v }}</div>
+                    {% endfor %}
+                  {% elif value is iterable and value is not string %}
+                    {% for item in value %}
+                      <div>• {{ item }}</div>
+                    {% endfor %}
+                  {% else %}
+                    {{ value }}
+                  {% endif %}
+                </div>
+              </section>
+            {% endfor %}
+          {% else %}
+            <p class="meta" style="margin-top:16px">No content sections found in this version.</p>
+          {% endif %}
+
+        {% else %}
+          <p class="meta" style="margin-top:16px">No current version available for this resume.</p>
+          <a href="{{ url_for('resume.edit_builder_resume', resume_id=resume.id) }}" style="display:inline-block;margin-top:12px;background:#1f6f78;color:#fff;padding:10px 18px;border-radius:8px">Create First Version</a>
+        {% endif %}
+
+      {% else %}
+        <p class="meta">Resume not found.</p>
+      {% endif %}
+    </article>
+  </main>
+</body>
+</html>

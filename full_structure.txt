@@ -3,6 +3,14 @@ paswan-resume-builder-main/
 ├── .github/
 │   └── workflows/
 │       └── ci.yml
+├── .pytest_cache/
+│   ├── v/
+│   │   └── cache/
+│   │       ├── lastfailed
+│   │       └── nodeids
+│   ├── .gitignore
+│   ├── CACHEDIR.TAG
+│   └── README.md
 ├── app/
 │   ├── admin/
 │   │   ├── __init__.py
@@ -93,9 +101,15 @@ paswan-resume-builder-main/
 ├── logs/
 ├── templates/
 │   ├── admin/
-│   │   └── dashboard.html
+│   │   ├── dashboard.html
+│   │   ├── jobs.html
+│   │   ├── logs.html
+│   │   ├── resumes.html
+│   │   ├── stats.html
+│   │   └── users.html
 │   ├── ai/
-│   │   └── improve_bullet.html
+│   │   ├── improve_bullet.html
+│   │   └── rewrite_resume.html
 │   ├── analytics/
 │   │   └── overview.html
 │   ├── auth/
@@ -111,13 +125,15 @@ paswan-resume-builder-main/
 │   ├── payment/
 │   │   └── checkout.html
 │   ├── profile/
-│   │   └── edit.html
+│   │   ├── edit.html
+│   │   └── settings.html
 │   ├── recruiter/
 │   │   └── search.html
 │   ├── resume/
 │   │   ├── builder.html
 │   │   ├── detail.html
 │   │   ├── list.html
+│   │   ├── list.html.backup
 │   │   ├── upload.html
 │   │   ├── version_detail.html
 │   │   └── versions.html
@@ -144,3 +160,4 @@ paswan-resume-builder-main/
 ├── docker-compose.yml
 ├── nginx.conf
 ├── requirements.txt
+└── tree.py

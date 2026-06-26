@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resumes | Paswan Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    :root {
+      --bg-deep: #060b14;
+      --bg-card: rgba(255,255,255,0.025);
+      --bg-card-hover: rgba(255,255,255,0.04);
+      --bg-input: rgba(255,255,255,0.03);
+      --border: rgba(255,255,255,0.06);
+      --border-hover: rgba(255,255,255,0.12);
+      --text: #f0f2f5;
+      --text-secondary: #8b95a8;
+      --text-muted: #5a6578;
+      --accent-1: #00d4aa;
+      --accent-2: #00a8e8;
+      --accent-gradient: linear-gradient(135deg, #00d4aa, #00a8e8);
+      --accent-glow: rgba(0, 212, 170, 0.15);
+      --danger: #ff4757;
+      --warning: #ffa502;
+      --success: #2ed573;
+      --info: #1e90ff;
+      --purple: #a29bfe;
+      --orange: #ff7f50;
+      --pink: #ff6b81;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg-deep); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+    .bg-orb { position: fixed; border-radius: 50%; filter: blur(120px); opacity: 0.12; pointer-events: none; z-index: 0; }
+    .bg-orb-1 { width: 600px; height: 600px; background: var(--accent-1); top: -200px; left: -100px; }
+    .bg-orb-2 { width: 500px; height: 500px; background: var(--purple); bottom: -150px; right: -100px; }
+    .noise-overlay { position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: 0.03; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E"); }
+    .admin-layout { display: flex; min-height: 100vh; position: relative; z-index: 2; }
+    .sidebar { width: 270px; background: rgba(6, 11, 20, 0.8); backdrop-filter: blur(20px); border-right: 1px solid var(--border); position: fixed; top: 0; left: 0; bottom: 0; z-index: 1000; display: flex; flex-direction: column; padding: 24px 0; transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+    .sidebar-brand { display: flex; align-items: center; gap: 12px; padding: 0 24px 28px; font-weight: 800; font-size: 1.15rem; color: var(--text); text-decoration: none; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+    .sidebar-brand .logo { width: 38px; height: 38px; background: var(--accent-gradient); border-radius: 12px; display: grid; place-items: center; color: #fff; font-weight: 800; font-size: 1rem; box-shadow: 0 0 20px rgba(0, 212, 170, 0.3); }
+    .sidebar-nav { flex: 1; padding: 0 16px; overflow-y: auto; }
+    .sidebar-section { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-muted); padding: 20px 12px 8px; }
+    .sidebar-link { display: flex; align-items: center; gap: 14px; padding: 11px 16px; border-radius: 12px; color: var(--text-secondary); text-decoration: none; font-size: 0.87rem; font-weight: 500; transition: all 0.25s ease; margin-bottom: 3px; position: relative; overflow: hidden; }
+    .sidebar-link::before { content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 3px; height: 0; background: var(--accent-gradient); border-radius: 0 4px 4px 0; transition: height 0.3s ease; }
+    .sidebar-link:hover { background: var(--bg-card-hover); color: var(--text); }
+    .sidebar-link:hover::before { height: 60%; }
+    .sidebar-link.active { background: var(--accent-glow); color: var(--accent-1); box-shadow: 0 0 30px rgba(0, 212, 170, 0.1), inset 0 1px 0 rgba(255,255,255,0.05); }
+    .sidebar-link.active::before { height: 80%; }
+    .sidebar-link i { width: 20px; text-align: center; font-size: 0.95rem; }
+    .sidebar-footer { padding: 20px 24px 0; border-top: 1px solid var(--border); margin-top: auto; }
+    .sidebar-user { display: flex; align-items: center; gap: 12px; }
+    .sidebar-user-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--accent-gradient); display: grid; place-items: center; color: white; font-weight: 700; font-size: 0.85rem; box-shadow: 0 0 15px rgba(0, 212, 170, 0.3); }
+    .sidebar-user-info { flex: 1; }
+    .sidebar-user-name { font-weight: 600; font-size: 0.88rem; color: var(--text); }
+    .sidebar-user-role { font-size: 0.7rem; color: var(--accent-1); font-weight: 700; background: rgba(0, 212, 170, 0.1); padding: 3px 10px; border-radius: 20px; display: inline-block; border: 1px solid rgba(0, 212, 170, 0.2); }
+    .main-area { flex: 1; margin-left: 270px; }
+    .topbar { position: sticky; top: 0; z-index: 100; background: rgba(6, 11, 20, 0.7); backdrop-filter: blur(20px) saturate(1.5); border-bottom: 1px solid var(--border); padding: 0 32px; height: 70px; display: flex; align-items: center; justify-content: space-between; }
+    .topbar-title { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em; }
+    .topbar-actions { display: flex; align-items: center; gap: 14px; }
+    .theme-toggle { width: 42px; height: 42px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg-card); color: var(--text-secondary); cursor: pointer; display: grid; place-items: center; font-size: 1rem; transition: all 0.3s ease; }
+    .theme-toggle:hover { background: var(--bg-card-hover); color: var(--text); border-color: var(--border-hover); box-shadow: 0 0 20px rgba(0, 212, 170, 0.1); transform: translateY(-1px); }
+    .back-link { color: var(--text-secondary); text-decoration: none; font-size: 0.85rem; font-weight: 500; display: flex; align-items: center; gap: 8px; transition: all 0.2s; padding: 8px 14px; border-radius: 10px; border: 1px solid transparent; }
+    .back-link:hover { color: var(--accent-1); border-color: var(--border); background: var(--bg-card); }
+    .content { padding: 32px; max-width: 1440px; margin: 0 auto; }
+    .page-header { margin-bottom: 28px; animation: fadeInUp 0.6s ease forwards; }
+    .page-header h1 { font-size: 1.7rem; font-weight: 800; letter-spacing: -0.03em; background: linear-gradient(135deg, #fff, #a0a8b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .page-header p { color: var(--text-secondary); font-size: 0.9rem; margin-top: 4px; }
+
+    .toolbar { display: flex; align-items: center; gap: 14px; margin-bottom: 24px; flex-wrap: wrap; animation: fadeInUp 0.6s ease forwards; animation-delay: 0.1s; opacity: 0; }
+    .search-box { flex: 1; min-width: 260px; position: relative; }
+    .search-box i { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.9rem; }
+    .search-box input { width: 100%; padding: 12px 16px 12px 44px; border-radius: 14px; border: 1px solid var(--border); background: var(--bg-input); color: var(--text); font-size: 0.88rem; font-family: inherit; transition: all 0.3s ease; outline: none; }
+    .search-box input:focus { border-color: var(--accent-1); box-shadow: 0 0 20px rgba(0, 212, 170, 0.1); }
+    .search-box input::placeholder { color: var(--text-muted); }
+    .btn { padding: 12px 22px; border-radius: 14px; border: none; font-size: 0.88rem; font-weight: 600; font-family: inherit; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; }
+    .btn-primary { background: var(--accent-gradient); color: #fff; box-shadow: 0 4px 20px rgba(0, 212, 170, 0.3); }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0, 212, 170, 0.4); }
+    .btn-danger { background: rgba(255, 71, 87, 0.1); color: var(--danger); border: 1px solid rgba(255, 71, 87, 0.2); }
+    .btn-danger:hover { background: rgba(255, 71, 87, 0.2); }
+    .btn-sm { padding: 8px 14px; font-size: 0.8rem; border-radius: 10px; }
+
+    .table-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; backdrop-filter: blur(10px); overflow: hidden; animation: fadeInUp 0.6s ease forwards; animation-delay: 0.2s; opacity: 0; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    thead th { padding: 16px 20px; text-align: left; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.015); }
+    tbody tr { border-bottom: 1px solid var(--border); transition: all 0.2s ease; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: var(--bg-card-hover); }
+    tbody td { padding: 16px 20px; font-size: 0.88rem; color: var(--text); vertical-align: middle; }
+    .resume-cell { display: flex; align-items: center; gap: 12px; }
+    .resume-icon { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; font-size: 1rem; color: var(--accent-1); background: rgba(0, 212, 170, 0.1); border: 1px solid rgba(0, 212, 170, 0.2); flex-shrink: 0; }
+    .resume-title { font-weight: 600; color: var(--text); }
+    .resume-meta { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
+    .badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; border: 1px solid; }
+    .badge-draft { color: var(--text-muted); background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); }
+    .badge-published { color: var(--success); background: rgba(46, 213, 115, 0.1); border-color: rgba(46, 213, 115, 0.2); }
+    .badge-archived { color: var(--warning); background: rgba(255, 165, 2, 0.1); border-color: rgba(255, 165, 2, 0.2); }
+    .actions { display: flex; gap: 8px; }
+    .action-btn { width: 34px; height: 34px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg-card); color: var(--text-secondary); cursor: pointer; display: grid; place-items: center; font-size: 0.85rem; transition: all 0.2s ease; }
+    .action-btn:hover { transform: translateY(-2px); }
+    .action-btn.view:hover { color: var(--info); border-color: rgba(30, 144, 255, 0.3); background: rgba(30, 144, 255, 0.1); }
+    .action-btn.delete:hover { color: var(--danger); border-color: rgba(255, 71, 87, 0.3); background: rgba(255, 71, 87, 0.1); }
+
+    .pagination { display: flex; align-items: center; justify-content: space-between; padding: 20px; border-top: 1px solid var(--border); }
+    .pagination-info { color: var(--text-muted); font-size: 0.85rem; }
+    .pagination-btns { display: flex; gap: 8px; }
+    .page-btn { padding: 8px 14px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg-card); color: var(--text-secondary); font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+    .page-btn:hover { background: var(--bg-card-hover); color: var(--text); border-color: var(--border-hover); }
+    .page-btn.disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+    .page-btn.active { background: var(--accent-glow); color: var(--accent-1); border-color: rgba(0, 212, 170, 0.3); }
+    .empty-state { text-align: center; padding: 60px 20px; color: var(--text-muted); }
+    .empty-state i { font-size: 3rem; margin-bottom: 16px; opacity: 0.3; }
+    .empty-state h3 { font-size: 1.1rem; color: var(--text-secondary); margin-bottom: 6px; }
+    .empty-state p { font-size: 0.85rem; }
+
+    .toast-container { position: fixed; top: 84px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+    .toast { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 16px 20px; backdrop-filter: blur(20px); min-width: 320px; display: flex; align-items: center; gap: 12px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); animation: toastIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards; position: relative; overflow: hidden; }
+    .toast::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; }
+    .toast.success::before { background: var(--success); }
+    .toast.error::before { background: var(--danger); }
+    .toast.warning::before { background: var(--warning); }
+    .toast.info::before { background: var(--info); }
+    .toast-icon { width: 32px; height: 32px; border-radius: 8px; display: grid; place-items: center; font-size: 14px; flex-shrink: 0; }
+    .toast.success .toast-icon { background: rgba(46, 213, 115, 0.1); color: var(--success); }
+    .toast.error .toast-icon { background: rgba(255, 71, 87, 0.1); color: var(--danger); }
+    .toast.warning .toast-icon { background: rgba(255, 165, 2, 0.1); color: var(--warning); }
+    .toast.info .toast-icon { background: rgba(30, 144, 255, 0.1); color: var(--info); }
+    .toast-content { flex: 1; }
+    .toast-title { font-weight: 700; font-size: 0.9rem; color: var(--text); }
+    .toast-msg { font-size: 0.8rem; color: var(--text-secondary); margin-top: 2px; }
+    .toast-close { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1rem; padding: 4px; transition: color 0.2s; }
+    .toast-close:hover { color: var(--text); }
+
+    @keyframes toastIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    @keyframes toastOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
+    @keyframes fadeInUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .sidebar-toggle { display: none; width: 42px; height: 42px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg-card); color: var(--text); cursor: pointer; align-items: center; justify-content: center; font-size: 1rem; }
+    @media (max-width: 768px) { .sidebar { transform: translateX(-100%); } .sidebar.open { transform: translateX(0); } .main-area { margin-left: 0; } .sidebar-toggle { display: flex; } .content { padding: 20px; } .toolbar { flex-direction: column; align-items: stretch; } .search-box { min-width: auto; } }
+    @media (max-width: 480px) { .topbar { padding: 0 16px; } .actions { flex-wrap: wrap; } }
+    ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; } ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+  </style>
+
+
+<base target="_blank">
+</head>
+<body>
+  <div class="bg-orb bg-orb-1"></div>
+  <div class="bg-orb bg-orb-2"></div>
+  <div class="noise-overlay"></div>
+
+  <div class="toast-container" id="toast-container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+        <div class="toast {{ category }}" data-auto-dismiss>
+          <div class="toast-icon"><i class="fas fa-{{ 'check' if category == 'success' else 'exclamation-triangle' if category == 'warning' else 'times' if category == 'error' else 'info' }}"></i></div>
+          <div class="toast-content">
+            <div class="toast-title">{{ category | title }}</div>
+            <div class="toast-msg">{{ message }}</div>
+          </div>
+          <button class="toast-close" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></button>
+        </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+  </div>
+
+  <div class="admin-layout">
+    <aside class="sidebar" id="sidebar">
+      <a href="{{ url_for('main.index') }}" class="sidebar-brand">
+        <div class="logo">P</div>
+        Paswan Admin
+      </a>
+            <nav class="sidebar-nav">
+        <div class="sidebar-section">Overview</div>
+        <a href="{{ url_for('admin.dashboard') }}" class="sidebar-link">
+          <i class="fas fa-th-large"></i> Dashboard
+        </a>
+        <div class="sidebar-section">Management</div>
+        <a href="{{ url_for('admin.users_page') }}" class="sidebar-link">
+          <i class="fas fa-users"></i> Users
+        </a>
+        <a href="{{ url_for('admin.resumes_page') }}" class="sidebar-link active">
+          <i class="fas fa-file-alt"></i> Resumes
+        </a>
+        <a href="{{ url_for('admin.jobs_page') }}" class="sidebar-link">
+          <i class="fas fa-briefcase"></i> Jobs
+        </a>
+        <a href="{{ url_for('admin.logs_page') }}" class="sidebar-link">
+          <i class="fas fa-clipboard-list"></i> Activity Logs
+        </a>
+        <div class="sidebar-section">System</div>
+        <a href="{{ url_for('admin.stats_page') }}" class="sidebar-link">
+          <i class="fas fa-chart-pie"></i> Statistics
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="sidebar-user-avatar">{{ current_user.first_name[0] if current_user.first_name else 'A' }}</div>
+          <div class="sidebar-user-info">
+            <div class="sidebar-user-name">{{ current_user.first_name or 'Admin' }}</div>
+            <span class="sidebar-user-role">Administrator</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <div class="main-area">
+      <header class="topbar">
+        <div style="display:flex; align-items:center; gap:14px;">
+          <button class="sidebar-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+          <div class="topbar-title">Resumes</div>
+        </div>
+        <div class="topbar-actions">
+          <a href="{{ url_for('main.dashboard') }}" class="back-link"><i class="fas fa-arrow-left"></i> Back to App</a>
+          <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme"><i class="fas fa-sun" id="theme-icon"></i></button>
+        </div>
+      </header>
+
+      <main class="content">
+        <div class="page-header">
+          <h1>Resume Management</h1>
+          <p>View, search, and manage all uploaded resumes.</p>
+        </div>
+
+        <div class="toolbar">
+          <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchInput" placeholder="Search by title or user..." value="{{ request.args.get('q', '') }}">
+          </div>
+          <button class="btn btn-primary" onclick="applyFilters()"><i class="fas fa-filter"></i> Search</button>
+        </div>
+
+        <div class="table-card">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Resume</th>
+                  <th>Owner</th>
+                  <th>Status</th>
+                  <th>ATS Score</th>
+                  <th>Created</th>
+                  <th style="text-align:right;">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for resume in resumes %}
+                <tr>
+                  <td>
+                    <div class="resume-cell">
+                      <div class="resume-icon"><i class="fas fa-file-pdf"></i></div>
+                      <div>
+                      <div class="resume-title">{{ resume['title'] or 'Untitled Resume' }}</div>
+                        <div class="resume-meta">{{ resume['file_type'] or 'PDF' }}{% if resume.get('file_size') %} • {{ (resume['file_size'] / 1024)|round(1) }} KB{% endif %}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td style="color:var(--text-secondary); font-size:0.85rem;">{{ resume['user_email'] or 'Unknown' }}</td>
+                  <td><span class="badge badge-{{ resume.get('status') or 'draft' }}">{{ (resume.get('status') or 'draft') | title }}</span></td>
+                  <td>
+                    {% if resume.get('ats_score') %}
+                    <span style="color:{{ 'var(--success)' if resume['ats_score'] >= 80 else 'var(--warning)' if resume['ats_score'] >= 50 else 'var(--danger)' }}; font-weight:700;">{{ resume['ats_score'] }}%</span>
+                    {% else %}
+                    <span style="color:var(--text-muted);">—</span>
+                    {% endif %}
+                  </td>
+                  <td style="color:var(--text-secondary); font-size:0.82rem;">{{ resume['created_at'][:10] if resume['created_at'] else 'N/A' }}</td>
+                  <td style="text-align:right;">
+                    <div class="actions">
+                      <a href="{{ url_for('resume.list_resumes', resume_id=resume['id']) }}" class="action-btn view" title="View Resume"><i class="fas fa-eye"></i></a>
+                      <form method="POST" action="{{ url_for('admin.delete_resume', resume_id=resume['id']) }}" style="display:inline;" onsubmit="return confirm('Delete this resume?')">
+                        <button type="submit" class="action-btn delete" title="Delete"><i class="fas fa-trash-alt"></i></button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+                {% else %}
+                <tr>
+                  <td colspan="6">
+                    <div class="empty-state">
+                      <i class="fas fa-file-alt"></i>
+                      <h3>No resumes found</h3>
+                      <p>No resumes have been uploaded yet.</p>
+                    </div>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% if pagination and pagination.pages > 1 %}
+          <div class="pagination">
+            <div class="pagination-info">Showing {{ pagination.start }} - {{ pagination.end }} of {{ pagination.total }}</div>
+            <div class="pagination-btns">
+              <a href="?page={{ pagination.prev }}&q={{ request.args.get('q', '') }}" class="page-btn {{ 'disabled' if pagination.page <= 1 else '' }}"><i class="fas fa-chevron-left"></i> Prev</a>
+              {% for p in pagination.pages_range %}
+              <a href="?page={{ p }}&q={{ request.args.get('q', '') }}" class="page-btn {{ 'active' if p == pagination.page else '' }}">{{ p }}</a>
+              {% endfor %}
+              <a href="?page={{ pagination.next }}&q={{ request.args.get('q', '') }}" class="page-btn {{ 'disabled' if pagination.page >= pagination.pages else '' }}">Next <i class="fas fa-chevron-right"></i></a>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    function applyFilters() {
+      const q = document.getElementById('searchInput').value;
+      const params = new URLSearchParams();
+      if (q) params.set('q', q);
+      window.location.href = '?' + params.toString();
+    }
+    document.getElementById('searchInput').addEventListener('keypress', function(e) { if (e.key === 'Enter') applyFilters(); });
+    document.querySelectorAll('.toast[data-auto-dismiss]').forEach(toast => {
+      setTimeout(() => { toast.style.animation = 'toastOut 0.4s forwards'; setTimeout(() => toast.remove(), 400); }, 5000);
+    });
+    function toggleTheme() {
+      const html = document.documentElement; const icon = document.getElementById('theme-icon');
+      if (html.getAttribute('data-theme') === 'light') { html.setAttribute('data-theme', 'dark'); icon.classList.remove('fa-moon'); icon.classList.add('fa-sun'); localStorage.setItem('paswan-theme', 'dark'); }
+      else { html.setAttribute('data-theme', 'light'); icon.classList.remove('fa-sun'); icon.classList.add('fa-moon'); localStorage.setItem('paswan-theme', 'light'); }
+    }
+    if (localStorage.getItem('paswan-theme') === 'light') { document.documentElement.setAttribute('data-theme', 'light'); const icon = document.getElementById('theme-icon'); if (icon) { icon.classList.remove('fa-sun'); icon.classList.add('fa-moon'); } }
+    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+    document.addEventListener('click', function(e) { const sidebar = document.getElementById('sidebar'); const toggle = document.querySelector('.sidebar-toggle'); if (window.innerWidth <= 768 && sidebar.classList.contains('open')) { if (!sidebar.contains(e.target) && !toggle.contains(e.target)) sidebar.classList.remove('open'); } });
+  </script>
+</body>
+</html>

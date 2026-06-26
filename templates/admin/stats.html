@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>System Statistics | Paswan Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    :root {
+      --bg-deep: #060b14;
+      --bg-card: rgba(255,255,255,0.025);
+      --bg-card-hover: rgba(255,255,255,0.04);
+      --bg-input: rgba(255,255,255,0.03);
+      --border: rgba(255,255,255,0.06);
+      --border-hover: rgba(255,255,255,0.12);
+      --text: #f0f2f5;
+      --text-secondary: #8b95a8;
+      --text-muted: #5a6578;
+      --accent-1: #00d4aa;
+      --accent-2: #00a8e8;
+      --accent-gradient: linear-gradient(135deg, #00d4aa, #00a8e8);
+      --accent-glow: rgba(0, 212, 170, 0.15);
+      --danger: #ff4757;
+      --warning: #ffa502;
+      --success: #2ed573;
+      --info: #1e90ff;
+      --purple: #a29bfe;
+      --orange: #ff7f50;
+    }
+    [data-theme="light"] {
+      --bg-deep: #f0f4f8;
+      --bg-card: rgba(255,255,255,0.85);
+      --bg-card-hover: rgba(255,255,255,0.95);
+      --bg-input: rgba(255,255,255,0.9);
+      --border: rgba(0,0,0,0.08);
+      --border-hover: rgba(0,0,0,0.15);
+      --text: #0d1117;
+      --text-secondary: #4a5568;
+      --text-muted: #9aa5b4;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg-deep); color: var(--text); min-height: 100vh; overflow-x: hidden; transition: background 0.3s, color 0.3s; }
+
+    .bg-orb { position: fixed; border-radius: 50%; filter: blur(120px); opacity: 0.12; pointer-events: none; z-index: 0; animation: orbFloat 20s ease-in-out infinite; }
+    .bg-orb-1 { width: 600px; height: 600px; background: var(--accent-1); top: -200px; left: -100px; animation-delay: 0s; }
+    .bg-orb-2 { width: 500px; height: 500px; background: var(--purple); bottom: -150px; right: -100px; animation-delay: -7s; }
+    .bg-orb-3 { width: 350px; height: 350px; background: var(--accent-2); top: 40%; left: 55%; animation-delay: -14s; opacity: 0.07; }
+    @keyframes orbFloat { 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(30px,-30px) scale(1.05)} 66%{transform:translate(-20px,20px) scale(0.95)} }
+
+    .noise-overlay { position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: 0.03; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E"); }
+
+    /* ── Layout ── */
+    .admin-layout { display: flex; min-height: 100vh; position: relative; z-index: 2; }
+
+    /* ── Sidebar ── */
+    .sidebar { width: 270px; background: rgba(6,11,20,0.85); backdrop-filter: blur(20px); border-right: 1px solid var(--border); position: fixed; top: 0; left: 0; bottom: 0; z-index: 1000; display: flex; flex-direction: column; padding: 24px 0; transition: transform 0.4s cubic-bezier(0.4,0,0.2,1); }
+    .sidebar-brand { display: flex; align-items: center; gap: 12px; padding: 0 24px 28px; font-weight: 800; font-size: 1.15rem; color: var(--text); text-decoration: none; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+    .sidebar-brand .logo { width: 38px; height: 38px; background: var(--accent-gradient); border-radius: 12px; display: grid; place-items: center; color: #fff; font-weight: 800; font-size: 1rem; box-shadow: 0 0 20px rgba(0,212,170,0.3); }
+    .sidebar-nav { flex: 1; padding: 0 16px; overflow-y: auto; }
+    .sidebar-section { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-muted); padding: 20px 12px 8px; }
+    .sidebar-link { display: flex; align-items: center; gap: 14px; padding: 11px 16px; border-radius: 12px; color: var(--text-secondary); text-decoration: none; font-size: 0.87rem; font-weight: 500; transition: all 0.25s ease; margin-bottom: 3px; position: relative; overflow: hidden; }
+    .sidebar-link::before { content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 3px; height: 0; background: var(--accent-gradient); border-radius: 0 4px 4px 0; transition: height 0.3s ease; }
+    .sidebar-link:hover { background: var(--bg-card-hover); color: var(--text); }
+    .sidebar-link:hover::before { height: 60%; }
+    .sidebar-link.active { background: var(--accent-glow); color: var(--accent-1); box-shadow: 0 0 30px rgba(0,212,170,0.1), inset 0 1px 0 rgba(255,255,255,0.05); }
+    .sidebar-link.active::before { height: 80%; }
+    .sidebar-link i { width: 20px; text-align: center; font-size: 0.95rem; }
+    .sidebar-footer { padding: 20px 24px 0; border-top: 1px solid var(--border); margin-top: auto; }
+    .sidebar-user { display: flex; align-items: center; gap: 12px; }
+    .sidebar-user-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--accent-gradient); display: grid; place-items: center; color: white; font-weight: 700; font-size: 0.85rem; box-shadow: 0 0 15px rgba(0,212,170,0.3); }
+    .sidebar-user-info { flex: 1; }
+    .sidebar-user-name { font-weight: 600; font-size: 0.88rem; color: var(--text); }
+    .sidebar-user-role { font-size: 0.7rem; color: var(--accent-1); font-weight: 700; background: rgba(0,212,170,0.1); padding: 3px 10px; border-radius: 20px; display: inline-block; border: 1px solid rgba(0,212,170,0.2); }
+
+    /* ── Main ── */
+    .main-area { flex: 1; margin-left: 270px; }
+    .topbar { position: sticky; top: 0; z-index: 100; background: rgba(6,11,20,0.7); backdrop-filter: blur(20px) saturate(1.5); border-bottom: 1px solid var(--border); padding: 0 32px; height: 70px; display: flex; align-items: center; justify-content: space-between; }
+    .topbar-title { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em; }
+    .topbar-actions { display: flex; align-items: center; gap: 14px; }
+    .theme-toggle { width: 42px; height: 42px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg-card); color: var(--text-secondary); cursor: pointer; display: grid; place-items: center; font-size: 1rem; transition: all 0.3s ease; }
+    .theme-toggle:hover { background: var(--bg-card-hover); color: var(--text); border-color: var(--border-hover); box-shadow: 0 0 20px rgba(0,212,170,0.1); transform: translateY(-1px); }
+    .back-link { color: var(--text-secondary); text-decoration: none; font-size: 0.85rem; font-weight: 500; display: flex; align-items: center; gap: 8px; transition: all 0.2s; padding: 8px 14px; border-radius: 10px; border: 1px solid transparent; }
+    .back-link:hover { color: var(--accent-1); border-color: var(--border); background: var(--bg-card); }
+    .sidebar-toggle { display: none; width: 42px; height: 42px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg-card); color: var(--text); cursor: pointer; align-items: center; justify-content: center; font-size: 1rem; }
+
+    .content { padding: 32px; max-width: 1440px; margin: 0 auto; }
+
+    /* ── Page Header ── */
+    .page-header { margin-bottom: 32px; animation: fadeInUp 0.6s ease forwards; }
+    .page-header h1 { font-size: 1.8rem; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 6px; background: linear-gradient(135deg, #fff 0%, #a0a8b8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .page-header p { color: var(--text-secondary); font-size: 0.95rem; }
+    .refresh-btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg-card); color: var(--text-secondary); font-size: 0.85rem; font-weight: 600; font-family: inherit; cursor: pointer; transition: all 0.3s ease; margin-top: 14px; }
+    .refresh-btn:hover { border-color: var(--accent-1); color: var(--accent-1); background: var(--accent-glow); transform: translateY(-1px); }
+    .refresh-btn.spinning i { animation: spin 0.7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Last Updated ── */
+    .last-updated { display: inline-flex; align-items: center; gap: 6px; font-size: 0.78rem; color: var(--text-muted); margin-left: 16px; }
+    .live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--success); box-shadow: 0 0 8px var(--success); animation: pulse 2s ease infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)} }
+
+    /* ── Stats Grid ── */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-bottom: 32px; }
+    .stat-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; padding: 26px; backdrop-filter: blur(10px); transition: all 0.4s cubic-bezier(0.4,0,0.2,1); position: relative; overflow: hidden; animation: fadeInUp 0.6s ease forwards; opacity: 0; }
+    .stat-card::after { content: ''; position: absolute; inset: 0; border-radius: 20px; opacity: 0; transition: opacity 0.4s ease; background: radial-gradient(circle at 50% 0%, var(--glow-color, rgba(0,212,170,0.08)), transparent 70%); pointer-events: none; }
+    .stat-card:hover { border-color: var(--border-hover); transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+    .stat-card:hover::after { opacity: 1; }
+    .stat-card:nth-child(1) { animation-delay: 0.05s; --glow-color: rgba(0,212,170,0.1); }
+    .stat-card:nth-child(2) { animation-delay: 0.10s; --glow-color: rgba(0,168,232,0.1); }
+    .stat-card:nth-child(3) { animation-delay: 0.15s; --glow-color: rgba(162,155,254,0.1); }
+    .stat-card:nth-child(4) { animation-delay: 0.20s; --glow-color: rgba(255,127,80,0.1); }
+
+    .stat-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .stat-icon { width: 48px; height: 48px; border-radius: 14px; display: grid; place-items: center; font-size: 1.2rem; }
+    .stat-icon.teal { background: rgba(0,212,170,0.12); color: var(--accent-1); box-shadow: 0 0 20px rgba(0,212,170,0.15); }
+    .stat-icon.blue { background: rgba(0,168,232,0.12); color: var(--accent-2); box-shadow: 0 0 20px rgba(0,168,232,0.15); }
+    .stat-icon.purple { background: rgba(162,155,254,0.12); color: var(--purple); box-shadow: 0 0 20px rgba(162,155,254,0.15); }
+    .stat-icon.orange { background: rgba(255,127,80,0.12); color: var(--orange); box-shadow: 0 0 20px rgba(255,127,80,0.15); }
+
+    .stat-value { font-size: 2.6rem; font-weight: 800; letter-spacing: -0.04em; line-height: 1; margin-bottom: 6px; }
+    .stat-label { font-size: 0.82rem; color: var(--text-secondary); font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; }
+
+    /* Loading skeleton */
+    .skeleton { background: linear-gradient(90deg, var(--bg-card) 25%, rgba(255,255,255,0.04) 50%, var(--bg-card) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 8px; }
+    @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+    .stat-value.loading { height: 48px; width: 80px; }
+    .stat-label.loading { height: 14px; width: 120px; margin-top: 8px; }
+
+    /* ── Breakdown Panel ── */
+    .panel { background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; backdrop-filter: blur(10px); overflow: hidden; animation: fadeInUp 0.6s ease forwards; opacity: 0; }
+    .panel:nth-child(1) { animation-delay: 0.3s; }
+    .panel:nth-child(2) { animation-delay: 0.4s; }
+    .panel-header { display: flex; align-items: center; justify-content: space-between; padding: 22px 24px; border-bottom: 1px solid var(--border); }
+    .panel-title { font-size: 1rem; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+
+    .panels-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
+    @media (max-width: 900px) { .panels-grid { grid-template-columns: 1fr; } }
+
+    /* Metric rows */
+    .metric-list { padding: 8px 0; }
+    .metric-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 24px; border-bottom: 1px solid var(--border); transition: background 0.2s; }
+    .metric-row:last-child { border-bottom: none; }
+    .metric-row:hover { background: var(--bg-card-hover); }
+    .metric-label { display: flex; align-items: center; gap: 10px; font-size: 0.88rem; color: var(--text-secondary); font-weight: 500; }
+    .metric-label i { width: 16px; text-align: center; opacity: 0.7; }
+    .metric-value { font-size: 1.15rem; font-weight: 800; color: var(--text); }
+    .metric-bar-wrap { flex: 1; margin: 0 20px; height: 6px; background: var(--border); border-radius: 10px; overflow: hidden; }
+    .metric-bar { height: 100%; border-radius: 10px; transition: width 1.2s cubic-bezier(0.4,0,0.2,1); }
+
+    /* JSON Viewer */
+    .json-panel { animation-delay: 0.5s; }
+    .json-header { display: flex; align-items: center; justify-content: space-between; padding: 22px 24px; border-bottom: 1px solid var(--border); }
+    .json-title { font-size: 1rem; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+    .copy-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg-input); color: var(--text-secondary); font-size: 0.8rem; font-weight: 600; font-family: inherit; cursor: pointer; transition: all 0.2s; }
+    .copy-btn:hover { border-color: var(--accent-1); color: var(--accent-1); background: var(--accent-glow); }
+    .copy-btn.copied { color: var(--success); border-color: rgba(46,213,115,0.3); background: rgba(46,213,115,0.08); }
+    .json-body { padding: 20px 24px; overflow-x: auto; }
+    pre { font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace; font-size: 0.85rem; line-height: 1.8; color: var(--text-secondary); white-space: pre-wrap; word-break: break-all; }
+    .json-key { color: var(--accent-1); }
+    .json-num { color: var(--purple); font-weight: 700; }
+    .json-str { color: var(--warning); }
+    .json-bool { color: var(--info); }
+
+    /* Error state */
+    .error-state { text-align: center; padding: 48px 24px; }
+    .error-state i { font-size: 3rem; color: var(--danger); opacity: 0.5; margin-bottom: 16px; }
+    .error-state h3 { font-size: 1.1rem; color: var(--text-secondary); margin-bottom: 8px; }
+    .error-state p { font-size: 0.85rem; color: var(--text-muted); }
+
+    /* Endpoint info badge */
+    .endpoint-badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 8px; background: rgba(0,212,170,0.06); border: 1px solid rgba(0,212,170,0.15); font-size: 0.75rem; font-family: monospace; color: var(--accent-1); margin-bottom: 24px; }
+    .method-tag { background: var(--accent-1); color: #000; font-weight: 800; font-size: 0.65rem; padding: 2px 7px; border-radius: 4px; }
+
+    /* Toast */
+    .toast-container { position: fixed; top: 84px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+    .toast { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 14px 18px; backdrop-filter: blur(20px); min-width: 280px; display: flex; align-items: center; gap: 12px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); animation: toastIn 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
+    .toast-icon { font-size: 1rem; }
+    .toast.success .toast-icon { color: var(--success); }
+    .toast.error .toast-icon { color: var(--danger); }
+    .toast-msg { flex: 1; font-size: 0.85rem; font-weight: 500; }
+    @keyframes toastIn { from{transform:translateX(100%);opacity:0} to{transform:translateX(0);opacity:1} }
+    @keyframes toastOut { from{transform:translateX(0);opacity:1} to{transform:translateX(100%);opacity:0} }
+    @keyframes fadeInUp { from{transform:translateY(20px);opacity:0} to{transform:translateY(0);opacity:1} }
+
+    ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+    @media (max-width: 768px) { .sidebar { transform: translateX(-100%); } .sidebar.open { transform: translateX(0); } .main-area { margin-left: 0; } .sidebar-toggle { display: flex; } .content { padding: 20px; } .stats-grid { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 480px) { .stats-grid { grid-template-columns: 1fr; } .topbar { padding: 0 16px; } }
+  </style>
+<base target="_blank">
+</head>
+<body>
+  <div class="bg-orb bg-orb-1"></div>
+  <div class="bg-orb bg-orb-2"></div>
+  <div class="bg-orb bg-orb-3"></div>
+  <div class="noise-overlay"></div>
+
+  <div class="toast-container" id="toast-container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+        <div class="toast {{ category }}" data-auto-dismiss>
+          <div class="toast-icon"><i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' }}"></i></div>
+          <div class="toast-msg">{{ message }}</div>
+        </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+  </div>
+
+  <div class="admin-layout">
+    <aside class="sidebar" id="sidebar">
+      <a href="{{ url_for('main.index') }}" class="sidebar-brand">
+        <div class="logo">P</div>
+        Paswan Admin
+      </a>
+      <nav class="sidebar-nav">
+        <div class="sidebar-section">Overview</div>
+        <a href="{{ url_for('admin.dashboard') }}" class="sidebar-link">
+          <i class="fas fa-th-large"></i> Dashboard
+        </a>
+        <div class="sidebar-section">Management</div>
+        <a href="{{ url_for('admin.users_page') }}" class="sidebar-link">
+          <i class="fas fa-users"></i> Users
+        </a>
+        <a href="{{ url_for('admin.resumes_page') }}" class="sidebar-link">
+          <i class="fas fa-file-alt"></i> Resumes
+        </a>
+        <a href="{{ url_for('admin.jobs_page') }}" class="sidebar-link">
+          <i class="fas fa-briefcase"></i> Jobs
+        </a>
+        <a href="{{ url_for('admin.logs_page') }}" class="sidebar-link">
+          <i class="fas fa-clipboard-list"></i> Activity Logs
+        </a>
+        <div class="sidebar-section">System</div>
+        <a href="{{ url_for('admin.stats_page') }}" class="sidebar-link active">
+          <i class="fas fa-chart-pie"></i> Statistics
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="sidebar-user-avatar">{{ current_user.first_name[0] if current_user.first_name else 'A' }}</div>
+          <div class="sidebar-user-info">
+            <div class="sidebar-user-name">{{ current_user.first_name or 'Admin' }}</div>
+            <span class="sidebar-user-role">Administrator</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <div class="main-area">
+      <header class="topbar">
+        <div style="display:flex; align-items:center; gap:14px;">
+          <button class="sidebar-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+          <div class="topbar-title">System Statistics</div>
+        </div>
+        <div class="topbar-actions">
+          <a href="{{ url_for('main.dashboard') }}" class="back-link"><i class="fas fa-arrow-left"></i> Back to App</a>
+          <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme"><i class="fas fa-sun" id="theme-icon"></i></button>
+        </div>
+      </header>
+
+      <main class="content">
+        <div class="page-header">
+          <h1>System Statistics <span style="font-size:1rem; background:rgba(0,212,170,0.1); -webkit-text-fill-color:var(--accent-1); border:1px solid rgba(0,212,170,0.2); padding:4px 14px; border-radius:20px; font-weight:700; letter-spacing:0.02em; vertical-align:middle;">Live</span></h1>
+          <p>Real-time platform metrics fetched from the API.</p>
+          <div style="display:flex; align-items:center; flex-wrap:wrap; gap:12px; margin-top:14px;">
+            <button class="refresh-btn" id="refreshBtn" onclick="loadStats()">
+              <i class="fas fa-sync-alt"></i> Refresh Stats
+            </button>
+            <span class="last-updated" id="lastUpdated" style="display:none;">
+              <span class="live-dot"></span>
+              Updated <span id="updatedTime">just now</span>
+            </span>
+          </div>
+        </div>
+
+        <div class="endpoint-badge">
+          <span class="method-tag">GET</span>
+          /admin/api/stats
+        </div>
+
+        <!-- ── Stat Cards ── -->
+        <div class="stats-grid" id="statsGrid">
+          <!-- Populated by JS -->
+          <div class="stat-card">
+            <div class="stat-header"><div class="stat-icon teal"><i class="fas fa-users"></i></div></div>
+            <div class="stat-value skeleton loading" id="val-total_users"></div>
+            <div class="stat-label skeleton loading" id="lbl-total_users"></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-header"><div class="stat-icon blue"><i class="fas fa-user-check"></i></div></div>
+            <div class="stat-value skeleton loading" id="val-active_users"></div>
+            <div class="stat-label skeleton loading" id="lbl-active_users"></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-header"><div class="stat-icon purple"><i class="fas fa-file-alt"></i></div></div>
+            <div class="stat-value skeleton loading" id="val-total_resumes"></div>
+            <div class="stat-label skeleton loading" id="lbl-total_resumes"></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-header"><div class="stat-icon orange"><i class="fas fa-briefcase"></i></div></div>
+            <div class="stat-value skeleton loading" id="val-total_jobs"></div>
+            <div class="stat-label skeleton loading" id="lbl-total_jobs"></div>
+          </div>
+        </div>
+
+        <!-- ── Breakdown Panels ── -->
+        <div class="panels-grid">
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title"><i class="fas fa-users" style="color:var(--accent-1);"></i> User Breakdown</div>
+            </div>
+            <div class="metric-list" id="userBreakdown">
+              <div class="metric-row">
+                <span class="metric-label"><i class="fas fa-user-check"></i> Active Users</span>
+                <div class="metric-bar-wrap"><div class="metric-bar" id="bar-active" style="width:0%;background:var(--success);"></div></div>
+                <span class="metric-value" id="br-active_users">—</span>
+              </div>
+              <div class="metric-row">
+                <span class="metric-label"><i class="fas fa-users"></i> Total Users</span>
+                <div class="metric-bar-wrap"><div class="metric-bar" id="bar-total" style="width:100%;background:var(--accent-gradient);"></div></div>
+                <span class="metric-value" id="br-total_users">—</span>
+              </div>
+              <div class="metric-row">
+                <span class="metric-label"><i class="fas fa-user-slash"></i> Inactive</span>
+                <div class="metric-bar-wrap"><div class="metric-bar" id="bar-inactive" style="width:0%;background:var(--text-muted);"></div></div>
+                <span class="metric-value" id="br-inactive_users">—</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title"><i class="fas fa-layer-group" style="color:var(--purple);"></i> Content Breakdown</div>
+            </div>
+            <div class="metric-list">
+              <div class="metric-row">
+                <span class="metric-label"><i class="fas fa-file-alt"></i> Total Resumes</span>
+                <div class="metric-bar-wrap"><div class="metric-bar" id="bar-resumes" style="width:0%;background:var(--purple);"></div></div>
+                <span class="metric-value" id="br-total_resumes">—</span>
+              </div>
+              <div class="metric-row">
+                <span class="metric-label"><i class="fas fa-briefcase"></i> Live Jobs</span>
+                <div class="metric-bar-wrap"><div class="metric-bar" id="bar-jobs" style="width:0%;background:var(--orange);"></div></div>
+                <span class="metric-value" id="br-total_jobs">—</span>
+              </div>
+              <div class="metric-row">
+                <span class="metric-label"><i class="fas fa-percent"></i> Active Rate</span>
+                <div class="metric-bar-wrap"><div class="metric-bar" id="bar-rate" style="width:0%;background:linear-gradient(90deg,var(--accent-1),var(--accent-2));"></div></div>
+                <span class="metric-value" id="br-active_rate">—</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Raw JSON Viewer ── -->
+        <div class="panel json-panel">
+          <div class="json-header">
+            <div class="json-title">
+              <i class="fas fa-code" style="color:var(--accent-2);"></i>
+              Raw API Response
+              <span style="font-size:0.72rem; color:var(--text-muted); font-weight:500; font-family:monospace;">/admin/api/stats</span>
+            </div>
+            <button class="copy-btn" id="copyBtn" onclick="copyJson()">
+              <i class="fas fa-copy"></i> Copy JSON
+            </button>
+          </div>
+          <div class="json-body">
+            <pre id="jsonOutput"><span style="color:var(--text-muted);">Loading...</span></pre>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <script>
+    let rawData = null;
+
+    const STAT_CONFIG = {
+      total_users:   { label: 'Total Users',    icon: 'teal',   iconClass: 'fa-users' },
+      active_users:  { label: 'Active Users',   icon: 'blue',   iconClass: 'fa-user-check' },
+      total_resumes: { label: 'Total Resumes',  icon: 'purple', iconClass: 'fa-file-alt' },
+      total_jobs:    { label: 'Live Jobs',       icon: 'orange', iconClass: 'fa-briefcase' },
+    };
+
+    async function loadStats() {
+      const btn = document.getElementById('refreshBtn');
+      btn.classList.add('spinning');
+
+      try {
+        const res = await fetch('{{ url_for("admin.system_stats") }}', {
+          headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+        });
+
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        rawData = await res.json();
+
+        renderCards(rawData);
+        renderBreakdown(rawData);
+        renderJson(rawData);
+
+        document.getElementById('lastUpdated').style.display = 'inline-flex';
+        document.getElementById('updatedTime').textContent = new Date().toLocaleTimeString();
+
+      } catch (err) {
+        showError(err.message);
+        document.getElementById('jsonOutput').innerHTML =
+          `<span style="color:var(--danger);">Error: ${err.message}</span>`;
+      } finally {
+        btn.classList.remove('spinning');
+      }
+    }
+
+    function renderCards(data) {
+      const grid = document.getElementById('statsGrid');
+      grid.innerHTML = '';
+      const keys = ['total_users', 'active_users', 'total_resumes', 'total_jobs'];
+      keys.forEach((key, i) => {
+        const cfg = STAT_CONFIG[key] || { label: key, icon: 'teal', iconClass: 'fa-chart-bar' };
+        const val = data[key] ?? 0;
+        const card = document.createElement('div');
+        card.className = 'stat-card';
+        card.style.animationDelay = `${0.05 * i}s`;
+        card.innerHTML = `
+          <div class="stat-header">
+            <div class="stat-icon ${cfg.icon}"><i class="fas ${cfg.iconClass}"></i></div>
+          </div>
+          <div class="stat-value" data-target="${val}">0</div>
+          <div class="stat-label">${cfg.label}</div>`;
+        grid.appendChild(card);
+      });
+      // Animate counters
+      grid.querySelectorAll('.stat-value[data-target]').forEach(el => {
+        const target = parseInt(el.dataset.target) || 0;
+        const start = performance.now();
+        const dur = 1200;
+        function tick(now) {
+          const p = Math.min((now - start) / dur, 1);
+          const ease = 1 - Math.pow(1 - p, 3);
+          el.textContent = Math.floor(target * ease).toLocaleString();
+          if (p < 1) requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+      });
+    }
+
+    function renderBreakdown(data) {
+      const total = data.total_users || 1;
+      const active = data.active_users || 0;
+      const inactive = Math.max(0, total - active);
+      const resumes = data.total_resumes || 0;
+      const jobs = data.total_jobs || 0;
+      const rate = total > 0 ? Math.round((active / total) * 100) : 0;
+      const maxContent = Math.max(resumes, jobs, 1);
+
+      document.getElementById('br-active_users').textContent = active.toLocaleString();
+      document.getElementById('br-total_users').textContent = total.toLocaleString();
+      document.getElementById('br-inactive_users').textContent = inactive.toLocaleString();
+      document.getElementById('br-total_resumes').textContent = resumes.toLocaleString();
+      document.getElementById('br-total_jobs').textContent = jobs.toLocaleString();
+      document.getElementById('br-active_rate').textContent = rate + '%';
+
+      setTimeout(() => {
+        document.getElementById('bar-active').style.width = ((active / total) * 100) + '%';
+        document.getElementById('bar-inactive').style.width = ((inactive / total) * 100) + '%';
+        document.getElementById('bar-resumes').style.width = ((resumes / maxContent) * 100) + '%';
+        document.getElementById('bar-jobs').style.width = ((jobs / maxContent) * 100) + '%';
+        document.getElementById('bar-rate').style.width = rate + '%';
+      }, 100);
+    }
+
+    function renderJson(data) {
+      const json = JSON.stringify(data, null, 2);
+      // Syntax highlight
+      const highlighted = json.replace(
+        /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g,
+        match => {
+          if (/^"/.test(match)) {
+            if (/:$/.test(match)) return `<span class="json-key">${match}</span>`;
+            return `<span class="json-str">${match}</span>`;
+          }
+          if (/true|false/.test(match)) return `<span class="json-bool">${match}</span>`;
+          return `<span class="json-num">${match}</span>`;
+        }
+      );
+      document.getElementById('jsonOutput').innerHTML = highlighted;
+    }
+
+    function showError(msg) {
+      document.getElementById('statsGrid').innerHTML = `
+        <div class="stat-card" style="grid-column:1/-1;">
+          <div class="error-state">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h3>Failed to load stats</h3>
+            <p>${msg}</p>
+          </div>
+        </div>`;
+    }
+
+    function copyJson() {
+      if (!rawData) return;
+      navigator.clipboard.writeText(JSON.stringify(rawData, null, 2)).then(() => {
+        const btn = document.getElementById('copyBtn');
+        btn.classList.add('copied');
+        btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+        setTimeout(() => {
+          btn.classList.remove('copied');
+          btn.innerHTML = '<i class="fas fa-copy"></i> Copy JSON';
+        }, 2000);
+      });
+    }
+
+    function showToast(msg, type='success') {
+      const tc = document.getElementById('toast-container');
+      const t = document.createElement('div');
+      t.className = `toast ${type}`;
+      t.innerHTML = `<div class="toast-icon"><i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i></div><div class="toast-msg">${msg}</div>`;
+      tc.appendChild(t);
+      setTimeout(() => { t.style.animation = 'toastOut 0.4s forwards'; setTimeout(() => t.remove(), 400); }, 3500);
+    }
+
+    // Theme
+    function toggleTheme() {
+      const html = document.documentElement;
+      const icon = document.getElementById('theme-icon');
+      if (html.getAttribute('data-theme') === 'light') {
+        html.setAttribute('data-theme', 'dark'); icon.classList.replace('fa-moon','fa-sun'); localStorage.setItem('paswan-theme','dark');
+      } else {
+        html.setAttribute('data-theme', 'light'); icon.classList.replace('fa-sun','fa-moon'); localStorage.setItem('paswan-theme','light');
+      }
+    }
+    if (localStorage.getItem('paswan-theme') === 'light') {
+      document.documentElement.setAttribute('data-theme','light');
+      const icon = document.getElementById('theme-icon');
+      if (icon) icon.classList.replace('fa-sun','fa-moon');
+    }
+
+    // Sidebar
+    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+    document.addEventListener('click', e => {
+      const sb = document.getElementById('sidebar'), tg = document.querySelector('.sidebar-toggle');
+      if (window.innerWidth <= 768 && sb.classList.contains('open') && !sb.contains(e.target) && !tg.contains(e.target)) sb.classList.remove('open');
+    });
+
+    // Flash toasts
+    document.querySelectorAll('.toast[data-auto-dismiss]').forEach(t => {
+      setTimeout(() => { t.style.animation = 'toastOut 0.4s forwards'; setTimeout(() => t.remove(), 400); }, 5000);
+    });
+
+    // Auto-load on page open
+    loadStats();
+
+    // Auto-refresh every 60 seconds
+    setInterval(loadStats, 60000);
+  </script>
+</body>
+</html>

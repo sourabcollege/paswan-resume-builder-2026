@@ -2,6 +2,7 @@ from __future__ import annotations
 import pytest
 from app import create_app
 from app.extensions import db
+from app.models.user import User
 
 
 @pytest.fixture
@@ -135,3 +136,130 @@ class TestFileUpload:
             content_type="multipart/form-data",
         )
         assert resp.status_code in (302, 400, 401, 403)
+
+
+# ── Admin Role Tests ────────────────────────────────────────────────────
+class TestAdminRoleAssignment:
+
+    def test_admin_email_becomes_admin_on_register(self, client, app):
+        """Admin email (from config) should get admin role on registration."""
+        with app.app_context():
+            admin_email = app.config.get("ADMIN_EMAIL", "sourabcollege@gmail.com")
+            resp = client.post("/auth/register", json={
+                "first_name": "Admin",
+                "last_name": "User",
+                "email": admin_email,
+                "password": "StrongPass123!",
+                "confirm_password": "StrongPass123!",
+                "accept_terms": True,
+            })
+            assert resp.status_code in (200, 201, 302)
+
+            user = User.query.filter_by(email=admin_email).first()
+            assert user is not None
+            assert user.role == User.ROLE_ADMIN
+            assert user.is_admin is True
+
+    def test_normal_email_becomes_user_on_register(self, client):
+        """Normal email should get user role on registration."""
+        resp = client.post("/auth/register", json={
+            "first_name": "Normal",
+            "last_name": "User",
+            "email": "normal@example.com",
+            "password": "StrongPass123!",
+            "confirm_password": "StrongPass123!",
+            "accept_terms": True,
+        })
+        assert resp.status_code in (200, 201, 302)
+
+        user = User.query.filter_by(email="normal@example.com").first()
+        assert user is not None
+        assert user.role == User.ROLE_USER
+        assert user.is_admin is False
+
+    def test_admin_email_promoted_on_login(self, client, app):
+        """Existing user with admin email gets promoted to admin on login."""
+        with app.app_context():
+            # Create user manually as regular user
+            admin_email = app.config.get("ADMIN_EMAIL", "sourabcollege@gmail.com")
+            user = User(
+                email=admin_email,
+                first_name="Existing",
+                last_name="User",
+                account_status=User.STATUS_ACTIVE,
+            )
+            user.set_password("StrongPass123!")
+            db.session.add(user)
+            db.session.commit()
+
+            # Verify initially not admin
+            assert user.role == User.ROLE_USER
+
+            # Login should promote to admin
+            resp = client.post("/auth/login", json={
+                "email": admin_email,
+                "password": "StrongPass123!",
+            })
+            assert resp.status_code in (200, 302)
+
+            # Refresh user from DB
+            db.session.refresh(user)
+            assert user.role == User.ROLE_ADMIN
+            assert user.is_admin is True
+
+
+class TestAdminRouteAccess:
+
+    def test_admin_route_blocked_for_normal_user(self, client):
+        """Normal user should get 403 when accessing admin routes."""
+        # Register normal user
+        client.post("/auth/register", json={
+            "first_name": "Normal",
+            "last_name": "User",
+            "email": "normal2@example.com",
+            "password": "StrongPass123!",
+            "confirm_password": "StrongPass123!",
+            "accept_terms": True,
+        })
+
+        # Login as normal user
+        client.post("/auth/login", json={
+            "email": "normal2@example.com",
+            "password": "StrongPass123!",
+        })
+
+        # Try accessing admin dashboard
+        resp = client.get("/admin/")
+        assert resp.status_code in (302, 403)
+
+    def test_admin_route_accessible_for_admin_user(self, client, app):
+        """Admin user should access admin routes successfully."""
+        with app.app_context():
+            admin_email = app.config.get("ADMIN_EMAIL", "sourabcollege@gmail.com")
+
+            # Register admin user
+            client.post("/auth/register", json={
+                "first_name": "Admin",
+                "last_name": "User",
+                "email": admin_email,
+                "password": "StrongPass123!",
+                "confirm_password": "StrongPass123!",
+                "accept_terms": True,
+            })
+
+            # ✅ Manually verify email and activate account (test env suppresses email)
+            from datetime import datetime, timezone
+            user = User.query.filter_by(email=admin_email).first()
+            user.email_verified_at = datetime.now(timezone.utc)
+            user.account_status = User.STATUS_ACTIVE
+            db.session.commit()
+
+            # Login as admin
+            client.post("/auth/login", json={
+                "email": admin_email,
+                "password": "StrongPass123!",
+            })
+
+            # Access admin dashboard
+            resp = client.get("/admin/")
+            assert resp.status_code == 200

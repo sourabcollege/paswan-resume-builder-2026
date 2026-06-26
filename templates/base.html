@@ -564,6 +564,25 @@
           <a href="{{ url_for('resume.list_resumes') }}" class="profile-menu-item"><i class="fas fa-file-alt"></i> My Resumes</a>
           <a href="{{ url_for('analytics.overview') }}" class="profile-menu-item"><i class="fas fa-chart-line"></i> Analytics</a>
           <a href="{{ url_for('profile.settings') }}" class="profile-menu-item"><i class="fas fa-cog"></i> Settings</a>
+          {% if current_user.is_authenticated and current_user.is_admin %}
+          <div class="profile-menu-divider"></div>
+          <span style="padding: 4px 16px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.05em;">Admin</span>
+          <a href="{{ url_for('admin.dashboard') }}" class="profile-menu-item" style="color: var(--accent); font-weight: 600;">
+            <i class="fas fa-shield-alt" style="color: var(--accent);"></i> Admin Dashboard
+          </a>
+          <a href="{{ url_for('admin.users_page') }}" class="profile-menu-item">
+            <i class="fas fa-users"></i> Manage Users
+          </a>
+          <a href="{{ url_for('admin.resumes_page') }}" class="profile-menu-item">
+            <i class="fas fa-file-alt"></i> Manage Resumes
+          </a>
+          <a href="{{ url_for('admin.jobs_page') }}" class="profile-menu-item">
+            <i class="fas fa-briefcase"></i> Manage Jobs
+          </a>
+          <a href="{{ url_for('admin.logs_page') }}" class="profile-menu-item">
+            <i class="fas fa-history"></i> Activity Logs
+          </a>
+          {% endif %}
           <div class="profile-menu-divider"></div>
           <a href="{{ url_for('auth.logout') }}" class="profile-menu-item" style="color:var(--danger);"><i class="fas fa-sign-out-alt"></i> Logout</a>
         </div>
@@ -588,6 +607,16 @@
     <a href="{{ url_for('profile.edit') }}"><i class="fas fa-user"></i> Profile</a>
     <a href="{{ url_for('resume.list_resumes') }}"><i class="fas fa-file-alt"></i> My Resumes</a>
     <a href="{{ url_for('profile.settings') }}"><i class="fas fa-cog"></i> Settings</a>
+    {% if current_user.is_authenticated and current_user.is_admin %}
+    <div style="padding: 8px 16px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.05em; margin-top: 8px;">Admin</div>
+    <a href="{{ url_for('admin.dashboard') }}" style="color: var(--accent); font-weight: 700;">
+      <i class="fas fa-shield-alt"></i> Admin Dashboard
+    </a>
+    <a href="{{ url_for('admin.users_page') }}"><i class="fas fa-users"></i> Manage Users</a>
+    <a href="{{ url_for('admin.resumes_page') }}"><i class="fas fa-file-alt"></i> Manage Resumes</a>
+    <a href="{{ url_for('admin.jobs_page') }}"><i class="fas fa-briefcase"></i> Manage Jobs</a>
+    <a href="{{ url_for('admin.logs_page') }}"><i class="fas fa-history"></i> Activity Logs</a>
+    {% endif %}
     <a href="{{ url_for('auth.logout') }}" style="color:var(--danger);"><i class="fas fa-sign-out-alt"></i> Logout</a>
     {% endif %}
   </div>

@@ -3,10 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard | Paswan Resume Builder</title>
+  <title>Admin Dashboard | Paswan Resume Builder</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root {
       --bg: #f0f4f8;
@@ -42,307 +41,343 @@
     }
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
     body { background: var(--bg); color: var(--text); min-height: 100vh; transition: all 0.3s ease; }
+
+    /* Layout */
+    .admin-layout { display: flex; min-height: 100vh; }
     
-    /* Navbar */
-    .navbar {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+    /* Sidebar */
+    .sidebar {
+      width: 260px; background: var(--surface-solid); border-right: 1px solid var(--border);
+      position: fixed; top: 0; left: 0; bottom: 0; z-index: 1000;
+      display: flex; flex-direction: column; padding: 20px 0;
+      transition: transform 0.3s ease;
+    }
+    .sidebar-brand {
+      display: flex; align-items: center; gap: 10px; padding: 0 20px 20px;
+      font-weight: 800; font-size: 1.1rem; color: var(--text); text-decoration: none;
+      border-bottom: 1px solid var(--border); margin-bottom: 16px;
+    }
+    .sidebar-brand .logo {
+      width: 34px; height: 34px; background: linear-gradient(135deg, var(--accent), var(--accent-light));
+      border-radius: 10px; display: grid; place-items: center; color: white; font-weight: 700; font-size: 0.9rem;
+    }
+    .sidebar-nav { flex: 1; padding: 0 12px; overflow-y: auto; }
+    .sidebar-section {
+      font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+      color: var(--text-secondary); padding: 16px 12px 8px;
+    }
+    .sidebar-link {
+      display: flex; align-items: center; gap: 12px; padding: 10px 14px;
+      border-radius: 10px; color: var(--text-secondary); text-decoration: none;
+      font-size: 0.88rem; font-weight: 500; transition: all 0.2s; margin-bottom: 2px;
+    }
+    .sidebar-link:hover, .sidebar-link.active {
+      background: var(--accent-glow); color: var(--accent);
+    }
+    .sidebar-link i { width: 20px; text-align: center; font-size: 0.95rem; }
+    .sidebar-footer {
+      padding: 16px 20px 0; border-top: 1px solid var(--border); margin-top: auto;
+    }
+    .sidebar-user {
+      display: flex; align-items: center; gap: 10px;
+    }
+    .sidebar-user-avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent-light));
+      display: grid; place-items: center; color: white; font-weight: 600; font-size: 0.8rem;
+    }
+    .sidebar-user-info { flex: 1; }
+    .sidebar-user-name { font-weight: 600; font-size: 0.85rem; color: var(--text); }
+    .sidebar-user-role {
+      font-size: 0.7rem; color: var(--accent); font-weight: 600;
+      background: var(--accent-glow); padding: 2px 8px; border-radius: 6px; display: inline-block;
+    }
+
+    /* Main Content */
+    .main-area { flex: 1; margin-left: 260px; }
+    .topbar {
+      position: sticky; top: 0; z-index: 100;
       background: var(--glass); backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--border); padding: 0 24px;
+      border-bottom: 1px solid var(--border); padding: 0 28px;
       height: 64px; display: flex; align-items: center; justify-content: space-between;
     }
-    .nav-brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.2rem; color: var(--text); text-decoration: none; }
-    .nav-brand .logo { width: 36px; height: 36px; background: linear-gradient(135deg, var(--accent), var(--accent-light)); border-radius: 10px; display: grid; place-items: center; color: white; font-weight: 700; }
-    .nav-links { display: flex; align-items: center; gap: 8px; }
-    .nav-links a { color: var(--text-secondary); text-decoration: none; padding: 8px 14px; border-radius: 8px; font-size: 0.9rem; font-weight: 500; transition: all 0.2s; }
-    .nav-links a:hover, .nav-links a.active { color: var(--accent); background: var(--accent-glow); }
-    .nav-actions { display: flex; align-items: center; gap: 12px; }
-    
-    /* Theme Toggle */
-    .theme-toggle { width: 40px; height: 40px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; display: grid; place-items: center; font-size: 1.1rem; transition: all 0.3s; }
+    .topbar-title { font-size: 1.2rem; font-weight: 700; }
+    .topbar-actions { display: flex; align-items: center; gap: 12px; }
+    .theme-toggle {
+      width: 38px; height: 38px; border-radius: 10px; border: 1px solid var(--border);
+      background: var(--surface); color: var(--text); cursor: pointer;
+      display: grid; place-items: center; font-size: 1rem; transition: all 0.3s;
+    }
     .theme-toggle:hover { transform: rotate(20deg); }
-    
-    /* Profile Dropdown */
-    .profile-dropdown { position: relative; }
-    .profile-btn { display: flex; align-items: center; gap: 10px; padding: 6px 12px 6px 6px; border-radius: 50px; border: 1px solid var(--border); background: var(--surface); cursor: pointer; transition: all 0.2s; }
-    .profile-btn:hover { box-shadow: var(--shadow); }
-    .profile-avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent-light)); display: grid; place-items: center; color: white; font-weight: 600; font-size: 0.85rem; }
-    .profile-menu { position: absolute; top: 55px; right: 0; width: 220px; background: var(--surface-solid); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow); padding: 8px; opacity: 0; visibility: hidden; transform: translateY(-10px); transition: all 0.3s; }
-    .profile-menu.open { opacity: 1; visibility: visible; transform: translateY(0); }
-    .profile-menu-item { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 10px; color: var(--text); text-decoration: none; font-size: 0.9rem; transition: all 0.2s; }
-    .profile-menu-item:hover { background: var(--accent-glow); color: var(--accent); }
-    .profile-menu-item i { width: 20px; text-align: center; color: var(--text-secondary); }
-    .profile-menu-divider { height: 1px; background: var(--border); margin: 8px 0; }
-    
-    /* Mobile Menu */
-    .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 8px; }
-    .hamburger span { width: 24px; height: 2px; background: var(--text); border-radius: 2px; transition: all 0.3s; }
-    .mobile-menu { position: fixed; top: 64px; left: 0; right: 0; bottom: 0; background: var(--bg); z-index: 999; padding: 24px; transform: translateX(-100%); transition: transform 0.3s; }
-    .mobile-menu.open { transform: translateX(0); }
-    .mobile-menu a { display: block; padding: 14px; color: var(--text); text-decoration: none; font-weight: 500; border-radius: 12px; margin-bottom: 4px; }
-    .mobile-menu a:hover { background: var(--accent-glow); color: var(--accent); }
-    
-    /* Main Content */
-    .main-content { margin-top: 64px; padding: 24px; max-width: 1400px; margin-left: auto; margin-right: auto; }
-    
-    /* Welcome Section */
-    .welcome-section { margin-bottom: 28px; }
-    .welcome-section h1 { font-size: 1.8rem; font-weight: 800; margin-bottom: 6px; }
-    .welcome-section p { color: var(--text-secondary); font-size: 0.95rem; }
-    
+    .back-link {
+      color: var(--text-secondary); text-decoration: none; font-size: 0.85rem; font-weight: 500;
+      display: flex; align-items: center; gap: 6px; transition: color 0.2s;
+    }
+    .back-link:hover { color: var(--accent); }
+
+    .content { padding: 28px; max-width: 1400px; }
+
+    /* Welcome */
+    .welcome { margin-bottom: 28px; }
+    .welcome h1 { font-size: 1.6rem; font-weight: 800; margin-bottom: 4px; }
+    .welcome p { color: var(--text-secondary); font-size: 0.9rem; }
+    .admin-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-light));
+      color: white; font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.06em; padding: 4px 12px; border-radius: 20px; margin-left: 10px;
+    }
+
     /* Stats Grid */
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 24px; }
-    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 24px; backdrop-filter: blur(10px); transition: all 0.3s; }
-    .stat-card:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 28px; }
+    .stat-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+      padding: 20px; backdrop-filter: blur(10px); transition: all 0.3s;
+    }
+    .stat-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
     .stat-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-    .stat-icon { width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center; font-size: 1.2rem; }
+    .stat-icon {
+      width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; font-size: 1.1rem;
+    }
     .stat-icon.blue { background: rgba(59,130,246,0.1); color: #3b82f6; }
     .stat-icon.teal { background: rgba(20,184,166,0.1); color: var(--accent-light); }
     .stat-icon.purple { background: rgba(168,85,247,0.1); color: #a855f7; }
     .stat-icon.orange { background: rgba(249,115,22,0.1); color: #f97316; }
-    .stat-value { font-size: 2rem; font-weight: 800; color: var(--text); }
-    .stat-label { font-size: 0.85rem; color: var(--text-secondary); margin-top: 4px; }
-    .stat-change { font-size: 0.8rem; margin-top: 8px; font-weight: 600; }
-    .stat-change.up { color: var(--success); }
-    .stat-change.down { color: var(--danger); }
-    
-    /* Quick Actions */
-    .section-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
-    .actions-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin-bottom: 24px; }
-    .action-btn { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 20px; text-align: center; text-decoration: none; color: var(--text); transition: all 0.3s; display: flex; flex-direction: column; align-items: center; gap: 10px; }
-    .action-btn:hover { transform: translateY(-3px); box-shadow: var(--shadow); border-color: var(--accent); }
-    .action-btn i { font-size: 1.5rem; width: 48px; height: 48px; border-radius: 14px; display: grid; place-items: center; background: var(--accent-glow); color: var(--accent); }
-    .action-btn span { font-size: 0.85rem; font-weight: 600; }
-    
-    /* Content Grid */
-    .content-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; }
-    .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 24px; backdrop-filter: blur(10px); }
+    .stat-icon.red { background: rgba(239,68,68,0.1); color: var(--danger); }
+    .stat-icon.green { background: rgba(16,185,129,0.1); color: var(--success); }
+    .stat-icon.yellow { background: rgba(245,158,11,0.1); color: var(--warning); }
+    .stat-value { font-size: 1.8rem; font-weight: 800; color: var(--text); }
+    .stat-label { font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px; }
+
+    /* Sections Grid */
+    .sections-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+    .panel {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+      padding: 24px; backdrop-filter: blur(10px);
+    }
     .panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-    .panel-title { font-size: 1rem; font-weight: 700; }
-    .panel-link { font-size: 0.8rem; color: var(--accent); text-decoration: none; font-weight: 600; }
-    
-    /* Activity List */
-    .activity-item { display: flex; align-items: center; gap: 14px; padding: 12px 0; border-bottom: 1px solid var(--border); }
-    .activity-item:last-child { border-bottom: none; }
-    .activity-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-    .activity-dot.success { background: var(--success); box-shadow: 0 0 8px var(--success); }
-    .activity-dot.warning { background: var(--warning); box-shadow: 0 0 8px var(--warning); }
-    .activity-dot.info { background: #3b82f6; box-shadow: 0 0 8px #3b82f6; }
-    .activity-text { flex: 1; font-size: 0.9rem; }
-    .activity-time { font-size: 0.75rem; color: var(--text-secondary); }
-    
-    /* Chart Container */
-    .chart-container { position: relative; height: 200px; }
-    
+    .panel-title { font-size: 0.95rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+    .panel-link { font-size: 0.78rem; color: var(--accent); text-decoration: none; font-weight: 600; }
+
+    /* Quick Links */
+    .quick-links { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .quick-link {
+      display: flex; align-items: center; gap: 10px; padding: 12px 14px;
+      border-radius: 12px; background: var(--surface); border: 1px solid var(--border);
+      color: var(--text); text-decoration: none; font-size: 0.85rem; font-weight: 500;
+      transition: all 0.2s;
+    }
+    .quick-link:hover { background: var(--accent-glow); border-color: var(--accent); transform: translateX(4px); }
+    .quick-link i { color: var(--accent); width: 18px; text-align: center; }
+
+    /* Empty State */
+    .empty-state { text-align: center; padding: 40px 20px; color: var(--text-secondary); }
+    .empty-state i { font-size: 2.5rem; margin-bottom: 12px; opacity: 0.5; }
+    .empty-state p { font-size: 0.9rem; }
+
+    /* Mobile Sidebar Toggle */
+    .sidebar-toggle {
+      display: none; width: 38px; height: 38px; border-radius: 10px;
+      border: 1px solid var(--border); background: var(--surface); color: var(--text);
+      cursor: pointer; align-items: center; justify-content: center; font-size: 1rem;
+    }
+
     /* Responsive */
     @media (max-width: 768px) {
-      .nav-links { display: none; }
-      .hamburger { display: flex; }
-      .content-grid { grid-template-columns: 1fr; }
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.open { transform: translateX(0); }
+      .main-area { margin-left: 0; }
+      .sidebar-toggle { display: flex; }
       .stats-grid { grid-template-columns: repeat(2, 1fr); }
-      .actions-grid { grid-template-columns: repeat(2, 1fr); }
-      .welcome-section h1 { font-size: 1.4rem; }
+      .sections-grid { grid-template-columns: 1fr; }
+      .content { padding: 16px; }
     }
     @media (max-width: 480px) {
       .stats-grid { grid-template-columns: 1fr; }
-      .actions-grid { grid-template-columns: 1fr; }
-      .navbar { padding: 0 16px; }
-      .main-content { padding: 16px; }
+      .quick-links { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Navbar -->
-  <nav class="navbar">
-    <a href="{{ url_for('main.index') }}" class="nav-brand">
-      <div class="logo">P</div>
-      Paswan Resume
-    </a>
-    
-    <div class="nav-links">
-      <a href="{{ url_for('main.index') }}">Home</a>
-      <a href="{{ url_for('main.dashboard') }}" class="active">Dashboard</a>
-      <a href="{{ url_for('resume.create_builder_resume') }}">Builder</a>
-      <a href="{{ url_for('jobs.list_jobs') }}">Jobs</a>
-      <a href="{{ url_for('analytics.overview') }}">Analytics</a>
-    </div>
-    
-    <div class="nav-actions">
-      <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">
-        <i class="fas fa-moon" id="theme-icon"></i>
-      </button>
+  <div class="admin-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <a href="{{ url_for('main.index') }}" class="sidebar-brand">
+        <div class="logo">P</div>
+        Paswan Admin
+      </a>
       
-      <div class="profile-dropdown">
-        <div class="profile-btn" onclick="toggleProfile()">
-          <div class="profile-avatar">{{ current_user.first_name[0] if current_user.first_name else 'U' }}</div>
-          <i class="fas fa-chevron-down" style="font-size:0.7rem; color:var(--text-secondary);"></i>
-        </div>
-        <div class="profile-menu" id="profileMenu">
-          <div style="padding:12px 14px; border-bottom:1px solid var(--border); margin-bottom:4px;">
-            <div style="font-weight:700; font-size:0.9rem;">{{ current_user.first_name }} {{ current_user.last_name }}</div>
-            <div style="font-size:0.8rem; color:var(--text-secondary);">{{ current_user.email }}</div>
+      <nav class="sidebar-nav">
+        <div class="sidebar-section">Overview</div>
+        <a href="{{ url_for('admin.dashboard') }}" class="sidebar-link active">
+          <i class="fas fa-th-large"></i> Dashboard
+        </a>
+        
+        <div class="sidebar-section">Management</div>
+        <a href="{{ url_for('admin.manage_users') }}" class="sidebar-link">
+          <i class="fas fa-users"></i> Users
+        </a>
+        <a href="{{ url_for('admin.manage_jobs') }}" class="sidebar-link">
+          <i class="fas fa-briefcase"></i> Jobs
+        </a>
+        <a href="{{ url_for('admin.view_logs') }}" class="sidebar-link">
+          <i class="fas fa-clipboard-list"></i> Activity Logs
+        </a>
+        
+        <div class="sidebar-section">System</div>
+        <a href="{{ url_for('admin.system_stats') }}" class="sidebar-link">
+          <i class="fas fa-chart-pie"></i> Statistics
+        </a>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="sidebar-user-avatar">{{ current_user.first_name[0] if current_user.first_name else 'A' }}</div>
+          <div class="sidebar-user-info">
+            <div class="sidebar-user-name">{{ current_user.first_name or 'Admin' }}</div>
+            <span class="sidebar-user-role">Administrator</span>
           </div>
-          <a href="{{ url_for('profile.edit') }}" class="profile-menu-item"><i class="fas fa-user"></i> Profile</a>
-          <a href="{{ url_for('resume.list_resumes') }}" class="profile-menu-item"><i class="fas fa-file-alt"></i> My Resumes</a>
-          <a href="{{ url_for('analytics.overview') }}" class="profile-menu-item"><i class="fas fa-chart-line"></i> Analytics</a>
-          <div class="profile-menu-divider"></div>
-          <a href="{{ url_for('auth.logout') }}" class="profile-menu-item" style="color:var(--danger);"><i class="fas fa-sign-out-alt"></i> Logout</a>
         </div>
       </div>
-      
-      <div class="hamburger" onclick="toggleMobile()">
-        <span></span>
-        <span></span>
-        <span></span>
-      </div>
+    </aside>
+
+    <!-- Main Area -->
+    <div class="main-area">
+      <!-- Topbar -->
+      <header class="topbar">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <button class="sidebar-toggle" onclick="toggleSidebar()">
+            <i class="fas fa-bars"></i>
+          </button>
+          <div class="topbar-title">Dashboard</div>
+        </div>
+        <div class="topbar-actions">
+          <a href="{{ url_for('main.dashboard') }}" class="back-link">
+            <i class="fas fa-arrow-left"></i> Back to App
+          </a>
+          <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">
+            <i class="fas fa-moon" id="theme-icon"></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- Content -->
+      <main class="content">
+        <div class="welcome">
+          <h1>
+            Admin Panel
+            <span class="admin-badge"><i class="fas fa-shield-alt"></i> Admin</span>
+          </h1>
+          <p>Manage users, jobs, and monitor system health from one place.</p>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-header">
+              <div class="stat-icon blue"><i class="fas fa-users"></i></div>
+            </div>
+            <div class="stat-value">{{ stats.total_users | default(0) }}</div>
+            <div class="stat-label">Total Users</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-header">
+              <div class="stat-icon green"><i class="fas fa-crown"></i></div>
+            </div>
+            <div class="stat-value">{{ stats.premium_users | default(0) }}</div>
+            <div class="stat-label">Premium Users</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-header">
+              <div class="stat-icon purple"><i class="fas fa-user-tie"></i></div>
+            </div>
+            <div class="stat-value">{{ stats.recruiters | default(0) }}</div>
+            <div class="stat-label">Recruiters</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-header">
+              <div class="stat-icon teal"><i class="fas fa-file-alt"></i></div>
+            </div>
+            <div class="stat-value">{{ stats.resumes_uploaded | default(0) }}</div>
+            <div class="stat-label">Resumes</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-header">
+              <div class="stat-icon orange"><i class="fas fa-briefcase"></i></div>
+            </div>
+            <div class="stat-value">{{ stats.jobs_posted | default(0) }}</div>
+            <div class="stat-label">Jobs Posted</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-header">
+              <div class="stat-icon yellow"><i class="fas fa-rupee-sign"></i></div>
+            </div>
+            <div class="stat-value">₹{{ stats.payments_total | default(0) }}</div>
+            <div class="stat-label">Revenue</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-header">
+              <div class="stat-icon red"><i class="fas fa-user-plus"></i></div>
+            </div>
+            <div class="stat-value">{{ stats.today_signups | default(0) }}</div>
+            <div class="stat-label">Today's Signups</div>
+          </div>
+        </div>
+
+        <!-- Sections Grid -->
+        <div class="sections-grid">
+          <!-- Quick Actions -->
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title"><i class="fas fa-bolt" style="color:var(--accent);"></i> Quick Actions</div>
+            </div>
+            <div class="quick-links">
+              <a href="{{ url_for('admin.manage_users') }}" class="quick-link">
+                <i class="fas fa-users-cog"></i> Manage Users
+              </a>
+              <a href="{{ url_for('admin.manage_jobs') }}" class="quick-link">
+                <i class="fas fa-plus-circle"></i> Add Job
+              </a>
+              <a href="{{ url_for('admin.view_logs') }}" class="quick-link">
+                <i class="fas fa-history"></i> View Logs
+              </a>
+              <a href="{{ url_for('admin.system_stats') }}" class="quick-link">
+                <i class="fas fa-server"></i> System Stats
+              </a>
+            </div>
+          </div>
+
+          <!-- System Status -->
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title"><i class="fas fa-heartbeat" style="color:var(--success);"></i> System Health</div>
+              <span style="font-size:0.75rem; color:var(--success); font-weight:600;">
+                <i class="fas fa-check-circle"></i> Operational
+              </span>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:12px;">
+              <div style="display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border);">
+                <span style="font-size:0.85rem; color:var(--text-secondary);"><i class="fas fa-database" style="margin-right:8px;"></i>Database</span>
+                <span style="font-size:0.8rem; color:var(--success); font-weight:600;">Connected</span>
+              </div>
+              <div style="display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border);">
+                <span style="font-size:0.85rem; color:var(--text-secondary);"><i class="fas fa-memory" style="margin-right:8px;"></i>Redis</span>
+                <span style="font-size:0.8rem; color:var(--success); font-weight:600;">Connected</span>
+              </div>
+              <div style="display:flex; align-items:center; justify-content:space-between; padding:10px 0;">
+                <span style="font-size:0.85rem; color:var(--text-secondary);"><i class="fas fa-tasks" style="margin-right:8px;"></i>Celery</span>
+                <span style="font-size:0.8rem; color:var(--success); font-weight:600;">Active</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
     </div>
-  </nav>
-  
-  <!-- Mobile Menu -->
-  <div class="mobile-menu" id="mobileMenu">
-    <a href="{{ url_for('main.index') }}"><i class="fas fa-home" style="margin-right:10px;"></i> Home</a>
-    <a href="{{ url_for('main.dashboard') }}" class="active"><i class="fas fa-th-large" style="margin-right:10px;"></i> Dashboard</a>
-    <a href="{{ url_for('resume.create_builder_resume') }}"><i class="fas fa-hammer" style="margin-right:10px;"></i> Builder</a>
-    <a href="{{ url_for('jobs.list_jobs') }}"><i class="fas fa-briefcase" style="margin-right:10px;"></i> Jobs</a>
-    <a href="{{ url_for('analytics.overview') }}"><i class="fas fa-chart-pie" style="margin-right:10px;"></i> Analytics</a>
-    <a href="{{ url_for('profile.edit') }}"><i class="fas fa-user" style="margin-right:10px;"></i> Profile</a>
-    <a href="{{ url_for('auth.logout') }}" style="color:var(--danger);"><i class="fas fa-sign-out-alt" style="margin-right:10px;"></i> Logout</a>
   </div>
 
-  <!-- Main Content -->
-  <main class="main-content">
-    
-    <div class="welcome-section">
-      <h1>Welcome back, {{ current_user.first_name or 'User' }}! 👋</h1>
-      <p>Your workspace is powered by your resume records, scores, and activity history.</p>
-    </div>
-    
-    <!-- Stats -->
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-header">
-          <div class="stat-icon blue"><i class="fas fa-file-alt"></i></div>
-          <span class="stat-change up"><i class="fas fa-arrow-up"></i> +2</span>
-        </div>
-        <div class="stat-value">{{ resume_count or 0 }}</div>
-        <div class="stat-label">Total Resumes</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-header">
-          <div class="stat-icon teal"><i class="fas fa-star"></i></div>
-          <span class="stat-change up"><i class="fas fa-arrow-up"></i> 12%</span>
-        </div>
-        <div class="stat-value">{{ ats_score or '-' }}</div>
-        <div class="stat-label">Latest ATS Score</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-header">
-          <div class="stat-icon purple"><i class="fas fa-briefcase"></i></div>
-          <span class="stat-change up"><i class="fas fa-arrow-up"></i> 5</span>
-        </div>
-        <div class="stat-value">{{ job_matches or 0 }}</div>
-        <div class="stat-label">Job Matches</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-header">
-          <div class="stat-icon orange"><i class="fas fa-bolt"></i></div>
-          <span class="stat-change up"><i class="fas fa-arrow-up"></i> 8%</span>
-        </div>
-        <div class="stat-value">{{ activity_count or 2 }}</div>
-        <div class="stat-label">Activity Records</div>
-      </div>
-    </div>
-    
-    <!-- Quick Actions -->
-    <div class="section-title"><i class="fas fa-rocket" style="color:var(--accent);"></i> Quick Actions</div>
-    <div class="actions-grid">
-      <a href="{{ url_for('resume.upload_resume') }}" class="action-btn">
-        <i class="fas fa-cloud-upload-alt"></i>
-        <span>Upload Resume</span>
-      </a>
-      <a href="{{ url_for('resume.create_builder_resume') }}" class="action-btn">
-        <i class="fas fa-hammer"></i>
-        <span>Resume Builder</span>
-      </a>
-      <a href="{{ url_for('jobs.list_jobs') }}" class="action-btn">
-        <i class="fas fa-search"></i>
-        <span>Browse Jobs</span>
-      </a>
-      <a href="{{ url_for('analytics.overview') }}" class="action-btn">
-        <i class="fas fa-chart-line"></i>
-        <span>Analytics</span>
-      </a>
-      <a href="{{ url_for('ai.improve_bullet') }}" class="action-btn">
-        <i class="fas fa-magic"></i>
-        <span>AI Enhance</span>
-      </a>
-      <a href="{{ url_for('resume.list_resumes') }}" class="action-btn">
-        <i class="fas fa-folder-open"></i>
-        <span>My Resumes</span>
-      </a>
-      <a href="{{ url_for('recruiter.search_candidates') }}" class="action-btn">
-        <i class="fas fa-user-tie"></i>
-        <span>For Recruiters</span>
-      </a>
-      <a href="{{ url_for('payment.checkout') }}" class="action-btn">
-        <i class="fas fa-crown"></i>
-        <span>Upgrade Plan</span>
-      </a>
-    </div>
-    
-    <!-- Content Grid -->
-    <div class="content-grid">
-      <div class="panel">
-        <div class="panel-header">
-          <div class="panel-title"><i class="fas fa-chart-bar" style="margin-right:8px; color:var(--accent);"></i>ATS Score Trend</div>
-          <a href="{{ url_for('analytics.overview') }}" class="panel-link">View all</a>
-        </div>
-        <div class="chart-container">
-          <canvas id="atsChart"></canvas>
-        </div>
-      </div>
-      
-      <div class="panel">
-        <div class="panel-header">
-          <div class="panel-title"><i class="fas fa-history" style="margin-right:8px; color:var(--accent);"></i>Recent Activity</div>
-          <a href="{{ url_for('analytics.overview') }}" class="panel-link">View all</a>
-        </div>
-        <div class="activity-item">
-          <div class="activity-dot success"></div>
-          <div class="activity-text">Login Success</div>
-          <div class="activity-time">Just now</div>
-        </div>
-        <div class="activity-item">
-          <div class="activity-dot info"></div>
-          <div class="activity-text">User Registered</div>
-          <div class="activity-time">2 min ago</div>
-        </div>
-        <div class="activity-item">
-          <div class="activity-dot warning"></div>
-          <div class="activity-text">Resume uploaded</div>
-          <div class="activity-time">1 hour ago</div>
-        </div>
-        <div class="activity-item">
-          <div class="activity-dot success"></div>
-          <div class="activity-text">ATS Score improved to 87</div>
-          <div class="activity-time">2 hours ago</div>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Recent Resumes -->
-    <div class="panel" style="margin-top:20px;">
-      <div class="panel-header">
-        <div class="panel-title"><i class="fas fa-file-alt" style="margin-right:8px; color:var(--accent);"></i>Recent Resumes</div>
-        <a href="{{ url_for('resume.list_resumes') }}" class="panel-link">View all</a>
-      </div>
-      <p style="color:var(--text-secondary); font-size:0.9rem; padding:20px 0;">No resumes yet. Upload your first PDF or DOCX to begin.</p>
-    </div>
-    
-  </main>
-
   <script>
-    // Dark Mode
+    // Theme Toggle
     function toggleTheme() {
       const html = document.documentElement;
       const icon = document.getElementById('theme-icon');
@@ -350,61 +385,32 @@
         html.setAttribute('data-theme', 'dark');
         icon.classList.remove('fa-moon');
         icon.classList.add('fa-sun');
-        localStorage.setItem('theme', 'dark');
+        localStorage.setItem('paswan-theme', 'dark');
       } else {
         html.setAttribute('data-theme', 'light');
         icon.classList.remove('fa-sun');
         icon.classList.add('fa-moon');
-        localStorage.setItem('theme', 'light');
+        localStorage.setItem('paswan-theme', 'light');
       }
     }
-    
-    // Load saved theme
-    if (localStorage.getItem('theme') === 'dark') {
+    if (localStorage.getItem('paswan-theme') === 'dark') {
       document.documentElement.setAttribute('data-theme', 'dark');
-      document.getElementById('theme-icon').classList.remove('fa-moon');
-      document.getElementById('theme-icon').classList.add('fa-sun');
+      const icon = document.getElementById('theme-icon');
+      if (icon) { icon.classList.remove('fa-moon'); icon.classList.add('fa-sun'); }
     }
-    
-    // Profile Dropdown
-    function toggleProfile() {
-      document.getElementById('profileMenu').classList.toggle('open');
+
+    // Sidebar Toggle (Mobile)
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('open');
     }
+
+    // Close sidebar when clicking outside on mobile
     document.addEventListener('click', function(e) {
-      if (!e.target.closest('.profile-dropdown')) {
-        document.getElementById('profileMenu').classList.remove('open');
-      }
-    });
-    
-    // Mobile Menu
-    function toggleMobile() {
-      document.getElementById('mobileMenu').classList.toggle('open');
-    }
-    
-    // Chart.js
-    const ctx = document.getElementById('atsChart').getContext('2d');
-    new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-        datasets: [{
-          label: 'ATS Score',
-          data: [65, 72, 68, 75, 82, 87],
-          borderColor: '#0f766e',
-          backgroundColor: 'rgba(15,118,110,0.1)',
-          fill: true,
-          tension: 0.4,
-          pointRadius: 4,
-          pointBackgroundColor: '#0f766e'
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: {
-          y: { beginAtZero: true, max: 100, grid: { color: 'rgba(148,163,184,0.1)' } },
-          x: { grid: { display: false } }
+      const sidebar = document.getElementById('sidebar');
+      const toggle = document.querySelector('.sidebar-toggle');
+      if (window.innerWidth <= 768 && sidebar.classList.contains('open')) {
+        if (!sidebar.contains(e.target) && !toggle.contains(e.target)) {
+          sidebar.classList.remove('open');
         }
       }
     });

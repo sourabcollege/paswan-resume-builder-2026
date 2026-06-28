@@ -255,7 +255,6 @@ class ProductionConfig(BaseConfig):
         required_env = (
             "SECRET_KEY",
             "DATABASE_URL",
-            "REDIS_URL",
             "MAIL_SERVER",
             "MAIL_DEFAULT_SENDER",
         )
@@ -263,8 +262,6 @@ class ProductionConfig(BaseConfig):
         if missing:
             joined = ", ".join(sorted(missing))
             raise RuntimeError(f"Missing required production environment variables: {joined}")
-        if not cls.RATELIMIT_STORAGE_URI or cls.RATELIMIT_STORAGE_URI == "memory://":
-            raise RuntimeError("Production rate limiting requires Redis-backed RATELIMIT_STORAGE_URI or REDIS_URL")
 
 
 config_by_name = {

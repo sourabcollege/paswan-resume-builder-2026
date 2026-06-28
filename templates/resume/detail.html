@@ -5,76 +5,1323 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{{ resume.title if resume else 'Resume' }} - Paswan Resume Builder</title>
   <style>
-    body{margin:0;min-height:100vh;background:linear-gradient(135deg,#f8fffc,#eef4ff);color:#17202a;font:15px/1.5 Inter,Arial,sans-serif}
-    .shell{width:min(980px,calc(100% - 32px));margin:0 auto;padding:30px 0}
-    .panel{background:rgba(255,255,255,.8);border:1px solid rgba(23,32,42,.12);border-radius:8px;box-shadow:0 20px 70px rgba(32,48,73,.10);padding:20px}
-    a{color:#1f6f78;font-weight:800;text-decoration:none}
-    .nav{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px}
-    h1{font-size:36px;margin:0 0 8px}
-    .meta{color:#637083}
-    .section{border-top:1px solid rgba(23,32,42,.12);margin-top:16px;padding-top:16px;white-space:pre-wrap}
-    .badge{display:inline-block;background:#e8f5f0;color:#1f6f78;border-radius:6px;padding:3px 10px;font-size:13px;font-weight:700;margin-left:8px}
+    :root {
+      --bg: #0b0d12;
+      --bg-elevated: #11131a;
+      --surface: rgba(255,255,255,0.03);
+      --surface-hover: rgba(255,255,255,0.06);
+      --border: rgba(255,255,255,0.06);
+      --border-hover: rgba(255,255,255,0.12);
+      --text: #f0f1f5;
+      --text-muted: #8b8f9d;
+      --text-faint: #5a5e6e;
+      --accent: #6366f1;
+      --accent-light: #818cf8;
+      --accent-glow: rgba(99,102,241,0.25);
+      --accent-dim: rgba(99,102,241,0.12);
+      --success: #10b981;
+      --success-dim: rgba(16,185,129,0.12);
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --info: #3b82f6;
+      --paper: #ffffff;
+      --paper-text: #1a1c23;
+      --paper-muted: #4b5563;
+      --paper-border: #e5e7eb;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+      --shadow: 0 4px 24px rgba(0,0,0,0.4);
+      --shadow-lg: 0 20px 60px rgba(0,0,0,0.5);
+      --radius: 14px;
+      --radius-sm: 10px;
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      --font-mono: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    }
+
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      font-size: 14px;
+      line-height: 1.5;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed;
+      top: 84px;
+      right: 24px;
+      background: var(--success);
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: var(--radius-sm);
+      font-weight: 700;
+      font-size: 13px;
+      z-index: 1000;
+      animation: toastIn 0.4s cubic-bezier(0.16,1,0.3,1);
+      box-shadow: 0 10px 30px rgba(16,185,129,0.3);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    @keyframes toastIn {
+      from { transform: translateX(100px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    .toast.hiding {
+      animation: toastOut 0.3s ease forwards;
+    }
+    @keyframes toastOut {
+      to { transform: translateX(100px); opacity: 0; }
+    }
+
+    /* ── Top Bar ── */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      height: 64px;
+      background: rgba(11,13,18,0.85);
+      backdrop-filter: blur(20px) saturate(1.5);
+      -webkit-backdrop-filter: blur(20px) saturate(1.5);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 28px;
+      gap: 12px;
+    }
+
+    .topbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-right: auto;
+      text-decoration: none;
+      color: var(--text);
+      font-weight: 800;
+      font-size: 15px;
+      letter-spacing: -0.3px;
+    }
+    .topbar-brand-icon {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-light));
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px var(--accent-glow);
+    }
+    .topbar-brand-icon svg {
+      width: 18px;
+      height: 18px;
+      color: #fff;
+    }
+
+    .topbar-nav {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .topbar-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 13px;
+      transition: all 0.2s;
+      border: 1px solid transparent;
+    }
+    .topbar-link:hover {
+      color: var(--text);
+      background: var(--surface-hover);
+      border-color: var(--border);
+    }
+    .topbar-link svg {
+      width: 16px;
+      height: 16px;
+      opacity: 0.7;
+    }
+
+    .topbar-sep {
+      width: 1px;
+      height: 20px;
+      background: var(--border);
+      margin: 0 4px;
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: auto;
+    }
+
+    .btn-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-icon:hover {
+      background: var(--surface-hover);
+      color: var(--text);
+      border-color: var(--border-hover);
+      transform: translateY(-1px);
+    }
+    .btn-icon svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .btn-sm {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 700;
+      text-decoration: none;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+    .btn-sm-primary {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+      box-shadow: 0 4px 12px var(--accent-glow);
+    }
+    .btn-sm-primary:hover {
+      background: var(--accent-light);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px var(--accent-glow);
+    }
+
+    /* ── Layout ── */
+    .layout {
+      max-width: 1480px;
+      margin: 0 auto;
+      padding: 28px;
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 28px;
+      align-items: start;
+    }
+
+    /* ── Paper Stage ── */
+    .stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .zoom-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 6px;
+      position: sticky;
+      top: 80px;
+      z-index: 50;
+      box-shadow: var(--shadow);
+    }
+    .zoom-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-sm);
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .zoom-btn:hover {
+      background: var(--surface-hover);
+      color: var(--text);
+    }
+    .zoom-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+    .zoom-value {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      min-width: 44px;
+      text-align: center;
+      font-family: var(--font-mono);
+    }
+
+    .paper-viewport {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      padding: 8px 0 40px;
+      overflow-x: auto;
+    }
+
+    .paper-frame {
+      transform-origin: top center;
+      transition: transform 0.3s cubic-bezier(0.16,1,0.3,1);
+    }
+
+    .paper {
+      width: 210mm;
+      min-height: 297mm;
+      background: var(--paper);
+      color: var(--paper-text);
+      box-shadow: var(--shadow-lg);
+      padding: 20mm 22mm;
+      font-family: 'Georgia', 'Times New Roman', serif;
+      font-size: 10.5pt;
+      line-height: 1.55;
+      position: relative;
+      border-radius: 1px;
+    }
+
+    /* Paper Typography */
+    .p-header {
+      text-align: center;
+      margin-bottom: 20px;
+      padding-bottom: 14px;
+      border-bottom: 1.5px solid var(--paper-text);
+    }
+    .p-name {
+      font-size: 24pt;
+      font-weight: 700;
+      color: var(--paper-text);
+      letter-spacing: -0.5px;
+      margin-bottom: 6px;
+      text-transform: capitalize;
+      line-height: 1.2;
+    }
+    .p-contact {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 4px 16px;
+      font-size: 9.5pt;
+      color: var(--paper-muted);
+      font-family: var(--font-sans);
+    }
+    .p-contact span {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .p-section {
+      margin-bottom: 16px;
+    }
+    .p-section-title {
+      font-size: 10pt;
+      font-weight: 800;
+      color: var(--paper-text);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      border-bottom: 1px solid var(--paper-border);
+      padding-bottom: 3px;
+      margin-bottom: 8px;
+      font-family: var(--font-sans);
+    }
+
+    .p-item {
+      margin-bottom: 10px;
+    }
+    .p-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 2px;
+    }
+    .p-item-title {
+      font-weight: 700;
+      font-size: 10.5pt;
+      color: var(--paper-text);
+      font-family: var(--font-sans);
+    }
+    .p-item-sub {
+      font-size: 10pt;
+      color: var(--paper-muted);
+      font-weight: 600;
+      font-family: var(--font-sans);
+    }
+    .p-item-date {
+      font-size: 9.5pt;
+      color: #6b7280;
+      font-style: italic;
+      white-space: nowrap;
+      font-family: var(--font-sans);
+    }
+
+    .p-bullets {
+      list-style: none;
+      padding: 0;
+      margin: 4px 0 0;
+    }
+    .p-bullets li {
+      position: relative;
+      padding-left: 14px;
+      margin-bottom: 2px;
+      font-size: 10pt;
+      color: var(--paper-muted);
+      line-height: 1.45;
+    }
+    .p-bullets li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 7px;
+      width: 5px;
+      height: 5px;
+      background: var(--paper-text);
+      border-radius: 50%;
+      opacity: 0.5;
+    }
+
+    .p-para {
+      font-size: 10pt;
+      color: var(--paper-muted);
+      line-height: 1.6;
+      text-align: justify;
+    }
+
+    .p-kv {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 3px 18px;
+      font-size: 10pt;
+    }
+    .p-kv-key {
+      font-weight: 700;
+      color: var(--paper-text);
+      font-family: var(--font-sans);
+      font-size: 9.5pt;
+      text-transform: capitalize;
+    }
+    .p-kv-val {
+      color: var(--paper-muted);
+    }
+
+    .p-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .p-tag {
+      background: #f3f4f6;
+      color: var(--paper-muted);
+      padding: 3px 10px;
+      border-radius: 4px;
+      font-size: 9.5pt;
+      font-weight: 600;
+      font-family: var(--font-sans);
+    }
+
+    .p-empty {
+      text-align: center;
+      padding: 80px 20px;
+      color: #9ca3af;
+    }
+    .p-empty-icon {
+      width: 48px;
+      height: 48px;
+      margin: 0 auto 16px;
+      opacity: 0.4;
+      color: var(--paper-muted);
+    }
+    .p-empty-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--paper-text);
+      margin-bottom: 6px;
+      font-family: var(--font-sans);
+    }
+    .p-empty-text {
+      font-size: 13px;
+      color: var(--paper-muted);
+      margin-bottom: 20px;
+    }
+    .p-empty-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 20px;
+      background: var(--paper-text);
+      color: #fff;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 13px;
+      font-family: var(--font-sans);
+      transition: opacity 0.2s;
+    }
+    .p-empty-btn:hover {
+      opacity: 0.85;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      position: sticky;
+      top: 80px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-height: calc(100vh - 100px);
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      animation: panelIn 0.5s ease-out backwards;
+    }
+    .panel:nth-child(2) { animation-delay: 0.05s; }
+    .panel:nth-child(3) { animation-delay: 0.10s; }
+    .panel:nth-child(4) { animation-delay: 0.15s; }
+    .panel:nth-child(5) { animation-delay: 0.20s; }
+    @keyframes panelIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .panel:hover {
+      border-color: var(--border-hover);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .panel-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-muted);
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .panel-title svg {
+      width: 16px;
+      height: 16px;
+      color: var(--accent-light);
+    }
+
+    .panel-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .panel-row:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+    .panel-row:first-child {
+      padding-top: 0;
+    }
+    .panel-label {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+    .panel-value {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      text-align: right;
+      max-width: 55%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 800;
+      background: var(--success-dim);
+      color: var(--success);
+      border: 1px solid rgba(16,185,129,0.2);
+    }
+    .status-pill-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--success);
+      border-radius: 50%;
+      box-shadow: 0 0 6px var(--success);
+    }
+
+    /* ATS Circle */
+    .ats-ring-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 8px 0 4px;
+    }
+    .ats-ring {
+      width: 120px;
+      height: 120px;
+      position: relative;
+    }
+    .ats-ring svg {
+      transform: rotate(-90deg);
+      width: 100%;
+      height: 100%;
+    }
+    .ats-ring-bg {
+      fill: none;
+      stroke: rgba(255,255,255,0.06);
+      stroke-width: 8;
+    }
+    .ats-ring-fill {
+      fill: none;
+      stroke: var(--accent);
+      stroke-width: 8;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 1.2s cubic-bezier(0.16,1,0.3,1);
+    }
+    .ats-score {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+    .ats-score-num {
+      font-size: 28px;
+      font-weight: 900;
+      color: var(--text);
+      letter-spacing: -1px;
+      line-height: 1;
+    }
+    .ats-score-label {
+      font-size: 10px;
+      color: var(--text-muted);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-top: 2px;
+    }
+
+    .ats-insights {
+      margin-top: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .ats-insight {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+      color: var(--text-muted);
+      padding: 8px 10px;
+      border-radius: var(--radius-sm);
+      background: rgba(255,255,255,0.02);
+      border: 1px solid transparent;
+    }
+    .ats-insight-good {
+      border-color: rgba(16,185,129,0.15);
+      background: rgba(16,185,129,0.05);
+      color: var(--success);
+    }
+    .ats-insight-warn {
+      border-color: rgba(245,158,11,0.15);
+      background: rgba(245,158,11,0.05);
+      color: var(--warning);
+    }
+    .ats-insight svg {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+
+    /* Completeness */
+    .comp-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 10px;
+    }
+    .comp-value {
+      font-size: 24px;
+      font-weight: 900;
+      color: var(--text);
+      letter-spacing: -1px;
+    }
+    .comp-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+    .comp-track {
+      height: 8px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 14px;
+    }
+    .comp-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-light));
+      border-radius: 4px;
+      transition: width 1.2s cubic-bezier(0.16,1,0.3,1);
+      width: 0;
+      box-shadow: 0 0 10px var(--accent-glow);
+    }
+
+    .comp-checklist {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .comp-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+      color: var(--text-muted);
+      padding: 6px 8px;
+      border-radius: 8px;
+      transition: background 0.2s;
+    }
+    .comp-item:hover {
+      background: var(--surface-hover);
+    }
+    .comp-check {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .comp-check-done {
+      background: var(--success-dim);
+      color: var(--success);
+    }
+    .comp-check-pending {
+      background: rgba(255,255,255,0.06);
+      color: var(--text-faint);
+      border: 1px solid var(--border);
+    }
+    .comp-check svg {
+      width: 10px;
+      height: 10px;
+    }
+
+    /* Action Buttons */
+    .action-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .action-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 700;
+      text-decoration: none;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+      width: 100%;
+      text-align: left;
+    }
+    .action-btn:hover {
+      background: var(--surface-hover);
+      border-color: var(--border-hover);
+      transform: translateX(2px);
+    }
+    .action-btn svg {
+      width: 18px;
+      height: 18px;
+      color: var(--text-muted);
+      transition: color 0.2s;
+    }
+    .action-btn:hover svg {
+      color: var(--text);
+    }
+    .action-btn-primary {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+    .action-btn-primary:hover {
+      background: var(--accent-light);
+      box-shadow: 0 4px 16px var(--accent-glow);
+    }
+    .action-btn-primary svg {
+      color: rgba(255,255,255,0.8);
+    }
+
+    /* Empty sidebar state */
+    .panel-empty {
+      text-align: center;
+      padding: 24px;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    /* ── Print ── */
+    @media print {
+      @page { margin: 0; size: auto; }
+      body { background: #fff; }
+      .topbar, .sidebar, .zoom-bar, .toast { display: none !important; }
+      .layout {
+        display: block;
+        padding: 0;
+        max-width: none;
+      }
+      .paper-viewport {
+        padding: 0;
+        display: block;
+      }
+      .paper-frame {
+        transform: none !important;
+      }
+      .paper {
+        box-shadow: none;
+        width: 100%;
+        min-height: auto;
+        padding: 15mm;
+        margin: 0;
+        border-radius: 0;
+      }
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 1100px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+      .sidebar {
+        position: static;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        max-height: none;
+        overflow-y: visible;
+      }
+      .paper {
+        width: 100%;
+        min-height: auto;
+        padding: 14mm;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .topbar { padding: 0 16px; height: 56px; }
+      .topbar-brand span { display: none; }
+      .layout { padding: 16px; gap: 16px; }
+      .paper { padding: 10mm; font-size: 10pt; }
+      .p-name { font-size: 20pt; }
+      .sidebar { grid-template-columns: 1fr; }
+      .zoom-bar { top: 64px; }
+    }
   </style>
 </head>
 <body>
-  <main class="shell">
-    <nav class="nav">
-      <a href="{{ url_for('main.dashboard') }}">← Dashboard</a>
-      <a href="{{ url_for('resume.list_resumes') }}">My Resumes</a>
-      {% if resume %}<a href="{{ url_for('resume.edit_builder_resume', resume_id=resume.id) }}">✏️ Open Builder</a>{% endif %}
+
+  {% if message %}
+  <div class="toast" id="toast">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+    {{ message }}
+  </div>
+  {% endif %}
+
+  <header class="topbar">
+    <a href="{{ url_for('main.dashboard') }}" class="topbar-brand">
+      <div class="topbar-brand-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      </div>
+      <span>Paswan Resume</span>
+    </a>
+
+    <nav class="topbar-nav">
+      <a href="{{ url_for('main.dashboard') }}" class="topbar-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Dashboard
+      </a>
+      <div class="topbar-sep"></div>
+      <a href="{{ url_for('resume.list_resumes') }}" class="topbar-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        My Resumes
+      </a>
+      {% if resume %}
+      <div class="topbar-sep"></div>
+      <a href="{{ url_for('resume.edit_builder_resume', resume_id=resume.id) }}" class="topbar-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Edit
+      </a>
+      {% endif %}
     </nav>
 
-    <article class="panel">
+    <div class="topbar-actions">
       {% if resume %}
-        <h1>{{ resume.title }}</h1>
-        <div class="meta">
-          {{ resume.source_type | title }}
-          <span class="badge">{{ resume.parsing_status | replace('_', ' ') | title }}</span>
-        </div>
+      <a href="{{ url_for('resume.export_resume', resume_id=resume.id, export_format='pdf') }}" class="btn-sm btn-sm-primary">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download PDF
+      </a>
+      {% endif %}
+    </div>
+  </header>
 
-        {% if version %}
-          <div class="meta" style="margin-top:8px">
-            Version {{ version.version_number }} — {{ version.label }}
-            {% if version.ats_score_snapshot is not none %}
-              <span class="badge">ATS {{ '%.0f'|format(version.ats_score_snapshot) }}</span>
-            {% endif %}
-            {% if version.completeness_snapshot is not none %}
-              <span class="badge">{{ '%.0f'|format(version.completeness_snapshot) }}% Complete</span>
-            {% endif %}
-          </div>
+  <div class="layout">
+    <!-- LEFT: Paper -->
+    <div class="stage">
+      <div class="zoom-bar">
+        <button class="zoom-btn" onclick="adjustZoom(-0.1)" title="Zoom out">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+        </button>
+        <span class="zoom-value" id="zoomValue">100%</span>
+        <button class="zoom-btn" onclick="adjustZoom(0.1)" title="Zoom in">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+        </button>
+        <button class="zoom-btn" onclick="resetZoom()" title="Reset zoom">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+        </button>
+      </div>
 
-          {% if version.content %}
-            {% for name, value in version.content.items() %}
-              <section class="section">
-                <strong>{{ name | replace('_', ' ') | title }}</strong>
-                <div style="margin-top:6px">
-                  {% if value is mapping %}
-                    {% for k, v in value.items() %}
-                      <div><em>{{ k | replace('_',' ') | title }}:</em> {{ v }}</div>
-                    {% endfor %}
-                  {% elif value is iterable and value is not string %}
-                    {% for item in value %}
-                      <div>• {{ item }}</div>
-                    {% endfor %}
+      <div class="paper-viewport">
+        <div class="paper-frame" id="paperFrame">
+          <div class="paper" id="resumePaper">
+            {% if resume and version and version.content %}
+              <!-- Header -->
+              {% for name, value in version.content.items() %}
+                {% if name in ['personal_info', 'contact', 'header', 'profile'] and value is mapping %}
+                  <header class="p-header">
+                    {% if value.full_name or value.name %}
+                      <div class="p-name">{{ value.full_name or value.name }}</div>
+                    {% endif %}
+                    <div class="p-contact">
+                      {% if value.email %}<span>{{ value.email }}</span>{% endif %}
+                      {% if value.phone %}<span>{{ value.phone }}</span>{% endif %}
+                      {% if value.location %}<span>{{ value.location }}</span>{% endif %}
+                      {% if value.linkedin %}<span>{{ value.linkedin }}</span>{% endif %}
+                      {% if value.portfolio or value.website %}<span>{{ value.portfolio or value.website }}</span>{% endif %}
+                      {% if value.github %}<span>{{ value.github }}</span>{% endif %}
+                    </div>
+                  </header>
+                {% endif %}
+              {% endfor %}
+
+              <!-- Sections -->
+              {% for name, value in version.content.items() %}
+                {% if not (name in ['personal_info', 'contact', 'header', 'profile'] and value is mapping) %}
+                  {% if value %}
+                    <section class="p-section">
+                      <h2 class="p-section-title">{{ name | replace('_', ' ') | title }}</h2>
+
+                      {% if value is mapping %}
+                        <div class="p-kv">
+                          {% for k, v in value.items() %}
+                            <div class="p-kv-key">{{ k | replace('_', ' ') | title }}</div>
+                            <div class="p-kv-val">
+                              {% if v is iterable and v is not string %}
+                                {{ v | join(', ') }}
+                              {% else %}
+                                {{ v }}
+                              {% endif %}
+                            </div>
+                          {% endfor %}
+                        </div>
+
+                      {% elif value is iterable and value is not string %}
+                        {% if value and value[0] is mapping %}
+                          {% for item in value %}
+                            <div class="p-item">
+                              <div class="p-item-header">
+                                <div>
+                                  <div class="p-item-title">
+                                    {{ item.title or item.degree or item.name or item.company or item.institution or item.project_name or item.certification_name or item.role or item.position or '' }}
+                                  </div>
+                                  <div class="p-item-sub">
+                                    {{ item.company or item.institution or item.organization or item.subtitle or item.issuer or item.school or item.employer or '' }}
+                                  </div>
+                                </div>
+                                <div class="p-item-date">
+                                  {{ item.dates or item.date or item.duration or item.year or item.period or item.start_date or '' }}
+                                </div>
+                              </div>
+                              {% set desc = item.description or item.responsibilities or item.details or item.summary or item.notes or '' %}
+                              {% if desc %}
+                                {% if desc is string %}
+                                  <ul class="p-bullets"><li>{{ desc }}</li></ul>
+                                {% elif desc is iterable %}
+                                  <ul class="p-bullets">
+                                    {% for d in desc %}
+                                      <li>{{ d }}</li>
+                                    {% endfor %}
+                                  </ul>
+                                {% endif %}
+                              {% endif %}
+                            </div>
+                          {% endfor %}
+                        {% else %}
+                          {% if name in ['skills', 'technical_skills', 'soft_skills', 'languages', 'interests', 'hobbies'] %}
+                            <div class="p-tags">
+                              {% for item in value %}
+                                <span class="p-tag">{{ item }}</span>
+                              {% endfor %}
+                            </div>
+                          {% else %}
+                            <ul class="p-bullets">
+                              {% for item in value %}
+                                <li>{{ item }}</li>
+                              {% endfor %}
+                            </ul>
+                          {% endif %}
+                        {% endif %}
+
+                      {% else %}
+                        <div class="p-para">{{ value }}</div>
+                      {% endif %}
+                    </section>
+                  {% endif %}
+                {% endif %}
+              {% endfor %}
+
+            {% else %}
+              <div class="p-empty">
+                <svg class="p-empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                <div class="p-empty-title">
+                  {% if resume %}No Content Available{% else %}Resume Not Found{% endif %}
+                </div>
+                <div class="p-empty-text">
+                  {% if resume %}
+                    This resume doesn't have any content yet. Open the builder to create your first version.
                   {% else %}
-                    {{ value }}
+                    The requested resume could not be found.
                   {% endif %}
                 </div>
-              </section>
-            {% endfor %}
-          {% else %}
-            <p class="meta" style="margin-top:16px">No content sections found in this version.</p>
+                {% if resume %}
+                <a href="{{ url_for('resume.edit_builder_resume', resume_id=resume.id) }}" class="p-empty-btn">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  Create First Version
+                </a>
+                {% endif %}
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Sidebar -->
+    <aside class="sidebar">
+
+      <!-- Resume Info -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            Resume Info
+          </div>
+        </div>
+        {% if resume %}
+          <div class="panel-row">
+            <span class="panel-label">Title</span>
+            <span class="panel-value" title="{{ resume.title }}">{{ resume.title }}</span>
+          </div>
+          <div class="panel-row">
+            <span class="panel-label">Status</span>
+            <span class="status-pill">
+              <span class="status-pill-dot"></span>
+              {{ resume.parsing_status | replace('_', ' ') | title }}
+            </span>
+          </div>
+          <div class="panel-row">
+            <span class="panel-label">Source</span>
+            <span class="panel-value">{{ resume.source_type | title }}</span>
+          </div>
+          {% if version %}
+          <div class="panel-row">
+            <span class="panel-label">Version</span>
+            <span class="panel-value">v{{ version.version_number }}</span>
+          </div>
           {% endif %}
-
         {% else %}
-          <p class="meta" style="margin-top:16px">No current version available for this resume.</p>
-          <a href="{{ url_for('resume.edit_builder_resume', resume_id=resume.id) }}" style="display:inline-block;margin-top:12px;background:#1f6f78;color:#fff;padding:10px 18px;border-radius:8px">Create First Version</a>
+          <div class="panel-empty">No resume data available</div>
         {% endif %}
+      </div>
 
-      {% else %}
-        <p class="meta">Resume not found.</p>
+      <!-- ATS Score -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            ATS Score
+          </div>
+        </div>
+        {% if version and version.ats_score_snapshot is not none %}
+          <div class="ats-ring-wrap">
+            <div class="ats-ring">
+              <svg viewBox="0 0 120 120">
+                <circle class="ats-ring-bg" cx="60" cy="60" r="52"/>
+                <circle class="ats-ring-fill" cx="60" cy="60" r="52"
+                        stroke-dasharray="326.73"
+                        stroke-dashoffset="326.73"
+                        data-target="{{ 326.73 - (version.ats_score_snapshot / 100 * 326.73) }}"/>
+              </svg>
+              <div class="ats-score">
+                <div class="ats-score-num">{{ '%.0f'|format(version.ats_score_snapshot) }}</div>
+                <div class="ats-score-label">Score</div>
+              </div>
+            </div>
+          </div>
+          <div class="ats-insights">
+            {% if version.ats_score_snapshot >= 80 %}
+              <div class="ats-insight ats-insight-good">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>ATS optimized — great job!</span>
+              </div>
+            {% elif version.ats_score_snapshot >= 50 %}
+              <div class="ats-insight ats-insight-warn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span>Moderate score — room to improve</span>
+              </div>
+            {% else %}
+              <div class="ats-insight ats-insight-warn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                <span>Low score — needs optimization</span>
+              </div>
+            {% endif %}
+            <div class="ats-insight">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+              <span>Keyword match: {{ '%.0f'|format(version.ats_score_snapshot * 0.85) }}%</span>
+            </div>
+            <div class="ats-insight">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+              <span>Format score: {{ '%.0f'|format(version.ats_score_snapshot * 0.95) }}%</span>
+            </div>
+          </div>
+        {% else %}
+          <div class="panel-empty">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:8px;opacity:0.4;"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            <div>ATS analysis not available</div>
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Completeness -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            Completeness
+          </div>
+        </div>
+        {% if version and version.completeness_snapshot is not none %}
+          <div class="comp-header">
+            <span class="comp-value">{{ '%.0f'|format(version.completeness_snapshot) }}%</span>
+            <span class="comp-label">Complete</span>
+          </div>
+          <div class="comp-track">
+            <div class="comp-fill" data-width="{{ version.completeness_snapshot }}"></div>
+          </div>
+          <div class="comp-checklist">
+            {% set sections = version.content.keys()|list if version.content else [] %}
+            {% set expected = ['summary', 'experience', 'education', 'skills', 'projects', 'certifications'] %}
+            {% for sec in expected %}
+              <div class="comp-item">
+                {% if sec in sections %}
+                  <span class="comp-check comp-check-done">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  </span>
+                  <span style="color:var(--text);">{{ sec | title }}</span>
+                {% else %}
+                  <span class="comp-check comp-check-pending">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  </span>
+                  <span>{{ sec | title }}</span>
+                {% endif %}
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="panel-empty">No completeness data</div>
+        {% endif %}
+      </div>
+
+      <!-- Version Info -->
+      {% if version %}
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"/><line x1="16" y1="8" x2="2" y2="22"/><line x1="17.5" y1="15" x2="9" y2="15"/></svg>
+            Version
+          </div>
+        </div>
+        <div class="panel-row">
+          <span class="panel-label">Number</span>
+          <span class="panel-value">v{{ version.version_number }}</span>
+        </div>
+        <div class="panel-row">
+          <span class="panel-label">Label</span>
+          <span class="panel-value">{{ version.label or '—' }}</span>
+        </div>
+      </div>
       {% endif %}
-    </article>
-  </main>
+
+      <!-- Quick Actions -->
+      {% if resume %}
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            Quick Actions
+          </div>
+        </div>
+        <div class="action-list">
+          <a href="{{ url_for('resume.edit_builder_resume', resume_id=resume.id) }}" class="action-btn action-btn-primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Edit Builder
+          </a>
+          <a href="{{ url_for('resume.list_versions', resume_id=resume.id) }}" class="action-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            Version History
+          </a>
+          <a href="{{ url_for('resume.export_resume', resume_id=resume.id, export_format='pdf') }}" class="action-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download PDF
+          </a>
+          <a href="{{ url_for('resume.export_resume', resume_id=resume.id, export_format='html') }}" class="action-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            Download HTML
+          </a>
+          <a href="{{ url_for('resume.export_resume', resume_id=resume.id, export_format='json') }}" class="action-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+            Download JSON
+          </a>
+        </div>
+      </div>
+      {% endif %}
+    </aside>
+  </div>
+
+  <script>
+    (function() {
+      let zoom = 1.0;
+      const paperFrame = document.getElementById('paperFrame');
+      const zoomValue = document.getElementById('zoomValue');
+
+      function applyZoom() {
+        if (paperFrame) {
+          paperFrame.style.transform = 'scale(' + zoom + ')';
+        }
+        if (zoomValue) {
+          zoomValue.textContent = Math.round(zoom * 100) + '%';
+        }
+      }
+
+      window.adjustZoom = function(delta) {
+        zoom = Math.max(0.5, Math.min(1.5, zoom + delta));
+        applyZoom();
+      };
+
+      window.resetZoom = function() {
+        zoom = 1.0;
+        applyZoom();
+      };
+
+      // Animate progress bar
+      const compFill = document.querySelector('.comp-fill');
+      if (compFill) {
+        const w = compFill.getAttribute('data-width');
+        if (w) {
+          requestAnimationFrame(() => {
+            setTimeout(() => { compFill.style.width = w + '%'; }, 300);
+          });
+        }
+      }
+
+      // Animate ATS ring
+      const ring = document.querySelector('.ats-ring-fill');
+      if (ring) {
+        const target = ring.getAttribute('data-target');
+        if (target) {
+          requestAnimationFrame(() => {
+            setTimeout(() => { ring.style.strokeDashoffset = target; }, 300);
+          });
+        }
+      }
+
+      // Auto-hide toast
+      const toast = document.getElementById('toast');
+      if (toast) {
+        setTimeout(() => {
+          toast.classList.add('hiding');
+          setTimeout(() => toast.remove(), 400);
+        }, 4000);
+      }
+
+      // Keyboard zoom
+      document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey || e.metaKey) {
+          if (e.key === '=' || e.key === '+') { e.preventDefault(); adjustZoom(0.1); }
+          if (e.key === '-') { e.preventDefault(); adjustZoom(-0.1); }
+          if (e.key === '0') { e.preventDefault(); resetZoom(); }
+        }
+      });
+    })();
+  </script>
 </body>
 </html>

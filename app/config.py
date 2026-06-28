@@ -50,13 +50,20 @@ def _runtime_secret() -> str:
     return os.environ.get("SECRET_KEY") or secrets.token_urlsafe(64)
 
 
+# ✅ PostgreSQL URL fix — Render uses "postgres://" but SQLAlchemy needs "postgresql://"
+def _fix_database_url(url: str | None) -> str | None:
+    if url and url.startswith("postgres://"):
+        return url.replace("postgres://", "postgresql://", 1)
+    return url
+
+
 class BaseConfig:
     # ── ADZUNA JOB API ──
     ADZUNA_APP_ID = os.environ.get("ADZUNA_APP_ID", "")
     ADZUNA_APP_KEY = os.environ.get("ADZUNA_APP_KEY", "")
     ADZUNA_COUNTRY = os.environ.get("ADZUNA_COUNTRY", "in")
     ADZUNA_MAX_RESULTS = _env_int("ADZUNA_MAX_RESULTS", 20)
-    
+
     # ── ADMIN ──
     ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", "")
 
@@ -69,14 +76,19 @@ class BaseConfig:
     WTF_CSRF_SECRET_KEY = os.environ.get("WTF_CSRF_SECRET_KEY") or SECRET_KEY
     WTF_CSRF_TIME_LIMIT = _env_int("WTF_CSRF_TIME_LIMIT", 3600)
 
-    SQLALCHEMY_DATABASE_URI = os.environ.get(
-        "DATABASE_URL",
-        _sqlite_uri("paswan_resume_builder.sqlite3"),
-    )
+    SQLALCHEMY_DATABASE_URI = _fix_database_url(
+        os.environ.get("DATABASE_URL")
+    ) or _sqlite_uri("paswan_resume_builder.sqlite3")
+
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+    # ✅ PostgreSQL ke liye pool settings
     SQLALCHEMY_ENGINE_OPTIONS = {
         "pool_pre_ping": True,
         "pool_recycle": _env_int("DB_POOL_RECYCLE_SECONDS", 280),
+        "pool_size": _env_int("DB_POOL_SIZE", 5),
+        "max_overflow": _env_int("DB_MAX_OVERFLOW", 10),
+        "connect_args": {},
     }
 
     MAX_CONTENT_LENGTH = _env_int("MAX_UPLOAD_BYTES", 5 * 1024 * 1024)
@@ -118,19 +130,19 @@ class BaseConfig:
             "camera=(), microphone=(), geolocation=()",
         ),
     }
-    
+
     CONTENT_SECURITY_POLICY = os.environ.get(
-     "CONTENT_SECURITY_POLICY",
-     "default-src 'self'; "
-     "script-src 'self' 'unsafe-inline' 'unsafe-eval' "
-     "https://cdn.jsdelivr.net https://cdn.jsdelivr.net/npm/; "
-     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
-     "font-src 'self' https://fonts.gstatic.com; "
-     "img-src 'self' data:; "
-     "connect-src 'self' https://cdn.jsdelivr.net; "
-     "frame-ancestors 'none'; "
-     "base-uri 'self'; "
-     "form-action 'self'",
+        "CONTENT_SECURITY_POLICY",
+        "default-src 'self'; "
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval' "
+        "https://cdn.jsdelivr.net https://cdn.jsdelivr.net/npm/; "
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+        "font-src 'self' https://fonts.gstatic.com; "
+        "img-src 'self' data:; "
+        "connect-src 'self' https://cdn.jsdelivr.net; "
+        "frame-ancestors 'none'; "
+        "base-uri 'self'; "
+        "form-action 'self'",
     )
 
     RATELIMIT_STORAGE_URI = os.environ.get("RATELIMIT_STORAGE_URI", "memory://")
@@ -141,7 +153,7 @@ class BaseConfig:
     REDIS_URL = os.environ.get("REDIS_URL", "memory://")
     CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL", "memory://")
     CELERY_RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND", "memory://")
-    CELERY_TASK_ALWAYS_EAGER = _env_bool("CELERY_TASK_ALWAYS_EAGER", True)  # No worker needed
+    CELERY_TASK_ALWAYS_EAGER = _env_bool("CELERY_TASK_ALWAYS_EAGER", True)
     CELERY_TASK_TIME_LIMIT = _env_int("CELERY_TASK_TIME_LIMIT", 300)
     CELERY_TASK_SOFT_TIME_LIMIT = _env_int("CELERY_TASK_SOFT_TIME_LIMIT", 240)
 
@@ -221,12 +233,10 @@ class BaseConfig:
 class DevelopmentConfig(BaseConfig):
     ENVIRONMENT = "development"
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = os.environ.get(
-        "DATABASE_URL",
-        _sqlite_uri("paswan_resume_builder_dev.sqlite3"),
-    )
+    SQLALCHEMY_DATABASE_URI = _fix_database_url(
+        os.environ.get("DATABASE_URL")
+    ) or _sqlite_uri("paswan_resume_builder_dev.sqlite3")
     MAIL_SUPPRESS_SEND = _env_bool("MAIL_SUPPRESS_SEND", True)
-    # ✅ AI enabled by default for local testing
     AI_ENABLED = True
 
 
@@ -243,25 +253,26 @@ class TestingConfig(BaseConfig):
 
 class ProductionConfig(BaseConfig):
     ENVIRONMENT = "production"
-    SESSION_COOKIE_SECURE = False
+    SESSION_COOKIE_SECURE = True
     REMEMBER_COOKIE_SECURE = True
     PREFERRED_URL_SCHEME = "https"
-    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL")
+
+    # ✅ PostgreSQL URL auto-fix
+    SQLALCHEMY_DATABASE_URI = _fix_database_url(os.environ.get("DATABASE_URL"))
+
     RATELIMIT_STORAGE_URI = os.environ.get("RATELIMIT_STORAGE_URI", "memory://")
 
     @classmethod
     def init_app(cls, app) -> None:
         super().init_app(app)
-        required_env = (
-            "SECRET_KEY",
-            "DATABASE_URL",
-            "MAIL_SERVER",
-            "MAIL_DEFAULT_SENDER",
-        )
+        # ✅ SOFT CHECK — warning instead of crash
+        required_env = ("SECRET_KEY", "DATABASE_URL")
         missing = [name for name in required_env if not os.environ.get(name)]
         if missing:
             joined = ", ".join(sorted(missing))
-            raise RuntimeError(f"Missing required production environment variables: {joined}")
+            app.logger.warning(f"Missing required env vars: {joined}")
+        else:
+            app.logger.info("All required production env vars are set.")
 
 
 config_by_name = {

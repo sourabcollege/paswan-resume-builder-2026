@@ -160,4 +160,7 @@ paswan-resume-builder-main/
 ├── docker-compose.yml
 ├── nginx.conf
 ├── requirements.txt
-└── tree.py
+├── requirements.txt.backup
+├── requirements.txt.old
+├── tree.py
+└── wsgi.py

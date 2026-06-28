@@ -22,7 +22,7 @@ class RegisterForm(FlaskForm):
     first_name = StringField("First name", filters=[_strip], validators=[DataRequired(), Length(min=2, max=120)])
     last_name = StringField("Last name", filters=[_strip], validators=[DataRequired(), Length(min=2, max=120)])
     email = EmailField("Email", filters=[_lower], validators=[DataRequired(), Email(), Length(max=255)])
-    password = PasswordField("Password", validators=[DataRequired(), Length(min=12, max=128)])
+    password = PasswordField("Password", validators=[DataRequired(), Length(min=8, max=128)])
     confirm_password = PasswordField(
         "Confirm password",
         validators=[DataRequired(), EqualTo("password", message="Passwords must match.")],
@@ -62,7 +62,7 @@ class PasswordResetRequestForm(FlaskForm):
 
 
 class PasswordResetForm(FlaskForm):
-    password = PasswordField("New password", validators=[DataRequired(), Length(min=12, max=128)])
+    password = PasswordField("New password", validators=[DataRequired(), Length(min=8, max=128)])
     confirm_password = PasswordField(
         "Confirm new password",
         validators=[DataRequired(), EqualTo("password", message="Passwords must match.")],
@@ -83,7 +83,7 @@ class ChangePasswordForm(FlaskForm):
     current_password = PasswordField("Current password", validators=[DataRequired()])
     new_password = PasswordField(
         "New password",
-        validators=[DataRequired(), Length(min=12, max=128)]
+        validators=[DataRequired(), Length(min=8, max=128)]
     )
     confirm_password = PasswordField(
         "Confirm new password",

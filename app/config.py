@@ -138,10 +138,10 @@ class BaseConfig:
     AUTH_LOGIN_RATE_LIMIT = os.environ.get("AUTH_LOGIN_RATE_LIMIT", "5 per minute")
     AI_RATE_LIMIT = os.environ.get("AI_RATE_LIMIT", "20 per hour")
 
-    REDIS_URL = os.environ.get("REDIS_URL", "redis://localhost:6379/0")
-    CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL", REDIS_URL)
-    CELERY_RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND", REDIS_URL)
-    CELERY_TASK_ALWAYS_EAGER = _env_bool("CELERY_TASK_ALWAYS_EAGER", False)
+    REDIS_URL = os.environ.get("REDIS_URL", "memory://")
+    CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL", "memory://")
+    CELERY_RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND", "memory://")
+    CELERY_TASK_ALWAYS_EAGER = _env_bool("CELERY_TASK_ALWAYS_EAGER", True)  # No worker needed
     CELERY_TASK_TIME_LIMIT = _env_int("CELERY_TASK_TIME_LIMIT", 300)
     CELERY_TASK_SOFT_TIME_LIMIT = _env_int("CELERY_TASK_SOFT_TIME_LIMIT", 240)
 
@@ -247,7 +247,7 @@ class ProductionConfig(BaseConfig):
     REMEMBER_COOKIE_SECURE = True
     PREFERRED_URL_SCHEME = "https"
     SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL")
-    RATELIMIT_STORAGE_URI = os.environ.get("RATELIMIT_STORAGE_URI") or os.environ.get("REDIS_URL")
+    RATELIMIT_STORAGE_URI = os.environ.get("RATELIMIT_STORAGE_URI", "memory://")
 
     @classmethod
     def init_app(cls, app) -> None:

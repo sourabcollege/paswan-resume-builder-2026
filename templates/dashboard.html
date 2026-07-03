@@ -309,6 +309,49 @@
       cursor: default;
     }
 
+    /* ── Paswan AI Button ── */
+    .btn-ai {
+      background: linear-gradient(135deg, #8b5cf6, #c084fc);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+      text-decoration: none;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-ai::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s;
+    }
+
+    .btn-ai:hover::before {
+      left: 100%;
+    }
+
+    .btn-ai:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
+    }
+
+    .btn-ai i {
+      font-size: 1rem;
+    }
+
     .header-avatar {
       width: 38px;
       height: 38px;
@@ -528,6 +571,10 @@
       .dashboard-content { padding: 20px 16px; }
       .stats-row { grid-template-columns: 1fr; }
       .header-greeting h1 { font-size: 1.1rem; }
+      .header-actions { gap: 10px; }
+      .btn-ai { padding: 8px 14px; font-size: 0.8rem; }
+      .btn-pro { padding: 8px 14px; font-size: 0.8rem; }
+      .btn-new { padding: 8px 14px; font-size: 0.8rem; }
     }
   </style>
 <base target="_blank">
@@ -645,6 +692,11 @@
               <i class="fas fa-star"></i> Upgrade to Pro
             </a>
           {% endif %}
+
+          <!-- Paswan AI Button -->
+          <a href="https://paswan-ai-v2-exyv.onrender.com/" class="btn-ai" title="Open Paswan AI">
+            <i class="fas fa-robot"></i> Paswan AI
+          </a>
 
           <a href="{{ url_for('resume.create_builder_resume') }}" class="btn-new">
             <i class="fas fa-plus"></i> New Resume +

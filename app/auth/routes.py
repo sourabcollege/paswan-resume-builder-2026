@@ -32,7 +32,8 @@ def csrf_token():
 @limiter.limit("1000 per hour")
 def register():
     if current_user.is_authenticated:
-        return _success({"message": "You are already signed in."})
+     return _success({"message": "You are already signed in.", "redirect": 
+    url_for("main.dashboard")})
 
     form = _form_from_request(RegisterForm)
     if request.method == "GET":
@@ -70,7 +71,7 @@ def register():
 @limiter.limit("1000 per hour")
 def login():
     if current_user.is_authenticated:
-        return _success({"message": "You are already signed in."})
+            return _success({"message": "You are already signed in.", "redirect": url_for("main.dashboard")})
 
     form = _form_from_request(LoginForm)
     if request.method == "GET":

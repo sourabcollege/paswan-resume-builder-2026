@@ -28,6 +28,7 @@
       --purple: #a29bfe;
       --orange: #ff7f50;
       --pink: #ff6b81;
+      --gold: #ffd700;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: 'Inter', sans-serif; background: var(--bg-deep); color: var(--text); min-height: 100vh; overflow-x: hidden; }
@@ -67,32 +68,15 @@
     .page-header h1 { font-size: 1.7rem; font-weight: 800; letter-spacing: -0.03em; background: linear-gradient(135deg, #fff, #a0a8b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
     .page-header p { color: var(--text-secondary); font-size: 0.9rem; margin-top: 4px; }
 
-    /* Search & Filter Bar */
-    .toolbar {
-      display: flex; align-items: center; gap: 14px; margin-bottom: 24px; flex-wrap: wrap;
-      animation: fadeInUp 0.6s ease forwards; animation-delay: 0.1s; opacity: 0;
-    }
-    .search-box {
-      flex: 1; min-width: 260px; position: relative;
-    }
+    .toolbar { display: flex; align-items: center; gap: 14px; margin-bottom: 24px; flex-wrap: wrap; animation: fadeInUp 0.6s ease forwards; animation-delay: 0.1s; opacity: 0; }
+    .search-box { flex: 1; min-width: 260px; position: relative; }
     .search-box i { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.9rem; }
-    .search-box input {
-      width: 100%; padding: 12px 16px 12px 44px; border-radius: 14px; border: 1px solid var(--border);
-      background: var(--bg-input); color: var(--text); font-size: 0.88rem; font-family: inherit;
-      transition: all 0.3s ease; outline: none;
-    }
+    .search-box input { width: 100%; padding: 12px 16px 12px 44px; border-radius: 14px; border: 1px solid var(--border); background: var(--bg-input); color: var(--text); font-size: 0.88rem; font-family: inherit; transition: all 0.3s ease; outline: none; }
     .search-box input:focus { border-color: var(--accent-1); box-shadow: 0 0 20px rgba(0, 212, 170, 0.1); }
     .search-box input::placeholder { color: var(--text-muted); }
-    .filter-select {
-      padding: 12px 16px; border-radius: 14px; border: 1px solid var(--border);
-      background: var(--bg-input); color: var(--text); font-size: 0.88rem; font-family: inherit;
-      cursor: pointer; outline: none; transition: all 0.3s ease; min-width: 160px;
-    }
+    .filter-select { padding: 12px 16px; border-radius: 14px; border: 1px solid var(--border); background: var(--bg-input); color: var(--text); font-size: 0.88rem; font-family: inherit; cursor: pointer; outline: none; transition: all 0.3s ease; min-width: 160px; }
     .filter-select:focus { border-color: var(--accent-1); }
-    .btn {
-      padding: 12px 22px; border-radius: 14px; border: none; font-size: 0.88rem; font-weight: 600;
-      font-family: inherit; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 8px; text-decoration: none;
-    }
+    .btn { padding: 12px 22px; border-radius: 14px; border: none; font-size: 0.88rem; font-weight: 600; font-family: inherit; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; }
     .btn-primary { background: var(--accent-gradient); color: #fff; box-shadow: 0 4px 20px rgba(0, 212, 170, 0.3); }
     .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0, 212, 170, 0.4); }
     .btn-danger { background: rgba(255, 71, 87, 0.1); color: var(--danger); border: 1px solid rgba(255, 71, 87, 0.2); }
@@ -103,38 +87,20 @@
     .btn-success:hover { background: rgba(46, 213, 115, 0.2); }
     .btn-sm { padding: 8px 14px; font-size: 0.8rem; border-radius: 10px; }
 
-    /* Table Card */
-    .table-card {
-      background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px;
-      backdrop-filter: blur(10px); overflow: hidden; animation: fadeInUp 0.6s ease forwards; animation-delay: 0.2s; opacity: 0;
-    }
-    .table-card::before {
-      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
-    }
+    .table-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; backdrop-filter: blur(10px); overflow: hidden; animation: fadeInUp 0.6s ease forwards; animation-delay: 0.2s; opacity: 0; position: relative; }
+    .table-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent); }
     .table-wrap { overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; }
-    thead th {
-      padding: 16px 20px; text-align: left; font-size: 0.75rem; font-weight: 700;
-      text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted);
-      border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.015);
-    }
+    thead th { padding: 16px 20px; text-align: left; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.015); }
     tbody tr { border-bottom: 1px solid var(--border); transition: all 0.2s ease; }
     tbody tr:last-child { border-bottom: none; }
     tbody tr:hover { background: var(--bg-card-hover); }
     tbody td { padding: 16px 20px; font-size: 0.88rem; color: var(--text); vertical-align: middle; }
     .user-cell { display: flex; align-items: center; gap: 12px; }
-    .user-avatar {
-      width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center;
-      font-weight: 700; font-size: 0.85rem; color: #fff; flex-shrink: 0;
-      background: linear-gradient(135deg, #667eea, #764ba2);
-    }
+    .user-avatar { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; font-weight: 700; font-size: 0.85rem; color: #fff; flex-shrink: 0; background: linear-gradient(135deg, #667eea, #764ba2); }
     .user-name { font-weight: 600; color: var(--text); }
     .user-email { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
-    .badge {
-      display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 20px;
-      font-size: 0.75rem; font-weight: 700; border: 1px solid;
-    }
+    .badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; border: 1px solid; }
     .badge-admin { color: var(--accent-1); background: rgba(0, 212, 170, 0.1); border-color: rgba(0, 212, 170, 0.2); }
     .badge-user { color: var(--info); background: rgba(30, 144, 255, 0.1); border-color: rgba(30, 144, 255, 0.2); }
     .badge-recruiter { color: var(--purple); background: rgba(162, 155, 254, 0.1); border-color: rgba(162, 155, 254, 0.2); }
@@ -142,40 +108,32 @@
     .badge-banned { color: var(--danger); background: rgba(255, 71, 87, 0.1); border-color: rgba(255, 71, 87, 0.2); }
     .badge-pending { color: var(--warning); background: rgba(255, 165, 2, 0.1); border-color: rgba(255, 165, 2, 0.2); }
     .badge-suspended { color: var(--orange); background: rgba(255, 127, 80, 0.1); border-color: rgba(255, 127, 80, 0.2); }
-    .actions { display: flex; gap: 8px; }
-    .action-btn {
-      width: 34px; height: 34px; border-radius: 10px; border: 1px solid var(--border);
-      background: var(--bg-card); color: var(--text-secondary); cursor: pointer;
-      display: grid; place-items: center; font-size: 0.85rem; transition: all 0.2s ease;
-    }
+    .badge-free { color: var(--text-muted); background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); }
+    .badge-pro { color: var(--gold); background: rgba(255, 215, 0, 0.1); border-color: rgba(255, 215, 0, 0.3); }
+    .badge-enterprise { color: var(--purple); background: rgba(162, 155, 254, 0.1); border-color: rgba(162, 155, 254, 0.3); }
+
+    .actions { display: flex; gap: 8px; justify-content: flex-end; }
+    .action-btn { width: 34px; height: 34px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg-card); color: var(--text-secondary); cursor: pointer; display: grid; place-items: center; font-size: 0.85rem; transition: all 0.2s ease; }
     .action-btn:hover { transform: translateY(-2px); }
     .action-btn.ban:hover { color: var(--warning); border-color: rgba(255, 165, 2, 0.3); background: rgba(255, 165, 2, 0.1); }
     .action-btn.unban:hover { color: var(--success); border-color: rgba(46, 213, 115, 0.3); background: rgba(46, 213, 115, 0.1); }
     .action-btn.delete:hover { color: var(--danger); border-color: rgba(255, 71, 87, 0.3); background: rgba(255, 71, 87, 0.1); }
+    .action-btn.activate-pro:hover { color: var(--gold); border-color: rgba(255, 215, 0, 0.4); background: rgba(255, 215, 0, 0.1); box-shadow: 0 0 15px rgba(255, 215, 0, 0.15); }
+    .action-btn.deactivate-pro:hover { color: var(--danger); border-color: rgba(255, 71, 87, 0.4); background: rgba(255, 71, 87, 0.1); }
 
-    /* Pagination */
-    .pagination {
-      display: flex; align-items: center; justify-content: space-between; padding: 20px;
-      border-top: 1px solid var(--border);
-    }
+    .pagination { display: flex; align-items: center; justify-content: space-between; padding: 20px; border-top: 1px solid var(--border); }
     .pagination-info { color: var(--text-muted); font-size: 0.85rem; }
     .pagination-btns { display: flex; gap: 8px; }
-    .page-btn {
-      padding: 8px 14px; border-radius: 10px; border: 1px solid var(--border);
-      background: var(--bg-card); color: var(--text-secondary); font-size: 0.85rem;
-      font-weight: 600; cursor: pointer; transition: all 0.2s; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
-    }
+    .page-btn { padding: 8px 14px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg-card); color: var(--text-secondary); font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
     .page-btn:hover { background: var(--bg-card-hover); color: var(--text); border-color: var(--border-hover); }
     .page-btn.disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
     .page-btn.active { background: var(--accent-glow); color: var(--accent-1); border-color: rgba(0, 212, 170, 0.3); }
 
-    /* Empty State */
     .empty-state { text-align: center; padding: 60px 20px; color: var(--text-muted); }
     .empty-state i { font-size: 3rem; margin-bottom: 16px; opacity: 0.3; }
     .empty-state h3 { font-size: 1.1rem; color: var(--text-secondary); margin-bottom: 6px; }
     .empty-state p { font-size: 0.85rem; }
 
-    /* Toast */
     .toast-container { position: fixed; top: 84px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
     .toast { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 16px 20px; backdrop-filter: blur(20px); min-width: 320px; display: flex; align-items: center; gap: 12px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); animation: toastIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards; position: relative; overflow: hidden; }
     .toast::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; }
@@ -204,6 +162,7 @@
     ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; } ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
   </style>
 
+<base target="_blank">
 </head>
 <body>
   <div class="bg-orb bg-orb-1"></div>
@@ -252,6 +211,8 @@
           <i class="fas fa-clipboard-list"></i> Activity Logs
         </a>
         <div class="sidebar-section">System</div>
+        <a href="{{ url_for('admin.stats_page') }}" class="sidebar-link">
+          <i class="fas fa-chart-pie"></i> Statistics
         </a>
       </nav>
       <div class="sidebar-footer">
@@ -280,7 +241,7 @@
       <main class="content">
         <div class="page-header">
           <h1>User Management</h1>
-          <p>View, search, ban/unban, and manage all registered users.</p>
+          <p>View, search, manage subscriptions, ban/unban, and manage all registered users.</p>
         </div>
 
         <div class="toolbar">
@@ -311,6 +272,7 @@
                 <tr>
                   <th>User</th>
                   <th>Role</th>
+                  <th>Plan</th>
                   <th>Status</th>
                   <th>Joined</th>
                   <th>Last Login</th>
@@ -330,21 +292,43 @@
                     </div>
                   </td>
                   <td><span class="badge badge-{{ user['role'] }}">{{ user['role'] | title }}</span></td>
+                  <td>
+                    <span class="badge badge-{{ user.get('subscription_plan', 'free') }}">
+                      <i class="fas fa-{{ 'crown' if user.get('subscription_plan') in ('pro', 'enterprise') else 'cube' }}"></i>
+                      {{ user.get('subscription_plan', 'free') | title }}
+                    </span>
+                  </td>
                   <td><span class="badge badge-{{ user['account_status'] }}">{{ user['account_status'] | replace('_', ' ') | title }}</span></td>
                   <td style="color:var(--text-secondary); font-size:0.82rem;">{{ user['created_at'][:10] if user['created_at'] else 'N/A' }}</td>
                   <td style="color:var(--text-secondary); font-size:0.82rem;">{{ user['last_login_at'][:10] if user['last_login_at'] else 'Never' }}</td>
                   <td style="text-align:right;">
                     <div class="actions">
+                      <!-- Subscription Toggle -->
+                      {% if user.get('subscription_plan') in ('pro', 'enterprise') %}
+                      <form method="POST" action="{{ url_for('admin.deactivate_user_pro', user_id=user['id']) }}" style="display:inline;" onsubmit="return confirm('Deactivate Pro subscription for {{ user['email'] }}?')">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="action-btn deactivate-pro" title="Deactivate Pro"><i class="fas fa-crown"></i></button>
+                      </form>
+                      {% else %}
+                      <form method="POST" action="{{ url_for('admin.activate_user_pro', user_id=user['id']) }}" style="display:inline;" onsubmit="return confirm('Activate Pro subscription for {{ user['email'] }}?')">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="action-btn activate-pro" title="Activate Pro"><i class="fas fa-crown"></i></button>
+                      </form>
+                      {% endif %}
+
                       {% if user['account_status'] == 'banned' %}
                       <form method="POST" action="{{ url_for('admin.unban_user', user_id=user['id']) }}" style="display:inline;" onsubmit="return confirm('Unban this user?')">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <button type="submit" class="action-btn unban" title="Unban User"><i class="fas fa-user-check"></i></button>
                       </form>
                       {% else %}
                       <form method="POST" action="{{ url_for('admin.ban_user', user_id=user['id']) }}" style="display:inline;" onsubmit="return confirm('Ban this user?')">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <button type="submit" class="action-btn ban" title="Ban User"><i class="fas fa-user-slash"></i></button>
                       </form>
                       {% endif %}
                       <form method="POST" action="{{ url_for('admin.delete_user', user_id=user['id']) }}" style="display:inline;" onsubmit="return confirm('Permanently delete this user? This cannot be undone.')">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <button type="submit" class="action-btn delete" title="Delete User"><i class="fas fa-trash-alt"></i></button>
                       </form>
                     </div>
@@ -352,7 +336,7 @@
                 </tr>
                 {% else %}
                 <tr>
-                  <td colspan="6">
+                  <td colspan="7">
                     <div class="empty-state">
                       <i class="fas fa-users-slash"></i>
                       <h3>No users found</h3>

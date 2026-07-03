@@ -15,6 +15,8 @@ from app.models.analytics import ResumeScore
 from app.repositories.resumes import ResumeRepository
 from app.services.job_service import JobService
 
+from app.services.payment_service import PaymentService
+
 from app.main import bp
 
 
@@ -29,6 +31,7 @@ def index():
 def dashboard():
     user_id = current_user.id
     resumes = ResumeRepository().list_for_user(user_id)
+    subscription = PaymentService.get_user_subscription(user_id)
     latest_score = (
         ResumeScore.query.filter_by(user_id=user_id, score_type="ats", is_latest=True)
         .order_by(ResumeScore.calculated_at.desc())
@@ -54,6 +57,7 @@ def dashboard():
         resumes=resumes[:5],
         recommendations=recommendations_result.data.get("recommendations", []),
         resume_context=recommendations_result.data.get("resume_context"),
+        subscription=subscription,
     )
 
 

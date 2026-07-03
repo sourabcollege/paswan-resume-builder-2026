@@ -1348,12 +1348,16 @@
           <li class="no">Version history</li>
           <li class="no">DOCX / JSON export</li>
         </ul>
+        {% if current_user.is_authenticated %}
+        <a href="{{ url_for('main.dashboard') }}" class="btn-price btn-price-outline">Go to Dashboard</a>
+        {% else %}
         <a href="{{ url_for('auth.register') }}" class="btn-price btn-price-outline">Get started free</a>
+        {% endif %}
       </div>
       <div class="price-card featured reveal reveal-delay-2">
         <div class="price-badge">✦ Most Popular</div>
         <p class="price-plan">Pro</p>
-        <div class="price-amount">₹499</div>
+        <div class="price-amount">₹29</div>
         <p class="price-period">/ month · for active job seekers</p>
         <ul class="price-features">
           <li>Unlimited resumes</li>
@@ -1364,7 +1368,11 @@
           <li>Advanced job matching</li>
           <li>Priority support</li>
         </ul>
+        {% if current_user.is_authenticated %}
+        <a href="{{ url_for('payment.checkout', plan='pro') }}" class="btn-price btn-price-filled">Start Pro <i class="fas fa-arrow-right" style="margin-left:4px;"></i></a>
+        {% else %}
         <a href="{{ url_for('auth.register') }}" class="btn-price btn-price-filled">Start Pro <i class="fas fa-arrow-right" style="margin-left:4px;"></i></a>
+        {% endif %}
       </div>
       <div class="price-card reveal reveal-delay-3">
         <p class="price-plan">Enterprise</p>

@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 from app.admin import bp
 from app.auth.decorators import admin_required
 from app.services.admin_service import AdminService
+from app.services.payment_service import PaymentService
 
 
 # ── DASHBOARD ──
@@ -26,17 +27,23 @@ def dashboard():
 def users_page():
     """User management page (HTML)."""
     page = request.args.get("page", 1, type=int)
-    q = request.args.get("q", "", type=str)          # CHANGED: search → q
+    q = request.args.get("q", "", type=str)
     role = request.args.get("role", "", type=str)
     status = request.args.get("status", "", type=str)
     result = AdminService.get_all_users(
         page=page,
         per_page=20,
-        search=q,                                    # CHANGED
+        search=q,
         role=role or None,
         status=status or None,
     )
-    # Build pagination dict for template
+
+    # 🆕 Enrich user data with subscription info
+    for user in result["users"]:
+        sub = PaymentService.get_user_subscription(user["id"])
+        user["subscription_plan"] = sub.get("plan", "free")
+        user["subscription_status"] = sub.get("status", "active")
+
     pagination = {
         "page": result["current_page"],
         "pages": result["pages"],
@@ -50,8 +57,8 @@ def users_page():
     return render_template(
         "admin/users.html",
         users=result["users"],
-        pagination=pagination,                        # ADDED
-        q=q,                                         # CHANGED
+        pagination=pagination,
+        q=q,
         role=role,
         status=status,
     )
@@ -136,6 +143,41 @@ def change_role(user_id: int):
     return jsonify(result), 200
 
 
+# ═══════════════════════════════════════════════════════════
+# 🆕 NEW: Subscription Management (Admin Only)
+# ═══════════════════════════════════════════════════════════
+@bp.route("/users/<int:user_id>/activate-pro", methods=["POST"])
+@login_required
+@admin_required
+def activate_user_pro(user_id: int):
+    """Manually activate Pro subscription for any user."""
+    if user_id == current_user.id:
+        flash("Use profile settings to manage your own subscription.", "warning")
+        return redirect(url_for("admin.users_page"))
+
+    result = PaymentService.activate_subscription_manually(
+        user_id=user_id, plan="pro", admin_user_id=current_user.id
+    )
+    if result.get("success"):
+        flash(f"User upgraded to Pro successfully.", "success")
+    else:
+        flash(result.get("error", "Failed to activate subscription."), "error")
+    return redirect(url_for("admin.users_page"))
+
+
+@bp.route("/users/<int:user_id>/deactivate-pro", methods=["POST"])
+@login_required
+@admin_required
+def deactivate_user_pro(user_id: int):
+    """Deactivate Pro subscription for a user."""
+    result = PaymentService.deactivate_subscription(user_id)
+    if result.get("success"):
+        flash(f"User subscription deactivated.", "success")
+    else:
+        flash(result.get("error", "Failed to deactivate subscription."), "error")
+    return redirect(url_for("admin.users_page"))
+
+
 # ── RESUME MANAGEMENT (HTML Page) ──
 @bp.route("/resumes", methods=["GET"])
 @login_required
@@ -143,9 +185,9 @@ def change_role(user_id: int):
 def resumes_page():
     """Resume management page (HTML)."""
     page = request.args.get("page", 1, type=int)
-    q = request.args.get("q", "", type=str)          # CHANGED: search → q
+    q = request.args.get("q", "", type=str)
     result = AdminService.get_all_resumes(
-        page=page, per_page=20, search=q or None    # CHANGED
+        page=page, per_page=20, search=q or None
     )
     pagination = {
         "page": result["current_page"],
@@ -160,8 +202,8 @@ def resumes_page():
     return render_template(
         "admin/resumes.html",
         resumes=result["resumes"],
-        pagination=pagination,                        # ADDED
-        q=q,                                         # CHANGED
+        pagination=pagination,
+        q=q,
     )
 
 
@@ -184,10 +226,10 @@ def delete_resume(resume_id: int):
 def jobs_page():
     """Job management page (HTML)."""
     page = request.args.get("page", 1, type=int)
-    q = request.args.get("q", "", type=str)          # CHANGED: search → q
+    q = request.args.get("q", "", type=str)
     status = request.args.get("status", "", type=str)
     result = AdminService.get_all_jobs(
-        page=page, per_page=20, search=q or None    # CHANGED
+        page=page, per_page=20, search=q or None
     )
     pagination = {
         "page": result["current_page"],
@@ -202,8 +244,8 @@ def jobs_page():
     return render_template(
         "admin/jobs.html",
         jobs=result["jobs"],
-        pagination=pagination,                        # ADDED
-        q=q,                                         # CHANGED
+        pagination=pagination,
+        q=q,
         status=status,
     )
 
@@ -237,10 +279,10 @@ def delete_job(job_id: int):
 def logs_page():
     """Activity logs page (HTML)."""
     page = request.args.get("page", 1, type=int)
-    q = request.args.get("q", "", type=str)          # CHANGED: search → q
+    q = request.args.get("q", "", type=str)
     entity = request.args.get("entity", "", type=str)
     severity = request.args.get("severity", "", type=str)
-    date = request.args.get("date", "", type=str)    # ADDED
+    date = request.args.get("date", "", type=str)
 
     parsed_from = None
     parsed_to = None
@@ -254,7 +296,7 @@ def logs_page():
     result = AdminService.get_activity_logs(
         page=page,
         per_page=50,
-        action=q,                                    # FIXED: was search=q, correct param is action
+        action=q,
         entity_type=entity or None,
         date_from=parsed_from,
         date_to=parsed_to,
@@ -274,8 +316,8 @@ def logs_page():
     return render_template(
         "admin/logs.html",
         logs=result["logs"],
-        pagination=pagination,                        # ADDED
-        q=q,                                         # CHANGED
+        pagination=pagination,
+        q=q,
         entity=entity,
         severity=severity,
         date=date,
@@ -295,8 +337,6 @@ def activity_logs_api():
     return jsonify(result), 200
 
 
-
-
 # ── SYSTEM STATS (HTML Page) ──
 @bp.route("/stats", methods=["GET"])
 @login_required
@@ -304,6 +344,7 @@ def activity_logs_api():
 def stats_page():
     """System statistics page (HTML)."""
     return render_template("admin/stats.html")
+
 
 # ── SYSTEM STATS (JSON API) ──
 @bp.route("/api/stats", methods=["GET"])

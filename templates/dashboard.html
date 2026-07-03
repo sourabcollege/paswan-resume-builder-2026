@@ -281,6 +281,34 @@
       box-shadow: 0 4px 16px rgba(139, 92, 246, 0.3);
     }
 
+    /* ── Pro / Upgrade Button ── */
+    .btn-pro {
+      background: linear-gradient(135deg, #f59e0b, #fbbf24);
+      color: #0f172a;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+
+    .btn-pro:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(245, 158, 11, 0.3);
+    }
+
+    .btn-pro.active {
+      background: linear-gradient(135deg, #10b981, #34d399);
+      color: white;
+      cursor: default;
+    }
+
     .header-avatar {
       width: 38px;
       height: 38px;
@@ -502,6 +530,7 @@
       .header-greeting h1 { font-size: 1.1rem; }
     }
   </style>
+<base target="_blank">
 </head>
 <body>
 
@@ -572,11 +601,21 @@
 
       <div class="sidebar-footer">
         <div class="plan-card">
-          <div class="plan-title">Free Plan</div>
-          <div class="plan-subtitle">2/3 resumes used</div>
-          <div class="plan-bar">
-            <div class="plan-bar-fill"></div>
-          </div>
+          {% if subscription and subscription.plan == 'pro' and subscription.status == 'active' %}
+            <div class="plan-title" style="color: #fbbf24;">
+              <i class="fas fa-crown" style="margin-right: 6px;"></i>Pro Plan
+            </div>
+            <div class="plan-subtitle">Unlimited resumes & AI features</div>
+            <div class="plan-bar">
+              <div class="plan-bar-fill" style="width: 100%; background: linear-gradient(90deg, #f59e0b, #fbbf24);"></div>
+            </div>
+          {% else %}
+            <div class="plan-title">Free Plan</div>
+            <div class="plan-subtitle">{{ resume_count or 0 }}/3 resumes used</div>
+            <div class="plan-bar">
+              <div class="plan-bar-fill" style="width: {{ ((resume_count or 0) / 3) * 100 }}%;"></div>
+            </div>
+          {% endif %}
         </div>
       </div>
     </aside>
@@ -595,6 +634,18 @@
           <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark/light mode">
             <i class="fas fa-moon" id="themeIcon"></i>
           </button>
+
+          <!-- Pro / Upgrade Button -->
+          {% if subscription and subscription.plan == 'pro' and subscription.status == 'active' %}
+            <div class="btn-pro active" title="Pro Plan Active">
+              <i class="fas fa-crown"></i> You are a Pro User
+            </div>
+          {% else %}
+            <a href="{{ url_for('payment.checkout', plan='pro') }}" class="btn-pro">
+              <i class="fas fa-star"></i> Upgrade to Pro
+            </a>
+          {% endif %}
+
           <a href="{{ url_for('resume.create_builder_resume') }}" class="btn-new">
             <i class="fas fa-plus"></i> New Resume +
           </a>
@@ -621,9 +672,15 @@
           <div class="stat-box">
             <div class="stat-label">Resumes</div>
             <div class="stat-number">{{ resume_count or 2 }}</div>
-            <div class="stat-meta warning">
-              <i class="fas fa-exclamation-triangle"></i> 1 left on free plan
+            {% if subscription and subscription.plan == 'pro' and subscription.status == 'active' %}
+            <div class="stat-meta up">
+              <i class="fas fa-check-circle"></i> Unlimited (Pro)
             </div>
+            {% else %}
+            <div class="stat-meta warning">
+              <i class="fas fa-exclamation-triangle"></i> {{ 3 - (resume_count or 0) }} left on free plan
+            </div>
+            {% endif %}
           </div>
           <div class="stat-box">
             <div class="stat-label">Job Matches</div>

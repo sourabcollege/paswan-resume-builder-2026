@@ -1129,9 +1129,15 @@
         75% of resumes are rejected by ATS before a human reads them. Paswan Resume Builder scores your resume, finds the gaps, and fixes them — automatically.
       </p>
       <div class="hero-actions">
-        <a href="{{ url_for('auth.register') }}" class="btn-gaming btn-gaming-primary">
-          <i class="fas fa-sparkles"></i> Check My ATS Score
+          {% if current_user.is_authenticated %}
+        <a href="{{ url_for('main.dashboard') }}" class="btn-gaming btn-gaming-primary">
+         <i class="fas fa-sparkles"></i> Check My ATS Score
         </a>
+         {% else %}
+        <a href="{{ url_for('auth.register') }}" class="btn-gaming btn-gaming-primary">
+         <i class="fas fa-sparkles"></i> Check My ATS Score
+        </a>
+          {% endif %}
         <a href="{{ url_for('resume.create_builder_resume') }}" class="btn-gaming btn-gaming-ghost">
           See the Builder <i class="fas fa-arrow-right"></i>
         </a>
@@ -1381,9 +1387,15 @@
   <div class="cta-banner reveal">
     <h2>Your resume is losing you jobs.<br><span class="grad-text">Find out why — free.</span></h2>
     <p>Get your ATS score in 60 seconds. No credit card. No signup required to start.</p>
-    <a href="{{ url_for('auth.register') }}" class="btn-gaming btn-gaming-primary" style="font-size:16px;padding:16px 32px;">
-      <i class="fas fa-sparkles"></i> Analyze My Resume Now
+    {% if current_user.is_authenticated %}
+    <a href="{{ url_for('main.dashboard') }}" class="btn-gaming btn-gaming-primary" style="font-size:16px;padding:16px 32px;">
+     <i class="fas fa-sparkles"></i> Analyze My Resume Now
     </a>
+     {% else %}
+    <a href="{{ url_for('auth.register') }}" class="btn-gaming btn-gaming-primary" style="font-size:16px;padding:16px 32px;">
+     <i class="fas fa-sparkles"></i> Analyze My Resume Now
+    </a>
+     {% endif %}
   </div>
 
   <!-- ══════ FOOTER ══════ -->

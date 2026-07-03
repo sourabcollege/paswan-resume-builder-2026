@@ -7,7 +7,7 @@ from functools import wraps
 from io import BytesIO
 from typing import Any
 
-from flask import Blueprint, abort, g, jsonify, redirect, render_template, request, send_file, url_for
+from flask import Blueprint, abort, flash, g, jsonify, redirect, render_template, request, send_file, url_for
 from flask_login import current_user
 from flask_wtf.csrf import generate_csrf
 from jinja2 import TemplateNotFound
@@ -184,7 +184,12 @@ def list_versions(resume_id: str):
 def create_version(resume_id: str):
     form = _form_from_request(VersionCreateForm)
     if not form.validate_on_submit():
-        return _validation_error(form)
+        # ── FIXED: Flash form validation errors and redirect back ──
+        for field, errors in form.errors.items():
+            for error in errors:
+                flash(f"{field}: {error}", "error")
+        return redirect(url_for("resume.list_versions", resume_id=resume_id))
+    
     payload: dict[str, Any] = {
         "label": form.label.data,
         "change_summary": form.change_summary.data,
@@ -193,8 +198,17 @@ def create_version(resume_id: str):
     }
     if form.content.data:
         payload["content"] = parse_json_object(form.content.data)
+    
     result = ResumeService().create_version(current_user.id, resume_id, payload, request_meta=_request_meta())
-    return _service_response(result)
+    
+    if not result.success:
+        # ── FIXED: Flash service error and redirect back to versions page ──
+        flash(result.message, "error")
+        return redirect(url_for("resume.list_versions", resume_id=resume_id))
+    
+    # ── FIXED: Success redirect ──
+    flash(result.message, "success")
+    return redirect(url_for("resume.list_versions", resume_id=resume_id))
 
 
 @bp.get("/<resume_id>/versions/<version_id>")
@@ -211,14 +225,25 @@ def version_detail(resume_id: str, version_id: str):
 def restore_version(resume_id: str, version_id: str):
     form = _form_from_request(ResumeActionForm)
     if not form.validate_on_submit():
-        return _validation_error(form)
+        # ── FIXED: Flash validation errors ──
+        for field, errors in form.errors.items():
+            for error in errors:
+                flash(f"{field}: {error}", "error")
+        return redirect(url_for("resume.list_versions", resume_id=resume_id))
+    
     result = ResumeService().restore_version(
         current_user.id,
         resume_id,
         version_id,
         request_meta=_request_meta(),
     )
-    return _service_response(result)
+    
+    if not result.success:
+        flash(result.message, "error")
+        return redirect(url_for("resume.list_versions", resume_id=resume_id))
+    
+    flash(result.message, "success")
+    return redirect(url_for("resume.list_versions", resume_id=resume_id))
 
 
 @bp.post("/<resume_id>/versions/compare")
@@ -227,14 +252,26 @@ def restore_version(resume_id: str, version_id: str):
 def compare_versions(resume_id: str):
     form = _form_from_request(VersionCompareForm)
     if not form.validate_on_submit():
-        return _validation_error(form)
+        # ── FIXED: Flash validation errors ──
+        for field, errors in form.errors.items():
+            for error in errors:
+                flash(f"{field}: {error}", "error")
+        return redirect(url_for("resume.list_versions", resume_id=resume_id))
+    
     result = ResumeService().compare_versions(
         current_user.id,
         resume_id,
         form.left_version_id.data,
         form.right_version_id.data,
     )
-    return _service_response(result)
+    
+    if not result.success:
+        flash(result.message, "error")
+        return redirect(url_for("resume.list_versions", resume_id=resume_id))
+    
+    # ── TODO: Add a compare results template if needed ──
+    flash(result.message, "success")
+    return redirect(url_for("resume.list_versions", resume_id=resume_id))
 
 
 # ── FIXED: GET + POST both allowed for export ──
@@ -249,7 +286,11 @@ def export_resume(resume_id: str, export_format: str):
     if request.method == "POST":
         form = _form_from_request(ExportForm)
         if not form.validate_on_submit():
-            return _validation_error(form)
+            # ── FIXED: Flash validation errors ──
+            for field, errors in form.errors.items():
+                for error in errors:
+                    flash(f"{field}: {error}", "error")
+            return redirect(url_for("resume.list_versions", resume_id=resume_id))
         version_id = form.version_id.data or None
         as_attachment = bool(form.download.data) or export_format.lower() != "html"
 
@@ -260,8 +301,11 @@ def export_resume(resume_id: str, export_format: str):
         version_id,
         request_meta=_request_meta(),
     )
+    
     if not result.success:
-        return _service_response(result)
+        # ── FIXED: Flash export error and redirect back ──
+        flash(result.message, "error")
+        return redirect(url_for("resume.list_versions", resume_id=resume_id))
 
     artifact = result.data["export"]
     return send_file(

@@ -1,5 +1,7 @@
 import os
 
+print("full_structure")
+
 def print_tree(dir_path, prefix=""):
     # Faltu folders jo hide karne hain
     ignore_dirs = {'.git', '__pycache__', 'venv', 'env', '.venv', '.agents', '.codex', 'node_modules', 'outputs'}

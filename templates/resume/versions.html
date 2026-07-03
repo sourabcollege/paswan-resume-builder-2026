@@ -3,29 +3,511 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Resume Versions - Paswan Resume Builder</title>
+  <title>Version History - {{ resume.title }} - Paswan Resume Builder</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    body{margin:0;min-height:100vh;background:linear-gradient(135deg,#f8fffc,#eef4ff);color:#17202a;font:15px/1.5 Inter,Arial,sans-serif}.shell{width:min(920px,calc(100% - 32px));margin:0 auto;padding:30px 0}.card{background:rgba(255,255,255,.8);border:1px solid rgba(23,32,42,.12);border-radius:8px;box-shadow:0 20px 70px rgba(32,48,73,.10);padding:18px;margin-bottom:12px}.nav{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px}a{color:#1f6f78;font-weight:800;text-decoration:none}h1{font-size:34px;margin:0 0 18px}.meta{color:#637083}
+    :root {
+      --bg: #0b0f19;
+      --bg-elevated: rgba(30, 41, 59, 0.45);
+      --border: rgba(255, 255, 255, 0.06);
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent: #38bdf8;
+      --accent2: #818cf8;
+      --success: #34d399;
+      --warning: #fbbf24;
+      --danger: #f87171;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(56, 189, 248, 0.08), transparent),
+                  radial-gradient(ellipse 80% 50% at 50% 110%, rgba(129, 140, 248, 0.06), transparent),
+                  var(--bg);
+      background-attachment: fixed;
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+    .shell { max-width: 1000px; margin: 0 auto; padding: 40px 24px; }
+    
+    .top-nav { display: flex; align-items: center; gap: 8px; margin-bottom: 32px; font-size: 13px; font-weight: 500; color: var(--text-muted); flex-wrap: wrap; }
+    .top-nav a { color: var(--text-muted); text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: color 0.2s; padding: 4px 0; }
+    .top-nav a:hover { color: var(--text); }
+    .top-nav .sep { width: 16px; height: 16px; opacity: 0.35; display: inline-flex; align-items: center; justify-content: center; }
+    
+    /* ── FLASH MESSAGES ── */
+    .flash-messages { margin-bottom: 24px; }
+    .flash {
+      background: var(--bg-elevated);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px 20px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 14px;
+      font-weight: 500;
+      animation: slideIn 0.4s ease both;
+    }
+    .flash-success { border-color: rgba(52, 211, 153, 0.2); color: var(--success); }
+    .flash-error { border-color: rgba(248, 113, 113, 0.2); color: var(--danger); }
+    .flash-warning { border-color: rgba(251, 191, 36, 0.2); color: var(--warning); }
+    .flash-icon { width: 20px; height: 20px; flex-shrink: 0; }
+    
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .page-header {
+      background: var(--bg-elevated);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 32px;
+      margin-bottom: 48px;
+      position: relative;
+      overflow: hidden;
+      animation: fadeIn 0.6s ease both;
+    }
+    .page-header::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(56,189,248,0.06), rgba(129,140,248,0.03));
+      pointer-events: none;
+    }
+    .header-grid { display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: start; position: relative; z-index: 1; }
+    h1 { font-size: 30px; font-weight: 800; letter-spacing: -0.02em; background: linear-gradient(to right, #fff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 24px; }
+    .stats-row { display: flex; flex-wrap: wrap; gap: 12px; }
+    .stat-pill {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 150px;
+      transition: all 0.25s ease;
+    }
+    .stat-pill:hover { background: rgba(255,255,255,0.06); transform: translateY(-2px); border-color: rgba(255,255,255,0.12); }
+    .stat-icon { width: 38px; height: 38px; border-radius: 10px; background: linear-gradient(135deg, var(--accent), var(--accent2)); display: flex; align-items: center; justify-content: center; color: #fff; flex-shrink: 0; }
+    .stat-icon svg { width: 18px; height: 18px; }
+    .stat-icon.green { background: linear-gradient(135deg, var(--success), #10b981); }
+    .stat-icon.purple { background: linear-gradient(135deg, #a78bfa, #c084fc); }
+    .stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 2px; }
+    .stat-value { font-size: 15px; font-weight: 700; color: var(--text); }
+    
+    .header-actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-end; }
+    
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 18px; border-radius: 12px; font-size: 13px; font-weight: 600; border: 1px solid transparent; cursor: pointer; text-decoration: none; transition: all 0.2s ease; background: none; color: var(--text); white-space: nowrap; }
+    .btn:hover { transform: translateY(-1px); }
+    .btn:active { transform: translateY(0); }
+    .btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; box-shadow: 0 4px 20px rgba(56,189,248,0.2); }
+    .btn-primary:hover { box-shadow: 0 6px 24px rgba(56,189,248,0.3); }
+    .btn-secondary { background: rgba(255,255,255,0.05); border-color: var(--border); color: var(--text-muted); }
+    .btn-secondary:hover { background: rgba(255,255,255,0.08); color: var(--text); border-color: rgba(255,255,255,0.15); }
+    .btn-ghost { padding: 8px 12px; color: var(--text-muted); font-size: 13px; }
+    .btn-ghost:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+    
+    .timeline { position: relative; padding-left: 32px; }
+    .timeline::before { content: ''; position: absolute; left: 10px; top: 8px; bottom: 0; width: 2px; background: linear-gradient(to bottom, var(--accent), var(--accent2), transparent); opacity: 0.25; }
+    .timeline-item { position: relative; margin-bottom: 36px; animation: fadeIn 0.5s ease both; }
+    .timeline-item:nth-child(1) { animation-delay: 0.05s; }
+    .timeline-item:nth-child(2) { animation-delay: 0.1s; }
+    .timeline-item:nth-child(3) { animation-delay: 0.15s; }
+    .timeline-item:nth-child(4) { animation-delay: 0.2s; }
+    .timeline-item:nth-child(5) { animation-delay: 0.25s; }
+    .timeline-item:nth-child(6) { animation-delay: 0.3s; }
+    .timeline-item:nth-child(7) { animation-delay: 0.35s; }
+    .timeline-item:nth-child(8) { animation-delay: 0.4s; }
+    .timeline-item:nth-child(9) { animation-delay: 0.45s; }
+    .timeline-item:nth-child(10) { animation-delay: 0.5s; }
+    
+    .timeline-dot { position: absolute; left: -32px; top: 6px; width: 16px; height: 16px; border-radius: 50%; background: var(--bg); border: 2px solid var(--accent2); box-shadow: 0 0 0 4px var(--bg); z-index: 2; display: flex; align-items: center; justify-content: center; }
+    .timeline-dot.current { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 0 4px var(--bg), 0 0 24px rgba(56,189,248,0.35); animation: pulseGlow 2.5s infinite; }
+    @keyframes pulseGlow { 0%, 100% { box-shadow: 0 0 0 4px var(--bg), 0 0 20px rgba(56,189,248,0.3); } 50% { box-shadow: 0 0 0 4px var(--bg), 0 0 32px rgba(56,189,248,0.5); } }
+    
+    .version-card {
+      background: var(--bg-elevated);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 24px;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    .version-card::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent); border-radius: 20px 20px 0 0; }
+    .version-card:hover { transform: translateY(-4px); border-color: rgba(255,255,255,0.12); box-shadow: 0 24px 64px rgba(0,0,0,0.35); }
+    .version-card.current { border-color: rgba(56,189,248,0.25); }
+    .version-card.current::before { content: ''; position: absolute; inset: -1px; border-radius: 20px; background: linear-gradient(135deg, var(--accent), var(--accent2)); opacity: 0.12; z-index: -1; filter: blur(12px); transition: opacity 0.3s; }
+    .version-card.current:hover::before { opacity: 0.2; }
+    
+    .card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
+    .version-title { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+    .version-number { font-size: 24px; font-weight: 800; background: linear-gradient(to right, #fff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -0.02em; }
+    .version-label { font-size: 15px; font-weight: 600; color: var(--text); }
+    
+    .badges { display: flex; gap: 8px; flex-wrap: wrap; }
+    .badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; border: 1px solid transparent; }
+    .badge-current { background: linear-gradient(135deg, rgba(56,189,248,0.15), rgba(129,140,248,0.1)); color: var(--accent); border-color: rgba(56,189,248,0.25); }
+    .badge-draft { background: linear-gradient(135deg, rgba(251,191,36,0.12), rgba(251,191,36,0.05)); color: var(--warning); border-color: rgba(251,191,36,0.2); }
+    .badge-archived { background: linear-gradient(135deg, rgba(148,163,184,0.12), rgba(148,163,184,0.05)); color: var(--text-muted); border-color: rgba(148,163,184,0.2); }
+    
+    .card-body { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; margin-bottom: 16px; }
+    .meta-item { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text-muted); }
+    .meta-item svg { width: 16px; height: 16px; opacity: 0.6; flex-shrink: 0; }
+    
+    .scores { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
+    .score-ring-wrap { display: flex; align-items: center; gap: 10px; }
+    .score-ring { position: relative; width: 52px; height: 52px; flex-shrink: 0; }
+    .score-ring svg { transform: rotate(-90deg); width: 52px; height: 52px; }
+    .ring-bg { fill: none; stroke: rgba(255,255,255,0.08); stroke-width: 4; }
+    .ring-fill { fill: none; stroke-width: 4; stroke-linecap: round; transition: stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1); }
+    .ring-value { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; }
+    .ring-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
+    
+    .change-summary { margin-top: 12px; padding: 12px 16px; background: rgba(255,255,255,0.03); border-left: 3px solid var(--accent2); border-radius: 0 12px 12px 0; font-size: 13px; color: var(--text-muted); font-style: italic; line-height: 1.5; }
+    
+    .card-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
+    
+    .empty-state { text-align: center; padding: 64px 24px; background: var(--bg-elevated); backdrop-filter: blur(20px); border: 1px solid var(--border); border-radius: 24px; margin-top: 32px; animation: fadeIn 0.6s ease both; }
+    .empty-icon { width: 64px; height: 64px; margin: 0 auto 20px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border-radius: 16px; display: flex; align-items: center; justify-content: center; color: #fff; box-shadow: 0 8px 32px rgba(56,189,248,0.2); }
+    .empty-icon svg { width: 28px; height: 28px; }
+    .empty-state h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; color: var(--text); }
+    .empty-state p { color: var(--text-muted); font-size: 14px; max-width: 420px; margin: 0 auto 24px; line-height: 1.6; }
+    
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    
+    @media (max-width: 768px) {
+      .shell { padding: 24px 16px; }
+      .page-header { padding: 24px; }
+      .header-grid { grid-template-columns: 1fr; }
+      .header-actions { justify-content: flex-start; }
+      h1 { font-size: 24px; }
+      .timeline { padding-left: 24px; }
+      .timeline-dot { left: -24px; }
+      .card-body { grid-template-columns: 1fr; }
+      .version-card { padding: 20px; }
+    }
   </style>
 </head>
 <body>
   <main class="shell">
-    <nav class="nav">
-      <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
-      <a href="{{ url_for('resume.list_resumes') }}">My resumes</a>
-      {% if resume %}<a href="{{ url_for('resume.resume_detail', resume_id=resume.id) }}">{{ resume.title }}</a>{% endif %}
+    <nav class="top-nav">
+      <a href="{{ url_for('main.dashboard') }}">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+        Dashboard
+      </a>
+      <span class="sep"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></span>
+      <a href="{{ url_for('resume.list_resumes') }}">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+        My Resumes
+      </a>
+      {% if resume %}
+      <span class="sep"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></span>
+      <a href="{{ url_for('resume.resume_detail', resume_id=resume.id) }}">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+        {{ resume.title }}
+      </a>
+      {% endif %}
     </nav>
-    <h1>Versions</h1>
+
+    <!-- ── FLASH MESSAGES ── -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      <div class="flash-messages">
+        {% for category, message in messages %}
+        <div class="flash flash-{{ category }}">
+          {% if category == 'success' %}
+          <svg class="flash-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+          {% elif category == 'error' %}
+          <svg class="flash-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+          {% else %}
+          <svg class="flash-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+          {% endif %}
+          {{ message }}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    {% endwith %}
+
+    {% set total_versions = versions|length %}
+    {% set current_version = versions|selectattr("is_current")|first %}
+
+    <div class="page-header">
+      <div class="header-grid">
+        <div>
+          <h1>{{ resume.title }}</h1>
+          <div class="stats-row">
+            <div class="stat-pill">
+              <div class="stat-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+              </div>
+              <div>
+                <div class="stat-label">Current Version</div>
+                <div class="stat-value">{% if current_version %}v{{ current_version.version_number }} - {{ current_version.label }}{% else %}None{% endif %}</div>
+              </div>
+            </div>
+
+            <div class="stat-pill">
+              <div class="stat-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+              </div>
+              <div>
+                <div class="stat-label">ATS Score</div>
+                <div class="stat-value" style="background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                  {% if current_version and current_version.ats_score_snapshot is not none %}{{ "%.0f"|format(current_version.ats_score_snapshot) }}/100{% else %}N/A{% endif %}
+                </div>
+              </div>
+            </div>
+
+            <div class="stat-pill">
+              <div class="stat-icon green">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+              </div>
+              <div>
+                <div class="stat-label">Completeness</div>
+                <div class="stat-value" style="color: var(--success);">
+                  {% if current_version and current_version.completeness_snapshot is not none %}{{ "%.0f"|format(current_version.completeness_snapshot) }}/100{% else %}N/A{% endif %}
+                </div>
+              </div>
+            </div>
+
+            <div class="stat-pill">
+              <div class="stat-icon purple">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+              </div>
+              <div>
+                <div class="stat-label">Total Versions</div>
+                <div class="stat-value">{{ total_versions }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="header-actions">
+          <a href="{{ url_for('resume.list_resumes') }}" class="btn btn-secondary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            Back
+          </a>
+          <a href="{{ url_for('resume.edit_builder_resume', resume_id=resume.id) }}" class="btn btn-secondary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+            Open Builder
+          </a>
+          <form method="POST" action="{{ url_for('resume.create_version', resume_id=resume.id) }}" style="display:inline;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="label" value="Version {{ total_versions + 1 }}">
+            <input type="hidden" name="template_key" value="{{ current_version.template_key if current_version else 'classic' }}">
+            <input type="hidden" name="make_current" value="false">
+            <input type="hidden" name="change_summary" value="">
+            <button type="submit" class="btn btn-primary">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              Create Version
+            </button>
+          </form>
+          <a href="{{ url_for('resume.export_resume', resume_id=resume.id, export_format='pdf') }}" class="btn btn-primary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            Export PDF
+          </a>
+        </div>
+      </div>
+    </div>
+
     {% if versions %}
+    <div class="timeline">
       {% for version in versions %}
-        <article class="card">
-          <strong><a href="{{ url_for('resume.version_detail', resume_id=resume.id, version_id=version.id) }}">Version {{ version.version_number }} - {{ version.label }}</a></strong>
-          <div class="meta">{{ version.status|title }}{% if version.is_current %} - Current{% endif %}{% if version.created_at %} - {{ version.created_at[:10] }}{% endif %}</div>
-        </article>
+      {% set ats_score = version.ats_score_snapshot %}
+      {% set completeness = version.completeness_snapshot %}
+      <div class="timeline-item">
+        <div class="timeline-dot {% if version.is_current %}current{% endif %}">
+          {% if version.is_current %}
+          <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          {% endif %}
+        </div>
+
+        <div class="version-card {% if version.is_current %}current{% endif %}">
+          <div class="card-header">
+            <div class="version-title">
+              <span class="version-number">v{{ version.version_number }}</span>
+              <span class="version-label">{{ version.label }}</span>
+            </div>
+            <div class="badges">
+              {% if version.is_current %}
+              <span class="badge badge-current">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                Current
+              </span>
+              {% endif %}
+              {% if version.status == 'draft' %}
+              <span class="badge badge-draft">Draft</span>
+              {% elif version.status == 'archived' %}
+              <span class="badge badge-archived">Archived</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="card-body">
+            <div class="meta-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+              <span>{{ version.created_at[:10] if version.created_at else 'Unknown date' }}</span>
+            </div>
+
+            <div class="meta-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+              <span>{{ version.template_key|title }}</span>
+            </div>
+
+            <div class="scores">
+              {% if ats_score is not none %}
+              <div class="score-ring-wrap">
+                <div class="score-ring">
+                  <svg viewBox="0 0 52 52">
+                    <circle class="ring-bg" cx="26" cy="26" r="20"></circle>
+                    <circle class="ring-fill" cx="26" cy="26" r="20" stroke="url(#gradAts)" stroke-dasharray="125.6" stroke-dashoffset="125.6" data-target="{{ 125.6 - (125.6 * ats_score / 100) }}"></circle>
+                    <defs>
+                      <linearGradient id="gradAts" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="#38bdf8" />
+                        <stop offset="100%" stop-color="#818cf8" />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                  <div class="ring-value" style="background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">{{ "%.0f"|format(ats_score) }}</div>
+                </div>
+                <div class="ring-label">ATS</div>
+              </div>
+              {% endif %}
+
+              {% if completeness is not none %}
+              <div class="score-ring-wrap">
+                <div class="score-ring">
+                  <svg viewBox="0 0 52 52">
+                    <circle class="ring-bg" cx="26" cy="26" r="20"></circle>
+                    <circle class="ring-fill" cx="26" cy="26" r="20" stroke="url(#gradComp)" stroke-dasharray="125.6" stroke-dashoffset="125.6" data-target="{{ 125.6 - (125.6 * completeness / 100) }}"></circle>
+                    <defs>
+                      <linearGradient id="gradComp" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="#34d399" />
+                        <stop offset="100%" stop-color="#10b981" />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                  <div class="ring-value" style="color: var(--success);">{{ "%.0f"|format(completeness) }}</div>
+                </div>
+                <div class="ring-label">Complete</div>
+              </div>
+              {% endif %}
+            </div>
+          </div>
+
+          {% if version.change_summary %}
+          <div class="change-summary">
+            {{ version.change_summary }}
+          </div>
+          {% endif %}
+
+          <div class="card-actions">
+            <a href="{{ url_for('resume.version_detail', resume_id=resume.id, version_id=version.id) }}" class="btn btn-ghost">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              Preview
+            </a>
+
+            {% if total_versions > 1 %}
+            <form method="POST" action="{{ url_for('resume.compare_versions', resume_id=resume.id) }}" style="display:inline;">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input type="hidden" name="left_version_id" value="{{ version.id }}">
+              {% if version.is_current %}
+                {% set compare_target = versions[1] %}
+                <input type="hidden" name="right_version_id" value="{{ compare_target.id }}">
+              {% else %}
+                <input type="hidden" name="right_version_id" value="{{ current_version.id }}">
+              {% endif %}
+              <button type="submit" class="btn btn-ghost">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"></polyline><line x1="4" y1="21" x2="21" y2="8"></line><polyline points="21 16 21 21 16 21"></polyline><line x1="15" y1="15" x2="21" y2="21"></line><line x1="4" y1="4" x2="9" y2="9"></line></svg>
+                Compare
+              </button>
+            </form>
+            {% endif %}
+
+            {% if not version.is_current %}
+            <form method="POST" action="{{ url_for('resume.restore_version', resume_id=resume.id, version_id=version.id) }}" style="display:inline;">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit" class="btn btn-ghost" onclick="return confirm('Restore version v{{ version.version_number }} as the new current version?');">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><polyline points="23 20 23 14 17 14"></polyline><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path></svg>
+                Restore
+              </button>
+            </form>
+            {% endif %}
+
+            <form method="POST" action="{{ url_for('resume.export_resume', resume_id=resume.id, export_format='pdf') }}" style="display:inline;">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input type="hidden" name="version_id" value="{{ version.id }}">
+              <input type="hidden" name="download" value="true">
+              <button type="submit" class="btn btn-ghost">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                Download
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
       {% endfor %}
+    </div>
+
+    {% if total_versions == 1 %}
+    <div class="empty-state">
+      <div class="empty-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5"></path><path d="M2 12l10 5 10-5"></path></svg>
+      </div>
+      <h3>Version Comparison</h3>
+      <p>Create multiple versions of your resume to compare changes, track improvements, and restore previous iterations. Your version history helps you experiment with different formats and content without losing your work.</p>
+      <div style="margin-top: 24px;">
+        <form method="POST" action="{{ url_for('resume.create_version', resume_id=resume.id) }}" style="display:inline;">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input type="hidden" name="label" value="Version 2">
+          <input type="hidden" name="template_key" value="{{ current_version.template_key if current_version else 'classic' }}">
+          <input type="hidden" name="make_current" value="false">
+          <input type="hidden" name="change_summary" value="">
+          <button type="submit" class="btn btn-primary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            Create Your First Version
+          </button>
+        </form>
+      </div>
+    </div>
+    {% endif %}
+
     {% else %}
-      <article class="card"><p class="meta">No versions are available for this resume.</p></article>
+    <div class="empty-state">
+      <div class="empty-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>
+      </div>
+      <h3>No Versions Available</h3>
+      <p>No versions are available for this resume.</p>
+    </div>
     {% endif %}
   </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.ring-fill[data-target]').forEach(function(ring) {
+        var target = parseFloat(ring.getAttribute('data-target'));
+        if (!isNaN(target)) {
+          requestAnimationFrame(function() {
+            ring.style.strokeDashoffset = target;
+          });
+        }
+      });
+    });
+  </script>
 </body>
 </html>

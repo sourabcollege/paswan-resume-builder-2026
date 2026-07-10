@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo.png') }}">
   <title>{% block title %}Paswan Resume Builder{% endblock %}</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -140,7 +141,16 @@
       transition: all 0.3s ease;
     }
 
-    .nav-brand:hover .logo {
+    .nav-brand .logo-img {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      object-fit: cover;
+      box-shadow: 0 4px 15px var(--sakura-glow);
+      transition: all 0.3s ease;
+    }
+
+    .nav-brand:hover .logo-img {
       transform: rotate(-5deg) scale(1.05);
       box-shadow: 0 6px 20px var(--sakura-glow), 0 0 30px var(--lavender-glow);
     }
@@ -523,15 +533,17 @@
     @media (max-width: 480px) {
       .nav-brand { font-size: 1.1rem; }
       .nav-brand .logo { width: 36px; height: 36px; font-size: 1rem; }
+      .nav-brand .logo-img { width: 36px; height: 36px; }
     }
   </style>
   {% block extra_css %}{% endblock %}
+<base target="_blank">
 </head>
 <body>
 
   <nav class="navbar" id="navbar">
     <a href="{{ url_for('main.index') }}" class="nav-brand">
-      <div class="logo">P</div>
+      <img src="{{ url_for('static', filename='images/logo.png') }}" alt="PRB" class="logo-img">
       Paswan Resume
     </a>
 

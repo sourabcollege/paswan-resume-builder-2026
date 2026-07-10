@@ -99,6 +99,8 @@ paswan-resume-builder-main/
 ├── instance/
 │   └── paswan_resume_builder_dev.sqlite3
 ├── logs/
+├── static/
+│   └── images/
 ├── templates/
 │   ├── admin/
 │   │   ├── dashboard.html

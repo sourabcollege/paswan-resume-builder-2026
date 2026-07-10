@@ -1053,6 +1053,13 @@
   color: #fff;
 }
 
+.footer-logo-img {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
 /* ── Scroll Reveal Animations ── */
 .reveal {
   opacity: 0;
@@ -1409,7 +1416,7 @@
   <!-- ══════ FOOTER ══════ -->
   <div class="landing-footer">
     <div class="footer-logo">
-      <div class="footer-logo-mark">P</div>
+      <img src="{{ url_for('static', filename='images/logo.png') }}" alt="PRB" class="footer-logo-img">
       Paswan<span style="color:var(--neon-indigo)">Resume</span>
     </div>
     <p>Built by Sourab Paswan · 2026 · Production-ready SaaS</p>

@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}?v=2">
+  <link rel="shortcut icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}?v=2">
   <title>Dashboard | Paswan Resume Builder</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -89,6 +91,13 @@
       color: white;
       font-weight: 700;
       font-size: 1rem;
+    }
+
+    .sidebar-logo-img {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      object-fit: cover;
     }
 
     .sidebar-brand {
@@ -579,6 +588,7 @@
     }
   </style>
 <base target="_blank">
+<base target="_blank">
 </head>
 <body>
 
@@ -595,7 +605,7 @@
     <!-- ═══ SIDEBAR ═══ -->
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-header">
-        <div class="sidebar-logo">P</div>
+        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="PRB" class="sidebar-logo-img">
         <a href="{{ url_for('main.index') }}" class="sidebar-brand">Paswan Resume</a>
       </div>
 
@@ -817,18 +827,18 @@
     const firstName = "{{ current_user.first_name or '' }}".trim();
     const username = "{{ current_user.username or '' }}".trim();
     const email = "{{ current_user.email or '' }}".trim();
-    
+
     let displayName = firstName;
     if (!displayName || displayName.toLowerCase() === 'test' || displayName.toLowerCase() === 'user') {
       displayName = username || email.split('@')[0] || 'User';
     }
-    
+
     // Update greeting with smart name
     const hour = new Date().getHours();
     let greeting = 'Good morning';
     if (hour >= 12 && hour < 17) greeting = 'Good afternoon';
     else if (hour >= 17) greeting = 'Good evening';
-    
+
     document.getElementById('greetingText').textContent = greeting + ', ' + displayName + ' 👋';
 
     // ── Theme Toggle ──
@@ -836,7 +846,7 @@
       const html = document.documentElement;
       const icon = document.getElementById('themeIcon');
       const isDark = html.getAttribute('data-theme') === 'dark';
-      
+
       if (isDark) {
         html.setAttribute('data-theme', 'light');
         icon.classList.remove('fa-moon');
@@ -855,7 +865,7 @@
       const saved = localStorage.getItem('paswan-theme');
       const html = document.documentElement;
       const icon = document.getElementById('themeIcon');
-      
+
       if (saved === 'light') {
         html.setAttribute('data-theme', 'light');
         icon.classList.remove('fa-moon');

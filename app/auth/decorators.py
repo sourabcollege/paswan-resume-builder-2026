@@ -39,7 +39,9 @@ def active_user_required(view: F) -> F:
     @wraps(view)
     @login_required
     def wrapped(*args: Any, **kwargs: Any):
-        if not _account_allowed():
+        # ✅ FIXED: Don't require email verification for basic access
+        # Only check user is logged in and not banned/suspended
+        if not _account_allowed(require_verified=False):
             return _forbidden("Your account is not allowed to access this resource.")
         return view(*args, **kwargs)
 
@@ -101,8 +103,13 @@ def owner_required(
 def _account_allowed(*, require_verified: bool = True) -> bool:
     if not getattr(current_user, "is_authenticated", False):
         return False
-    if getattr(current_user, "account_status", None) != User.STATUS_ACTIVE:
+
+    # ✅ FIXED: Allow both "active" and "pending_verification" users
+    # Only block suspended/banned accounts
+    status = getattr(current_user, "account_status", None)
+    if status in (User.STATUS_SUSPENDED, User.STATUS_BANNED):
         return False
+
     if require_verified and not getattr(current_user, "is_email_verified", False):
         return False
     return True

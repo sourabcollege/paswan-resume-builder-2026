@@ -1,834 +1,811 @@
-{% extends "base.html" %}
+{% extends "mobile/base.html" %}
 
-{% block title %}Edit Profile — {{ user.first_name }}{% endblock %}
+{% block title %}Edit Profile | Paswan Resume{% endblock %}
 
 {% block extra_css %}
 <style>
-  :root {
-    --bg: #0b1120;
-    --bg-light: #151e32;
-    --surface: rgba(21, 30, 50, 0.7);
-    --surface-solid: #151e32;
-    --sidebar: #0f172a;
-    --text: #f1f5f9;
-    --text-secondary: #94a3b8;
-    --text-muted: #64748b;
-    --border: rgba(148, 163, 184, 0.1);
-    --accent: #14b8a6;
-    --accent-light: #5eead4;
-    --accent-glow: rgba(20, 184, 166, 0.15);
-    --accent-purple: #8b5cf6;
-    --accent-orange: #f59e0b;
-    --danger: #ef4444;
-    --success: #10b981;
-    --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    --glass: rgba(21, 30, 50, 0.6);
+  /* ── Profile Edit Page ── */
+  .edit-page {
+    padding-bottom: calc(var(--nav-height) + env(safe-area-inset-bottom) + 120px);
   }
 
-  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-  body { background: var(--bg); color: var(--text); min-height: 100vh; }
-
-  .profile-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 24px;
-    display: grid;
-    grid-template-columns: 320px 1fr;
-    gap: 24px;
-  }
-
-  @media (max-width: 900px) {
-    .profile-container { grid-template-columns: 1fr; }
-  }
-
-  /* ── Left Card ── */
-  .profile-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 28px;
-    backdrop-filter: blur(12px);
-    height: fit-content;
-    position: sticky;
-    top: 90px;
-  }
-
+  /* ── Avatar Section ── */
   .avatar-section {
-    text-align: center;
-    margin-bottom: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 0 24px;
   }
 
   .avatar-wrapper {
     position: relative;
     width: 120px;
     height: 120px;
-    margin: 0 auto 16px;
+  }
+
+  .avatar-circle {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-teal), #2dd4bf);
+    display: grid;
+    place-items: center;
+    color: white;
+    font-size: 2.5rem;
+    font-weight: 800;
+    box-shadow: 0 8px 32px rgba(20, 184, 166, 0.25);
+    border: 3px solid rgba(255, 255, 255, 0.08);
   }
 
   .avatar-img {
-    width: 120px;
-    height: 120px;
+    width: 100%;
+    height: 100%;
     border-radius: 50%;
     object-fit: cover;
-    border: 3px solid var(--accent);
-    box-shadow: 0 0 20px var(--accent-glow);
+    border: 3px solid rgba(255, 255, 255, 0.08);
   }
 
-  .avatar-placeholder {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--accent), var(--accent-light));
-    display: grid;
-    place-items: center;
-    font-size: 3rem;
-    font-weight: 700;
-    color: white;
-    border: 3px solid var(--accent);
-    box-shadow: 0 0 20px var(--accent-glow);
-  }
-
-  .avatar-edit {
+  .avatar-badge {
     position: absolute;
     bottom: 4px;
     right: 4px;
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    background: var(--accent-purple);
-    border: 2px solid var(--bg);
+    background: linear-gradient(135deg, var(--accent-purple), #a78bfa);
+    border: 3px solid var(--bg-primary);
     display: grid;
     place-items: center;
     color: white;
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.35);
     cursor: pointer;
-    font-size: 0.85rem;
-    transition: all 0.2s;
+    transition: transform 0.2s ease;
   }
 
-  .avatar-edit:hover {
-    transform: scale(1.1);
-    box-shadow: 0 0 12px rgba(139, 92, 246, 0.4);
+  .avatar-badge:active {
+    transform: scale(0.9);
   }
 
-  .profile-name {
-    font-size: 1.3rem;
+  .avatar-badge svg {
+    width: 16px;
+    height: 16px;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
+    stroke: currentColor;
+    pointer-events: none;
+  }
+
+  /* ── Form Sections ── */
+  .form-section {
+    margin-bottom: 28px;
+  }
+
+  .section-title {
+    font-size: 0.72rem;
     font-weight: 700;
-    margin-bottom: 4px;
-  }
-
-  .profile-role {
-    font-size: 0.85rem;
-    color: var(--accent-light);
-    margin-bottom: 8px;
-  }
-
-  .profile-location {
-    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
     color: var(--text-muted);
+    margin-bottom: 14px;
+    padding-left: 4px;
+  }
+
+  /* ── Floating Label Inputs ── */
+  .float-group {
+    position: relative;
+    margin-bottom: 16px;
+  }
+
+  .float-input {
+    width: 100%;
+    height: 56px;
+    padding: 20px 14px 8px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    background: #1e293b;
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 1rem; /* Prevents iOS zoom */
+    font-weight: 500;
+    transition: all 0.2s ease;
+    -webkit-appearance: none;
+    outline: none;
+  }
+
+  .float-input:focus {
+    border-color: var(--accent-teal);
+    box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.15);
+  }
+
+  .float-input::placeholder {
+    color: transparent;
+  }
+
+  .float-label {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 1rem;
+    font-weight: 500;
+    pointer-events: none;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-origin: left top;
+  }
+
+  .float-input:focus ~ .float-label,
+  .float-input:not(:placeholder-shown) ~ .float-label {
+    top: 10px;
+    transform: translateY(0) scale(0.72);
+    color: var(--accent-teal);
+    font-weight: 700;
+  }
+
+  .float-input:invalid:not(:placeholder-shown) {
+    border-color: rgba(244, 63, 94, 0.5);
+  }
+
+  .float-input:invalid:not(:placeholder-shown) ~ .float-label {
+    color: var(--accent-rose);
+  }
+
+  /* ── Phone Input ── */
+  .phone-wrap {
+    display: flex;
+    align-items: stretch;
+    height: 56px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    background: #1e293b;
+    overflow: hidden;
+    transition: all 0.2s ease;
+  }
+
+  .phone-wrap:focus-within {
+    border-color: var(--accent-teal);
+    box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.15);
+  }
+
+  .phone-prefix {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 6px;
+    padding: 0 12px;
+    color: var(--text-secondary);
+    font-weight: 700;
+    font-size: 0.95rem;
+    border-right: 1px solid var(--border);
+    background: rgba(15, 23, 42, 0.4);
+    user-select: none;
   }
 
-  .social-links {
+  .phone-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 500;
+    padding: 0 14px;
+    outline: none;
+    -webkit-appearance: none;
+  }
+
+  .phone-input::placeholder {
+    color: var(--text-muted);
+  }
+
+  /* ── Textarea ── */
+  .textarea-wrap {
+    position: relative;
+  }
+
+  .float-textarea {
+    width: 100%;
+    min-height: 120px;
+    padding: 28px 14px 28px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    background: #1e293b;
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 500;
+    line-height: 1.6;
+    resize: none;
+    transition: all 0.2s ease;
+    -webkit-appearance: none;
+    outline: none;
+  }
+
+  .float-textarea:focus {
+    border-color: var(--accent-teal);
+    box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.15);
+  }
+
+  .float-textarea::placeholder {
+    color: transparent;
+  }
+
+  .textarea-wrap .float-label {
+    top: 18px;
+    transform: none;
+  }
+
+  .float-textarea:focus ~ .float-label,
+  .float-textarea:not(:placeholder-shown) ~ .float-label {
+    top: 8px;
+    transform: scale(0.72);
+    color: var(--accent-teal);
+    font-weight: 700;
+  }
+
+  .char-counter {
+    position: absolute;
+    bottom: 10px;
+    right: 14px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    pointer-events: none;
+  }
+
+  .char-counter.warning {
+    color: var(--accent-amber);
+  }
+
+  .char-counter.danger {
+    color: var(--accent-rose);
+  }
+
+  /* ── Link Inputs ── */
+  .link-row {
     display: flex;
-    justify-content: center;
-    gap: 12px;
-    margin-top: 20px;
-    margin-bottom: 20px;
+    align-items: stretch;
+    gap: 10px;
+    margin-bottom: 14px;
   }
 
-  .social-btn {
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
-    background: var(--glass);
+  .link-icon {
+    width: 48px;
+    height: 56px;
+    min-width: 48px;
+    border-radius: 14px;
+    background: #1e293b;
     border: 1px solid var(--border);
     display: grid;
     place-items: center;
     color: var(--text-secondary);
-    text-decoration: none;
+  }
+
+  .link-icon svg {
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
+  }
+
+  .link-input {
+    flex: 1;
+    height: 56px;
+    padding: 0 14px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    background: #1e293b;
+    color: var(--text-primary);
+    font-family: inherit;
     font-size: 1rem;
-    transition: all 0.2s;
-  }
-
-  .social-btn:hover {
-    background: var(--accent-glow);
-    color: var(--accent-light);
-    border-color: var(--accent);
-    transform: translateY(-2px);
-  }
-
-  .social-btn.linkedin:hover { color: #0a66c2; border-color: #0a66c2; }
-  .social-btn.github:hover { color: #f0f6fc; border-color: #f0f6fc; }
-
-  .stats-mini {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-    margin-top: 20px;
-    padding-top: 20px;
-    border-top: 1px solid var(--border);
-  }
-
-  .mini-stat {
-    text-align: center;
-  }
-
-  .mini-stat-value {
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: var(--accent-light);
-  }
-
-  .mini-stat-label {
-    font-size: 0.7rem;
-    color: var(--text-muted);
-    margin-top: 2px;
-  }
-
-  /* ── Completion Bar ── */
-  .completion-section {
-    margin-top: 20px;
-    padding-top: 20px;
-    border-top: 1px solid var(--border);
-  }
-
-  .completion-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
-  }
-
-  .completion-title {
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: var(--text-secondary);
-  }
-
-  .completion-percent {
-    font-size: 0.85rem;
-    font-weight: 700;
-    color: var(--accent-light);
-  }
-
-  .completion-bar {
-    height: 6px;
-    background: var(--border);
-    border-radius: 3px;
-    overflow: hidden;
-  }
-
-  .completion-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--accent), var(--accent-light));
-    border-radius: 3px;
-    transition: width 0.5s ease;
-  }
-
-  /* ── Right Form ── */
-  .form-panel {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 32px;
-    backdrop-filter: blur(12px);
-  }
-
-  .form-header {
-    margin-bottom: 28px;
-  }
-
-  .form-header h2 {
-    font-size: 1.4rem;
-    font-weight: 700;
-    margin-bottom: 6px;
-  }
-
-  .form-header p {
-    font-size: 0.85rem;
-    color: var(--text-muted);
-  }
-
-  .form-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-  }
-
-  @media (max-width: 600px) {
-    .form-grid { grid-template-columns: 1fr; }
-  }
-
-  .form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .form-group.full-width {
-    grid-column: 1 / -1;
-  }
-
-  .form-label {
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .form-label i {
-    font-size: 0.85rem;
-    color: var(--accent);
-  }
-
-  .form-input {
-    background: rgba(15, 23, 42, 0.8);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 12px 14px;
-    color: var(--text);
-    font-size: 0.9rem;
-    transition: all 0.2s;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    -webkit-appearance: none;
     outline: none;
   }
 
-  .form-input:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px var(--accent-glow);
+  .link-input:focus {
+    border-color: var(--accent-teal);
+    box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.15);
   }
 
-  .form-input::placeholder {
+  .link-input::placeholder {
     color: var(--text-muted);
   }
 
-  textarea.form-input {
-    resize: vertical;
-    min-height: 100px;
-    line-height: 1.6;
-  }
-
-  /* ── Skills Chips ── */
-  .skills-container {
+  /* ── Skills ── */
+  .skills-chips {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
-    margin-top: 8px;
+    margin-bottom: 14px;
+    min-height: 36px;
   }
 
   .skill-chip {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 6px 12px;
+    padding: 8px 14px;
     border-radius: 20px;
     font-size: 0.85rem;
-    font-weight: 500;
-    background: var(--accent-glow);
-    color: var(--accent-light);
-    border: 1px solid var(--accent);
-    cursor: pointer;
-    transition: all 0.2s;
+    font-weight: 600;
+    background: linear-gradient(135deg, rgba(20, 184, 166, 0.12), rgba(139, 92, 246, 0.08));
+    color: var(--accent-teal-light);
+    border: 1px solid rgba(20, 184, 166, 0.2);
+    transition: all 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
   }
 
-  .skill-chip:hover {
-    background: var(--accent);
-    color: var(--bg);
+  .skill-chip:active {
+    transform: scale(0.95);
   }
 
   .skill-chip .remove {
-    font-size: 0.75rem;
-    opacity: 0.7;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: rgba(255, 255, 255, 0.1);
+    color: inherit;
+    font-size: 0.7rem;
+    cursor: pointer;
+    border: none;
+    padding: 0;
+    margin-left: 2px;
   }
 
-  .skill-chip .remove:hover {
-    opacity: 1;
+  .skill-chip .remove:active {
+    background: rgba(244, 63, 94, 0.3);
+    color: var(--accent-rose);
   }
 
-  .skill-input-wrapper {
+  .skill-add-row {
     display: flex;
-    gap: 8px;
-    margin-top: 8px;
+    gap: 10px;
   }
 
-  .skill-input {
+  .skill-add-input {
     flex: 1;
+    height: 48px;
+    padding: 0 14px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: #1e293b;
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 500;
+    outline: none;
+    -webkit-appearance: none;
+  }
+
+  .skill-add-input:focus {
+    border-color: var(--accent-purple);
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.12);
+  }
+
+  .skill-add-input::placeholder {
+    color: var(--text-muted);
   }
 
   .btn-add-skill {
-    padding: 10px 16px;
-    border-radius: 10px;
-    background: var(--accent-glow);
-    border: 1px solid var(--accent);
-    color: var(--accent-light);
-    font-weight: 600;
+    height: 48px;
+    padding: 0 18px;
+    border-radius: 12px;
+    border: 1px solid var(--accent-purple);
+    background: rgba(139, 92, 246, 0.1);
+    color: var(--accent-purple-light);
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 700;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.2s ease;
     white-space: nowrap;
   }
 
-  .btn-add-skill:hover {
-    background: var(--accent);
-    color: var(--bg);
+  .btn-add-skill:active {
+    transform: scale(0.95);
+    background: rgba(139, 92, 246, 0.2);
   }
 
   /* ── Visibility Toggle ── */
   .visibility-card {
+    background: var(--surface-solid);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 18px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 16px 20px;
-    background: rgba(15, 23, 42, 0.6);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    margin-top: 8px;
+    gap: 16px;
+    margin-bottom: 16px;
   }
 
   .visibility-info h4 {
     font-size: 0.95rem;
-    font-weight: 600;
+    font-weight: 700;
+    color: var(--text-primary);
     margin-bottom: 4px;
   }
 
   .visibility-info p {
-    font-size: 0.8rem;
-    color: var(--text-muted);
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
   }
 
   .toggle-switch {
     position: relative;
+    display: inline-block;
     width: 52px;
-    height: 28px;
-    background: var(--border);
-    border-radius: 14px;
-    cursor: pointer;
-    transition: all 0.3s;
+    height: 30px;
     flex-shrink: 0;
   }
 
-  .toggle-switch.active {
-    background: var(--accent);
+  .toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
   }
 
-  .toggle-switch::after {
+  .toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(100, 116, 139, 0.25);
+    border-radius: 30px;
+    transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .toggle-slider::before {
     content: '';
     position: absolute;
-    top: 3px;
-    left: 3px;
-    width: 22px;
-    height: 22px;
+    height: 26px;
+    width: 26px;
+    left: 2px;
+    bottom: 2px;
     background: white;
     border-radius: 50%;
-    transition: all 0.3s;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
   }
 
-  .toggle-switch.active::after {
-    left: 27px;
+  input:checked + .toggle-slider {
+    background: linear-gradient(135deg, var(--accent-purple), var(--accent-teal));
   }
 
-  /* ── Public Preview Card ── */
+  input:checked + .toggle-slider::before {
+    transform: translateX(22px);
+  }
+
+  /* ── Preview Card ── */
   .preview-card {
-    margin-top: 20px;
-    padding: 20px;
-    background: rgba(15, 23, 42, 0.6);
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(20, 184, 166, 0.04));
     border: 1px solid var(--border);
-    border-radius: 12px;
-    border-left: 3px solid var(--accent);
-  }
-
-  .preview-title {
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: var(--accent-light);
-    margin-bottom: 12px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .preview-content {
+    border-radius: 16px;
+    padding: 16px;
     display: flex;
     align-items: center;
     gap: 14px;
   }
 
   .preview-avatar {
-    width: 48px;
-    height: 48px;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--accent), var(--accent-light));
+    background: linear-gradient(135deg, var(--accent-teal), #2dd4bf);
     display: grid;
     place-items: center;
     color: white;
     font-weight: 700;
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     flex-shrink: 0;
   }
 
   .preview-details h4 {
     font-size: 0.95rem;
-    font-weight: 600;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 2px;
   }
 
   .preview-details p {
     font-size: 0.8rem;
-    color: var(--text-muted);
-    margin-top: 2px;
+    color: var(--text-secondary);
   }
 
   .preview-tags {
     display: flex;
     gap: 6px;
     margin-top: 6px;
+    flex-wrap: wrap;
   }
 
   .preview-tag {
     font-size: 0.7rem;
-    padding: 2px 8px;
+    padding: 3px 8px;
     border-radius: 10px;
-    background: var(--accent-glow);
-    color: var(--accent-light);
+    background: rgba(20, 184, 166, 0.1);
+    color: var(--accent-teal-light);
+    font-weight: 600;
   }
 
-  /* ── Action Buttons ── */
-  .form-actions {
+  /* ── Sticky Bottom Actions ── */
+  .sticky-actions {
+    position: fixed;
+    bottom: calc(var(--nav-height) + env(safe-area-inset-bottom));
+    left: 0;
+    right: 0;
+    z-index: 90;
+    padding: 12px 16px calc(8px + env(safe-area-inset-bottom));
+    background: linear-gradient(to top, var(--bg-primary) 70%, transparent);
     display: flex;
     gap: 12px;
-    margin-top: 32px;
-    padding-top: 24px;
-    border-top: 1px solid var(--border);
+    backdrop-filter: blur(4px);
   }
 
-  .btn-primary {
-    padding: 12px 28px;
-    border-radius: 10px;
-    background: linear-gradient(135deg, var(--accent), var(--accent-light));
-    color: var(--bg);
+  .btn-save {
+    flex: 1;
+    height: 56px;
+    border-radius: 16px;
     border: none;
-    font-weight: 700;
-    font-size: 0.95rem;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 16px var(--accent-glow);
-  }
-
-  .btn-secondary {
-    padding: 12px 24px;
-    border-radius: 10px;
-    background: var(--glass);
-    border: 1px solid var(--border);
-    color: var(--text-secondary);
-    font-weight: 600;
-    font-size: 0.9rem;
-    cursor: pointer;
-    transition: all 0.2s;
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .btn-secondary:hover {
-    border-color: var(--accent);
-    color: var(--accent-light);
-  }
-
-  /* ── Verification Badge ── */
-  .verified-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 0.75rem;
-    color: var(--success);
-    margin-left: 6px;
-  }
-
-  /* ── Toast ── */
-  .toast {
-    position: fixed;
-    top: 24px;
-    right: 24px;
-    padding: 14px 20px;
-    border-radius: 12px;
-    background: var(--success);
+    background: linear-gradient(135deg, var(--accent-teal), #2dd4bf);
     color: white;
-    font-weight: 600;
-    font-size: 0.9rem;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-    transform: translateX(150%);
-    transition: transform 0.4s ease;
-    z-index: 1000;
+    font-family: inherit;
+    font-size: 1.05rem;
+    font-weight: 700;
+    cursor: pointer;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
+    box-shadow: 0 4px 20px rgba(20, 184, 166, 0.3);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  .toast.show {
-    transform: translateX(0);
+  .btn-save:active {
+    transform: scale(0.96);
+    box-shadow: 0 2px 10px rgba(20, 184, 166, 0.2);
   }
 
-  .toast.error {
-    background: var(--danger);
+  .btn-cancel {
+    height: 56px;
+    padding: 0 24px;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    background: var(--surface-solid);
+    color: var(--text-secondary);
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
   }
+
+  .btn-cancel:active {
+    background: var(--border);
+    transform: scale(0.96);
+  }
+
+  /* ── Animations ── */
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .animate-in {
+    animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .delay-1 { animation-delay: 0.05s; opacity: 0; }
+  .delay-2 { animation-delay: 0.1s; opacity: 0; }
+  .delay-3 { animation-delay: 0.15s; opacity: 0; }
+  .delay-4 { animation-delay: 0.2s; opacity: 0; }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="profile-container">
+<div class="edit-page">
 
-  <!-- ═══ LEFT CARD ═══ -->
-  <div class="profile-card">
-    <div class="avatar-section">
-      <div class="avatar-wrapper">
-        {% if user.avatar_path %}
-          <img src="{{ user.avatar_path }}" alt="Avatar" class="avatar-img">
-        {% else %}
-          <div class="avatar-placeholder">
-            {{ (user.first_name or user.username or 'U')[0] }}
-          </div>
-        {% endif %}
-        <div class="avatar-edit" onclick="document.getElementById('avatarInput').click()" title="Change photo">
-          <i class="fas fa-camera"></i>
+  <!-- ═══════ Avatar ═══════ -->
+  <div class="avatar-section animate-in delay-1">
+    <div class="avatar-wrapper" onclick="document.getElementById('avatarInput').click()">
+      {% if user.avatar_path %}
+        <img src="{{ user.avatar_path }}" alt="Avatar" class="avatar-img" id="avatarPreview">
+      {% else %}
+        <div class="avatar-circle" id="avatarPlaceholder">
+          {{ (user.first_name or user.username or 'U')[0] }}
         </div>
-        <input type="file" id="avatarInput" style="display:none;" accept="image/*">
+      {% endif %}
+      <div class="avatar-badge">
+        <svg viewBox="0 0 24 24">
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+          <circle cx="12" cy="13" r="4"/>
+        </svg>
       </div>
-
-      <div class="profile-name">
-        {{ user.first_name or '' }} {{ user.last_name or '' }}
-        {% if user.is_email_verified %}
-          <span class="verified-badge" title="Email verified"><i class="fas fa-check-circle"></i></span>
-        {% endif %}
-      </div>
-      <div class="profile-role">{{ user.headline or 'No headline set' }}</div>
-      <div class="profile-location">
-        <i class="fas fa-map-marker-alt"></i>
-        {{ user.location or 'No location set' }}
-      </div>
-    </div>
-
-    <!-- Social Links -->
-    <div class="social-links">
-      {% set linkedin = (user.profile_data or {}).get('linkedin_url', '') %}
-      {% set github = (user.profile_data or {}).get('github_url', '') %}
-      <a href="{{ linkedin or '#' }}" target="_blank" class="social-btn linkedin" title="LinkedIn">
-        <i class="fab fa-linkedin-in"></i>
-      </a>
-      <a href="{{ github or '#' }}" target="_blank" class="social-btn github" title="GitHub">
-        <i class="fab fa-github"></i>
-      </a>
-      <a href="mailto:{{ user.email }}" class="social-btn" title="Email">
-        <i class="fas fa-envelope"></i>
-      </a>
-    </div>
-
-    <!-- Mini Stats -->
-    <div class="stats-mini">
-      <div class="mini-stat">
-        <div class="mini-stat-value">{{ resume_count or 3 }}</div>
-        <div class="mini-stat-label">Resumes</div>
-      </div>
-      <div class="mini-stat">
-        <div class="mini-stat-value">{{ ats_score or 78 }}</div>
-        <div class="mini-stat-label">ATS Score</div>
-      </div>
-      <div class="mini-stat">
-        <div class="mini-stat-value">{{ job_matches or 14 }}</div>
-        <div class="mini-stat-label">Matches</div>
-      </div>
-    </div>
-
-    <!-- Profile Completion -->
-    <div class="completion-section">
-      <div class="completion-header">
-        <span class="completion-title">Profile Completion</span>
-        <span class="completion-percent" id="completionText">{{ completion or 45 }}%</span>
-      </div>
-      <div class="completion-bar">
-        <div class="completion-fill" id="completionBar" style="width: {{ completion or 45 }}%"></div>
-      </div>
+      <input type="file" id="avatarInput" style="display:none;" accept="image/*" onchange="handleAvatar(this)">
     </div>
   </div>
 
-  <!-- ═══ RIGHT FORM ═══ -->
-  <div class="form-panel">
-    <div class="form-header">
-      <h2><i class="fas fa-user-edit" style="color: var(--accent); margin-right: 8px;"></i>Edit Profile</h2>
-      <p>Update your personal details and professional information</p>
+  <form id="profileForm" method="POST" action="{{ url_for('profile.edit') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <!-- ═══════ Personal Info ═══════ -->
+    <div class="form-section animate-in delay-1">
+      <div class="section-title">Personal Info</div>
+
+      <div class="float-group">
+        <input type="text" class="float-input" name="first_name" id="first_name"
+               value="{{ user.first_name or '' }}" placeholder="First Name" required>
+        <label class="float-label">First Name</label>
+      </div>
+
+      <div class="float-group">
+        <input type="text" class="float-input" name="last_name" id="last_name"
+               value="{{ user.last_name or '' }}" placeholder="Last Name" required>
+        <label class="float-label">Last Name</label>
+      </div>
+
+      <div class="phone-wrap">
+        <span class="phone-prefix">+91</span>
+        <input type="tel" class="phone-input" name="phone" id="phone"
+               value="{{ user.phone or '' }}" placeholder="Phone number" maxlength="15">
+      </div>
+
+      <div class="float-group" style="margin-top: 16px;">
+        <input type="text" class="float-input" name="location" id="location"
+               value="{{ user.location or '' }}" placeholder="Location">
+        <label class="float-label">Location</label>
+      </div>
     </div>
 
-    <form id="profileForm" method="POST" action="{{ url_for('profile.edit') }}">
+    <!-- ═══════ Professional ═══════ -->
+    <div class="form-section animate-in delay-2">
+      <div class="section-title">Professional</div>
 
-      <div class="form-grid">
-        <!-- First Name -->
-        <div class="form-group">
-          <label class="form-label"><i class="fas fa-user"></i>First Name</label>
-          <input type="text" class="form-input" name="first_name" value="{{ user.first_name or '' }}" placeholder="e.g. Sourab">
+      <div class="float-group">
+        <input type="text" class="float-input" name="headline" id="headline"
+               value="{{ user.headline or '' }}" placeholder="Target Job Role / Headline">
+        <label class="float-label">Target Job Role / Headline</label>
+      </div>
+
+      <div class="textarea-wrap">
+        <textarea class="float-textarea" name="bio" id="bio" placeholder="Bio"
+                  maxlength="500" oninput="handleBio(this)">{{ user.bio or '' }}</textarea>
+        <label class="float-label">Bio</label>
+        <span class="char-counter" id="bioCounter">0/500</span>
+      </div>
+    </div>
+
+    <!-- ═══════ Links ═══════ -->
+    <div class="form-section animate-in delay-3">
+      <div class="section-title">Links</div>
+
+      <div class="link-row">
+        <div class="link-icon">
+          <svg viewBox="0 0 24 24"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
         </div>
+        <input type="url" class="link-input" name="linkedin_url" id="linkedin_url"
+               value="{{ profile_data.get('linkedin_url', '') }}" placeholder="LinkedIn URL">
+      </div>
 
-        <!-- Last Name -->
-        <div class="form-group">
-          <label class="form-label"><i class="fas fa-user"></i>Last Name</label>
-          <input type="text" class="form-input" name="last_name" value="{{ user.last_name or '' }}" placeholder="e.g. Paswan">
+      <div class="link-row">
+        <div class="link-icon">
+          <svg viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
         </div>
+        <input type="url" class="link-input" name="github_url" id="github_url"
+               value="{{ profile_data.get('github_url', '') }}" placeholder="GitHub URL">
+      </div>
+    </div>
 
-        <!-- Phone -->
-        <div class="form-group">
-          <label class="form-label"><i class="fas fa-phone"></i>Phone</label>
-          <input type="tel" class="form-input" name="phone" value="{{ user.phone or '' }}" placeholder="+91 99753 22***">
+    <!-- ═══════ Skills ═══════ -->
+    <div class="form-section animate-in delay-3">
+      <div class="section-title">Skills</div>
+      <div class="skills-chips" id="skillsContainer">
+        {% for skill in skills %}
+        <span class="skill-chip" data-skill="{{ skill }}">
+          {{ skill }}
+          <button type="button" class="remove" onclick="removeSkill('{{ skill }}')">&times;</button>
+        </span>
+        {% endfor %}
+      </div>
+      <div class="skill-add-row">
+        <input type="text" class="skill-add-input" id="skillInput" placeholder="Add a skill (e.g. Python)">
+        <button type="button" class="btn-add-skill" onclick="addSkill()">+ Add</button>
+      </div>
+      <input type="hidden" name="skills" id="skillsHidden" value="{{ skills | join(',') }}">
+    </div>
+
+    <!-- ═══════ Profile Visibility ═══════ -->
+    <div class="form-section animate-in delay-4">
+      <div class="section-title">Profile Visibility</div>
+
+      <div class="visibility-card">
+        <div class="visibility-info">
+          <h4 id="visibilityTitle">Private Profile</h4>
+          <p id="visibilityDesc">Only you can see your profile details</p>
         </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="visibilityToggle"
+                 {% if user.profile_visibility == 'public' %}checked{% endif %}
+                 onchange="toggleVisibility()">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <input type="hidden" name="profile_visibility" id="visibilityInput"
+             value="{{ user.profile_visibility or 'private' }}">
 
-        <!-- Location -->
-        <div class="form-group">
-          <label class="form-label"><i class="fas fa-map-marker-alt"></i>Location</label>
-          <input type="text" class="form-input" name="location" value="{{ user.location or '' }}" placeholder="e.g. Mumbai, Maharashtra">
-        </div>
-
-        <!-- Headline -->
-        <div class="form-group full-width">
-          <label class="form-label"><i class="fas fa-briefcase"></i>Target Job Role / Headline</label>
-          <input type="text" class="form-input" name="headline" value="{{ user.headline or '' }}" placeholder="e.g. Python Developer | React | Flask | AI Enthusiast">
-        </div>
-
-        <!-- LinkedIn -->
-        <div class="form-group">
-          <label class="form-label"><i class="fab fa-linkedin"></i>LinkedIn URL</label>
-          <input type="url" class="form-input" name="linkedin_url" value="{{ profile_data.get('linkedin_url', '') }}" placeholder="https://linkedin.com/in/...">
-        </div>
-
-        <!-- GitHub -->
-        <div class="form-group">
-          <label class="form-label"><i class="fab fa-github"></i>GitHub URL</label>
-          <input type="url" class="form-input" name="github_url" value="{{ profile_data.get('github_url', '') }}" placeholder="https://github.com/...">
-        </div>
-
-        <!-- Bio -->
-        <div class="form-group full-width">
-          <label class="form-label"><i class="fas fa-align-left"></i>Bio</label>
-          <textarea class="form-input" name="bio" placeholder="Tell recruiters about yourself...">{{ user.bio or '' }}</textarea>
-        </div>
-
-        <!-- Skills -->
-        <div class="form-group full-width">
-          <label class="form-label"><i class="fas fa-tags"></i>Skills</label>
-          <div class="skills-container" id="skillsContainer">
-            {% for skill in skills %}
-            <span class="skill-chip" onclick="removeSkill(this)">
-              {{ skill }} <span class="remove"><i class="fas fa-times"></i></span>
-            </span>
+      <div class="preview-card">
+        <div class="preview-avatar" id="previewAvatar">{{ (user.first_name or 'U')[0] }}</div>
+        <div class="preview-details">
+          <h4 id="previewName">{{ user.first_name or 'Your Name' }} {{ user.last_name or '' }}</h4>
+          <p id="previewHeadline">{{ user.headline or 'Your headline will appear here' }}</p>
+          <div class="preview-tags" id="previewTags">
+            {% for skill in skills[:3] %}
+            <span class="preview-tag">{{ skill }}</span>
             {% endfor %}
           </div>
-          <div class="skill-input-wrapper">
-            <input type="text" class="form-input skill-input" id="skillInput" placeholder="Add a skill (e.g. Python, React)...">
-            <button type="button" class="btn-add-skill" onclick="addSkill()">
-              <i class="fas fa-plus"></i> Add
-            </button>
-          </div>
-          <input type="hidden" name="skills" id="skillsHidden" value="{{ skills | join(',') }}">
-        </div>
-
-        <!-- Visibility Toggle -->
-        <div class="form-group full-width">
-          <label class="form-label"><i class="fas fa-eye"></i>Profile Visibility</label>
-          <div class="visibility-card">
-            <div class="visibility-info">
-              <h4 id="visibilityTitle">{% if user.profile_visibility == 'public' %}Public Profile{% else %}Private Profile{% endif %}</h4>
-              <p id="visibilityDesc">{% if user.profile_visibility == 'public' %}Recruiters can find and view your profile{% else %}Only you can see your profile details{% endif %}</p>
-            </div>
-            <div class="toggle-switch {% if user.profile_visibility == 'public' %}active{% endif %}" id="visibilityToggle" onclick="toggleVisibility()"></div>
-          </div>
-          <input type="hidden" name="profile_visibility" id="visibilityInput" value="{{ user.profile_visibility or 'private' }}">
         </div>
       </div>
+    </div>
 
-      <!-- Public Preview -->
-      <div class="preview-card">
-        <div class="preview-title"><i class="fas fa-eye"></i>Recruiters will see this</div>
-        <div class="preview-content">
-          <div class="preview-avatar">{{ (user.first_name or 'U')[0] }}</div>
-          <div class="preview-details">
-            <h4 id="previewName">{{ user.first_name or 'Your Name' }} {{ user.last_name or '' }}</h4>
-            <p id="previewHeadline">{{ user.headline or 'Your headline will appear here' }}</p>
-            <div class="preview-tags" id="previewTags">
-              {% for skill in skills[:3] %}
-              <span class="preview-tag">{{ skill }}</span>
-              {% endfor %}
-            </div>
-          </div>
-        </div>
-      </div>
+    <!-- Spacer for sticky bar -->
+    <div style="height: 80px;"></div>
+  </form>
 
-      <!-- Actions -->
-      <div class="form-actions">
-        <button type="submit" class="btn-primary">
-          <i class="fas fa-save"></i> Save Changes
-        </button>
-        <a href="{{ url_for('main.dashboard') }}" class="btn-secondary">
-          <i class="fas fa-times"></i> Cancel
-        </a>
-      </div>
-    </form>
-  </div>
 </div>
 
-<!-- Toast Notification -->
-<div class="toast" id="toast">
-  <i class="fas fa-check-circle"></i>
-  <span id="toastMessage">Profile saved!</span>
+<!-- ═══════ Sticky Bottom Actions ═══════ -->
+<div class="sticky-actions">
+  <button type="button" class="btn-cancel" onclick="history.back()">Cancel</button>
+  <button type="button" class="btn-save" onclick="submitProfile()">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+      <polyline points="17 21 17 13 7 13 7 21"/>
+      <polyline points="7 3 7 8 15 8"/>
+    </svg>
+    Save Changes
+  </button>
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-  // ── Skills Management ──
+  /* ── Skills State ── */
   let skills = {{ skills | tojson }};
+
+  function renderSkills() {
+    const container = document.getElementById('skillsContainer');
+    container.innerHTML = skills.map(s => `
+      <span class="skill-chip" data-skill="${escapeHtml(s)}">
+        ${escapeHtml(s)}
+        <button type="button" class="remove" onclick="removeSkill('${escapeHtml(s)}')">&times;</button>
+      </span>
+    `).join('');
+    document.getElementById('skillsHidden').value = skills.join(',');
+    updatePreview();
+  }
 
   function addSkill() {
     const input = document.getElementById('skillInput');
     const val = input.value.trim();
     if (!val) return;
-
-    if (!skills.includes(val)) {
-      skills.push(val);
-      renderSkills();
+    if (skills.includes(val)) {
+      showToast('Skill already added');
       input.value = '';
-      updatePreview();
-      updateCompletion();
+      return;
     }
-  }
-
-  function removeSkill(el) {
-    const text = el.textContent.replace('×', '').trim();
-    skills = skills.filter(s => s !== text);
+    skills.push(val);
+    input.value = '';
     renderSkills();
-    updatePreview();
-    updateCompletion();
   }
 
-  function renderSkills() {
-    const container = document.getElementById('skillsContainer');
-    container.innerHTML = skills.map(s => `
-      <span class="skill-chip" onclick="removeSkill(this)">
-        ${s} <span class="remove"><i class="fas fa-times"></i></span>
-      </span>
-    `).join('');
-    document.getElementById('skillsHidden').value = skills.join(',');
+  function removeSkill(skill) {
+    skills = skills.filter(s => s !== skill);
+    renderSkills();
   }
 
-  // Enter key to add skill
   document.getElementById('skillInput').addEventListener('keypress', function(e) {
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -836,15 +813,39 @@
     }
   });
 
-  // ── Visibility Toggle ──
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  /* ── Bio Handling ── */
+  function handleBio(textarea) {
+    // Auto-expand
+    textarea.style.height = 'auto';
+    textarea.style.height = Math.max(120, textarea.scrollHeight) + 'px';
+
+    // Char counter
+    const len = textarea.value.length;
+    const counter = document.getElementById('bioCounter');
+    counter.textContent = len + '/500';
+    counter.className = 'char-counter' + (len > 450 ? ' danger' : len > 350 ? ' warning' : '');
+  }
+
+  // Init bio height
+  (function() {
+    const bio = document.getElementById('bio');
+    if (bio && bio.value) handleBio(bio);
+  })();
+
+  /* ── Visibility Toggle ── */
   function toggleVisibility() {
-    const toggle = document.getElementById('visibilityToggle');
+    const checkbox = document.getElementById('visibilityToggle');
     const input = document.getElementById('visibilityInput');
     const title = document.getElementById('visibilityTitle');
     const desc = document.getElementById('visibilityDesc');
 
-    toggle.classList.toggle('active');
-    const isPublic = toggle.classList.contains('active');
+    const isPublic = checkbox.checked;
     input.value = isPublic ? 'public' : 'private';
     title.textContent = isPublic ? 'Public Profile' : 'Private Profile';
     desc.textContent = isPublic
@@ -852,78 +853,109 @@
       : 'Only you can see your profile details';
   }
 
-  // ── Live Preview Update ──
-  const inputs = document.querySelectorAll('.form-input');
-  inputs.forEach(input => {
-    input.addEventListener('input', updatePreview);
-  });
-
+  /* ── Live Preview Updates ── */
   function updatePreview() {
-    const firstName = document.querySelector('[name="first_name"]').value || 'Your Name';
-    const lastName = document.querySelector('[name="last_name"]').value || '';
-    const headline = document.querySelector('[name="headline"]').value || 'Your headline will appear here';
+    const firstName = document.getElementById('first_name').value || 'Your Name';
+    const lastName = document.getElementById('last_name').value || '';
+    const headline = document.getElementById('headline').value || 'Your headline will appear here';
 
-    document.getElementById('previewName').textContent = firstName + ' ' + lastName;
+    document.getElementById('previewName').textContent = (firstName + ' ' + lastName).trim();
     document.getElementById('previewHeadline').textContent = headline;
+    document.getElementById('previewAvatar').textContent = (firstName[0] || 'U').toUpperCase();
 
     const tagsContainer = document.getElementById('previewTags');
     tagsContainer.innerHTML = skills.slice(0, 3).map(s =>
-      `<span class="preview-tag">${s}</span>`
+      `<span class="preview-tag">${escapeHtml(s)}</span>`
     ).join('');
   }
 
-  // ── Completion Calculator ──
-  function updateCompletion() {
-    const fields = [
-      document.querySelector('[name="first_name"]').value,
-      document.querySelector('[name="last_name"]').value,
-      document.querySelector('[name="phone"]').value,
-      document.querySelector('[name="location"]').value,
-      document.querySelector('[name="headline"]').value,
-      document.querySelector('[name="bio"]').value,
-      document.querySelector('[name="linkedin_url"]').value,
-      document.querySelector('[name="github_url"]').value,
-      skills.length > 0,
-    ];
-    const filled = fields.filter(Boolean).length;
-    const pct = Math.min(100, filled * 11 + 10);
-    document.getElementById('completionBar').style.width = pct + '%';
-    document.getElementById('completionText').textContent = pct + '%';
-  }
-
-  // ── Form Submit with AJAX ──
-  document.getElementById('profileForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const formData = new FormData(this);
-    const data = Object.fromEntries(formData);
-    data.skills = skills;
-
-    fetch('{{ url_for("profile.edit") }}', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': '{{ csrf_token() }}'
-      },
-      body: JSON.stringify(data)
-    })
-    .then(r => r.json())
-    .then(res => {
-      showToast(res.message || 'Profile saved!', !res.success);
-    })
-    .catch(() => {
-      // Fallback: normal form submit
-      this.submit();
-    });
+  // Attach live listeners
+  ['first_name', 'last_name', 'headline'].forEach(id => {
+    document.getElementById(id).addEventListener('input', updatePreview);
   });
 
-  function showToast(msg, isError) {
-    const toast = document.getElementById('toast');
-    document.getElementById('toastMessage').textContent = msg;
-    toast.className = 'toast' + (isError ? ' error' : '') + ' show';
-    setTimeout(() => toast.classList.remove('show'), 3000);
+  /* ── Avatar Preview ── */
+  function handleAvatar(input) {
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const wrapper = document.querySelector('.avatar-wrapper');
+        const existing = wrapper.querySelector('.avatar-img');
+        const placeholder = document.getElementById('avatarPlaceholder');
+        if (existing) {
+          existing.src = e.target.result;
+        } else if (placeholder) {
+          placeholder.outerHTML = `<img src="${e.target.result}" alt="Avatar" class="avatar-img" id="avatarPreview">`;
+        }
+        showToast('Photo selected. Save to upload.');
+      };
+      reader.readAsDataURL(input.files[0]);
+    }
   }
 
-  // Init
-  updateCompletion();
+  /* ── Form Submit ── */
+  async function submitProfile() {
+    const btn = document.querySelector('.btn-save');
+    btn.style.opacity = '0.7';
+    btn.style.pointerEvents = 'none';
+
+    const data = {
+      first_name: document.getElementById('first_name').value,
+      last_name: document.getElementById('last_name').value,
+      phone: document.getElementById('phone').value,
+      location: document.getElementById('location').value,
+      headline: document.getElementById('headline').value,
+      bio: document.getElementById('bio').value,
+      linkedin_url: document.getElementById('linkedin_url').value,
+      github_url: document.getElementById('github_url').value,
+      skills: skills,
+      profile_visibility: document.getElementById('visibilityInput').value
+    };
+
+    try {
+      const res = await fetch('{{ url_for("profile.edit") }}', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCsrfToken()
+        },
+        body: JSON.stringify(data)
+      });
+      const result = await res.json();
+      if (result.success) {
+        showToast(result.message || 'Profile saved!');
+        setTimeout(() => window.location.href = '{{ url_for("profile.edit") }}', 600);
+      } else {
+        showToast(result.message || 'Failed to save', 'error');
+      }
+    } catch (err) {
+      // Fallback to normal form submit
+      document.getElementById('profileForm').submit();
+    } finally {
+      btn.style.opacity = '';
+      btn.style.pointerEvents = '';
+    }
+  }
+
+  /* ── Toast ── */
+  function showToast(message, type = 'success') {
+    const existing = document.querySelector('.mobile-toast');
+    if (existing) existing.remove();
+
+    const toast = document.createElement('div');
+    toast.className = 'mobile-toast';
+    const icon = type === 'success'
+      ? '<svg class="toast-icon toast-success" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>'
+      : '<svg class="toast-icon toast-error" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+
+    toast.innerHTML = icon + '<span>' + message + '</span>';
+    document.body.appendChild(toast);
+
+    requestAnimationFrame(() => toast.classList.add('show'));
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(() => toast.remove(), 300);
+    }, 2500);
+  }
 </script>
 {% endblock %}

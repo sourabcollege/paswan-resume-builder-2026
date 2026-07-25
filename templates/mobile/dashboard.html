@@ -1,0 +1,782 @@
+{% extends "mobile/base.html" %}
+
+{% block title %}Dashboard | Paswan Resume{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* ── Pull-to-Refresh Visual ── */
+  .ptr-zone {
+    position: relative;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+    min-height: 100%;
+  }
+
+  .ptr-spinner {
+    height: 0;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: height 0.3s ease;
+  }
+
+  .ptr-spinner.visible {
+    height: 60px;
+  }
+
+  .ptr-spinner svg {
+    width: 28px;
+    height: 28px;
+    color: var(--accent-purple);
+    animation: ptrSpin 1s linear infinite;
+  }
+
+  @keyframes ptrSpin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* ── Greeting Card ── */
+  .greeting-card {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.12), rgba(20, 184, 166, 0.08));
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 22px 20px;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .greeting-card::before {
+    content: '';
+    position: absolute;
+    top: -40px;
+    right: -40px;
+    width: 120px;
+    height: 120px;
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.15), transparent 70%);
+    pointer-events: none;
+  }
+
+  .greeting-text {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.3;
+    margin-bottom: 6px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .date-text {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── Stats Scroll Row ── */
+  .stats-scroll {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    margin: 0 -16px 24px;
+    padding: 4px 16px;
+    scroll-padding-left: 16px;
+    scroll-padding-right: 16px;
+  }
+
+  .stats-scroll::-webkit-scrollbar {
+    display: none;
+  }
+
+  .stat-card {
+    flex: 0 0 calc(50% - 6px);
+    min-width: 160px;
+    background: var(--surface-solid);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 18px 16px;
+    scroll-snap-align: start;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.15s ease, border-color 0.2s ease;
+  }
+
+  .stat-card:active {
+    transform: scale(0.96);
+    border-color: var(--border-strong);
+  }
+
+  .stat-card::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 16px;
+    bottom: 16px;
+    width: 3.5px;
+    border-radius: 0 4px 4px 0;
+  }
+
+  .stat-card-purple::after { background: linear-gradient(180deg, #8b5cf6, #a78bfa); }
+  .stat-card-teal::after   { background: linear-gradient(180deg, #14b8a6, #5eead4); box-shadow: 0 0 12px rgba(20, 184, 166, 0.3); }
+  .stat-card-orange::after { background: linear-gradient(180deg, #f59e0b, #fbbf24); }
+  .stat-card-blue::after   { background: linear-gradient(180deg, #3b82f6, #60a5fa); }
+
+  .stat-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+  }
+
+  .stat-value {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .stat-card-teal .stat-value {
+    background: linear-gradient(135deg, var(--accent-teal), var(--accent-teal-light));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .stat-meta {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+  }
+
+  .meta-pro { color: var(--accent-teal); }
+  .meta-free { color: var(--accent-amber); }
+
+  /* ── Section Cards ── */
+  .section-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 20px;
+    backdrop-filter: blur(12px);
+    transition: transform 0.15s ease, border-color 0.2s ease;
+  }
+
+  .section-card:active {
+    transform: scale(0.98);
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .section-header h3 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+
+  .section-badge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--accent-purple);
+    background: rgba(139, 92, 246, 0.1);
+    padding: 4px 10px;
+    border-radius: 20px;
+  }
+
+  /* ── Chart ── */
+  .chart-container {
+    height: 180px;
+    position: relative;
+  }
+
+  /* ── Skills ── */
+  .skills-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .skill-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .skill-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  .skill-name { color: var(--text-primary); }
+  .skill-pct  { color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+
+  .skill-bar-bg {
+    height: 8px;
+    background: rgba(148, 163, 184, 0.1);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  .skill-bar-fill {
+    height: 100%;
+    border-radius: 999px;
+    transition: width 1s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* ── Quick Actions ── */
+  .quick-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .btn-create {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    height: 56px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, var(--accent-purple), #7c3aed);
+    color: white;
+    font-size: 1rem;
+    font-weight: 700;
+    text-decoration: none;
+    border: none;
+    box-shadow: 0 4px 20px rgba(139, 92, 246, 0.35);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-create:active {
+    transform: scale(0.96);
+    box-shadow: 0 2px 10px rgba(139, 92, 246, 0.2);
+  }
+
+  .btn-create svg {
+    width: 20px;
+    height: 20px;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
+    stroke: currentColor;
+  }
+
+  .btn-upload {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    height: 48px;
+    border-radius: 14px;
+    background: var(--surface-solid);
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-decoration: none;
+    border: 1px solid var(--border);
+    transition: all 0.2s ease;
+  }
+
+  .btn-upload:active {
+    transform: scale(0.96);
+    background: rgba(139, 92, 246, 0.08);
+    border-color: var(--border-strong);
+  }
+
+  .btn-upload svg {
+    width: 18px;
+    height: 18px;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
+    stroke: currentColor;
+  }
+
+  /* ── Pro Banner ── */
+  .pro-banner {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.9), rgba(124, 58, 237, 0.95));
+    border-radius: 20px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 24px;
+    box-shadow: 0 8px 32px rgba(139, 92, 246, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .pro-banner::before {
+    content: '';
+    position: absolute;
+    top: -20px;
+    right: -20px;
+    width: 100px;
+    height: 100px;
+    background: radial-gradient(circle, rgba(255,255,255,0.12), transparent 70%);
+    pointer-events: none;
+  }
+
+  .pro-title {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: white;
+    margin-bottom: 4px;
+  }
+
+  .pro-subtitle {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.75);
+    font-weight: 500;
+  }
+
+  .btn-pro-sm {
+    flex-shrink: 0;
+    background: white;
+    color: #7c3aed;
+    font-weight: 700;
+    font-size: 0.85rem;
+    padding: 10px 18px;
+    border-radius: 12px;
+    text-decoration: none;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+    transition: all 0.2s ease;
+  }
+
+  .btn-pro-sm:active {
+    transform: scale(0.92);
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  /* ── Activity ── */
+  .activity-list {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .activity-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .activity-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .activity-item:first-child {
+    padding-top: 0;
+  }
+
+  .activity-icon {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    border-radius: 10px;
+    background: rgba(139, 92, 246, 0.1);
+    display: grid;
+    place-items: center;
+    color: var(--accent-purple);
+  }
+
+  .activity-icon svg {
+    width: 16px;
+    height: 16px;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
+    stroke: currentColor;
+  }
+
+  .activity-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .activity-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 3px;
+    word-break: break-word;
+  }
+
+  .activity-time {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  /* ── Empty State ── */
+  .empty-state {
+    text-align: center;
+    padding: 28px 0;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="ptr-zone" id="ptrZone">
+  <div class="ptr-spinner" id="ptrSpinner">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+    </svg>
+  </div>
+
+  <!-- ═══════ Greeting ═══════ -->
+  <div class="greeting-card"
+       data-first-name="{{ current_user.first_name or '' }}"
+       data-username="{{ current_user.username or '' }}"
+       data-email="{{ current_user.email or '' }}">
+    <div class="greeting-text" id="greetingText">Good morning, {{ current_user.first_name or 'User' }} 👋</div>
+    <div class="date-text" id="currentDate">Loading date...</div>
+  </div>
+
+  <!-- ═══════ Stats Scroll ═══════ -->
+  <div class="stats-scroll">
+    <div class="stat-card stat-card-purple">
+      <div class="stat-label">Resumes</div>
+      <div class="stat-value">{{ resume_count or 0 }}</div>
+      <div class="stat-meta">
+        {% if subscription and subscription.plan == 'pro' and subscription.status == 'active' %}
+          <span class="meta-pro">Unlimited (Pro)</span>
+        {% else %}
+          <span class="meta-free">{{ 3 - (resume_count or 0) }} left on free</span>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="stat-card stat-card-teal">
+      <div class="stat-label">ATS Score</div>
+      <div class="stat-value">{{ latest_ats_score or ats_score or 78 }}</div>
+      <div class="stat-meta">Latest average</div>
+    </div>
+
+    <div class="stat-card stat-card-orange">
+      <div class="stat-label">Job Matches</div>
+      <div class="stat-value">{{ job_matches or 0 }}</div>
+      <div class="stat-meta">Recommended</div>
+    </div>
+
+    <div class="stat-card stat-card-blue">
+      <div class="stat-label">Complete</div>
+      <div class="stat-value">{{ completeness or 0 }}%</div>
+      <div class="stat-meta">Profile status</div>
+    </div>
+  </div>
+
+  <!-- ═══════ Quick Actions ═══════ -->
+  <div class="quick-actions">
+    <a href="{{ url_for('resume.create_builder_resume') }}" class="btn-create">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <path d="M12 5v14M5 12h14"/>
+      </svg>
+      <span>Create New Resume</span>
+    </a>
+    <a href="{{ url_for('resume.list_resumes') }}" class="btn-upload">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="17 8 12 3 7 8"/>
+        <line x1="12" y1="3" x2="12" y2="15"/>
+      </svg>
+      <span>My Resumes</span>
+    </a>
+  </div>
+
+  <!-- ═══════ ATS Trend ═══════ -->
+  <div class="section-card">
+    <div class="section-header">
+      <h3>ATS Score Trend</h3>
+      <span class="section-badge">30 days</span>
+    </div>
+    <div class="chart-container">
+      <canvas id="atsTrendChart"></canvas>
+    </div>
+  </div>
+
+  <!-- ═══════ Skills Breakdown ═══════ -->
+  <div class="section-card">
+    <div class="section-header">
+      <h3>Skills Breakdown</h3>
+    </div>
+    <div class="skills-list">
+      <div class="skill-row">
+        <div class="skill-info">
+          <span class="skill-name">Technical</span>
+          <span class="skill-pct">45%</span>
+        </div>
+        <div class="skill-bar-bg">
+          <div class="skill-bar-fill" style="width: 45%; background: linear-gradient(90deg, #8b5cf6, #a78bfa);"></div>
+        </div>
+      </div>
+      <div class="skill-row">
+        <div class="skill-info">
+          <span class="skill-name">Soft Skills</span>
+          <span class="skill-pct">25%</span>
+        </div>
+        <div class="skill-bar-bg">
+          <div class="skill-bar-fill" style="width: 25%; background: linear-gradient(90deg, #14b8a6, #5eead4);"></div>
+        </div>
+      </div>
+      <div class="skill-row">
+        <div class="skill-info">
+          <span class="skill-name">Tools</span>
+          <span class="skill-pct">20%</span>
+        </div>
+        <div class="skill-bar-bg">
+          <div class="skill-bar-fill" style="width: 20%; background: linear-gradient(90deg, #f59e0b, #fbbf24);"></div>
+        </div>
+      </div>
+      <div class="skill-row">
+        <div class="skill-info">
+          <span class="skill-name">Languages</span>
+          <span class="skill-pct">10%</span>
+        </div>
+        <div class="skill-bar-bg">
+          <div class="skill-bar-fill" style="width: 10%; background: linear-gradient(90deg, #3b82f6, #60a5fa);"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ Recent Activity ═══════ -->
+  <div class="section-card">
+    <div class="section-header">
+      <h3>Recent Activity</h3>
+    </div>
+    {% if recent_activity %}
+      <div class="activity-list">
+        {% for activity in recent_activity[:5] %}
+        <div class="activity-item">
+          <div class="activity-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+            </svg>
+          </div>
+          <div class="activity-content">
+            <div class="activity-title">{{ activity.action or activity.description or 'Activity' }}</div>
+            <div class="activity-time">
+              {% if activity.created_at %}
+                {{ activity.created_at.strftime('%b %d, %I:%M %p') }}
+              {% else %}
+                Recently
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state">No recent activity yet. Create your first resume!</div>
+    {% endif %}
+  </div>
+
+  <!-- ═══════ Pro Banner ═══════ -->
+  {% if not (subscription and subscription.plan == 'pro' and subscription.status == 'active') %}
+  <div class="pro-banner">
+    <div class="pro-content">
+      <div class="pro-title">Upgrade to Pro</div>
+      <div class="pro-subtitle">Unlimited resumes & AI features</div>
+    </div>
+    <a href="{{ url_for('payment.checkout', plan='pro') }}" class="btn-pro-sm">Upgrade</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  /* ── Greeting & Date ── */
+  (function() {
+    const card = document.querySelector('.greeting-card');
+    const firstName = (card.dataset.firstName || '').trim();
+    const username = (card.dataset.username || '').trim();
+    const email = (card.dataset.email || '').trim();
+
+    let displayName = firstName;
+    if (!displayName || displayName.toLowerCase() === 'test' || displayName.toLowerCase() === 'user') {
+      displayName = username || email.split('@')[0] || 'User';
+    }
+
+    const hour = new Date().getHours();
+    let greeting = 'Good morning';
+    if (hour >= 12 && hour < 17) greeting = 'Good afternoon';
+    else if (hour >= 17) greeting = 'Good evening';
+
+    document.getElementById('greetingText').textContent = greeting + ', ' + displayName + ' 👋';
+
+    const dateOpts = { weekday: 'long', month: 'long', day: 'numeric' };
+    document.getElementById('currentDate').textContent = new Date().toLocaleDateString(undefined, dateOpts);
+  })();
+
+  /* ── Pull-to-Refresh Simulation ── */
+  (function() {
+    const zone = document.getElementById('ptrZone');
+    const spinner = document.getElementById('ptrSpinner');
+    let startY = 0;
+    let pulling = false;
+
+    zone.addEventListener('touchstart', function(e) {
+      if (zone.scrollTop <= 0) {
+        startY = e.touches[0].clientY;
+        pulling = true;
+      }
+    }, { passive: true });
+
+    zone.addEventListener('touchmove', function(e) {
+      if (!pulling) return;
+      const diff = e.touches[0].clientY - startY;
+      if (diff > 60 && zone.scrollTop <= 0) {
+        spinner.classList.add('visible');
+      } else if (diff < 20) {
+        spinner.classList.remove('visible');
+      }
+    }, { passive: true });
+
+    zone.addEventListener('touchend', function() {
+      if (spinner.classList.contains('visible')) {
+        setTimeout(() => {
+          spinner.classList.remove('visible');
+          // Simulate refresh
+          document.querySelectorAll('.stat-value').forEach(el => {
+            el.style.opacity = '0.6';
+            setTimeout(() => el.style.opacity = '1', 400);
+          });
+        }, 800);
+      }
+      pulling = false;
+    }, { passive: true });
+  })();
+
+  /* ── ATS Trend Chart (Mobile Simplified) ── */
+  (function() {
+    const ctx = document.getElementById('atsTrendChart');
+    if (!ctx) return;
+
+    Chart.defaults.color = '#64748b';
+    Chart.defaults.borderColor = 'rgba(100, 116, 139, 0.08)';
+    Chart.defaults.font.family = 'Inter, system-ui, sans-serif';
+
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['1d', '5d', '10d', '15d', '20d', '25d', '30d'],
+        datasets: [{
+          label: 'ATS',
+          data: [52, 58, 61, 65, 70, 74, {{ latest_ats_score or ats_score or 78 }}],
+          borderColor: '#8b5cf6',
+          backgroundColor: (ctx) => {
+            const chart = ctx.chart;
+            const {ctx: c, chartArea} = chart;
+            if (!chartArea) return null;
+            const grad = c.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+            grad.addColorStop(0, 'rgba(139, 92, 246, 0.25)');
+            grad.addColorStop(1, 'rgba(139, 92, 246, 0.0)');
+            return grad;
+          },
+          fill: true,
+          tension: 0.4,
+          pointRadius: 4,
+          pointBackgroundColor: '#8b5cf6',
+          pointBorderColor: '#0f172a',
+          pointBorderWidth: 2,
+          borderWidth: 2.5,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#1e293b',
+            titleColor: '#f8fafc',
+            bodyColor: '#f8fafc',
+            borderColor: 'rgba(148, 163, 184, 0.15)',
+            borderWidth: 1,
+            padding: 10,
+            cornerRadius: 10,
+            displayColors: false,
+            callbacks: {
+              title: () => '',
+              label: (ctx) => 'Score: ' + ctx.parsed.y
+            }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            max: 100,
+            grid: { color: 'rgba(100, 116, 139, 0.06)' },
+            ticks: { font: { size: 10 }, padding: 6 }
+          },
+          x: {
+            grid: { display: false },
+            ticks: { font: { size: 10 }, padding: 6 }
+          }
+        },
+        interaction: {
+          mode: 'index',
+          intersect: false,
+        }
+      }
+    });
+  })();
+
+  /* ── Animate Skill Bars on View ── */
+  (function() {
+    const bars = document.querySelectorAll('.skill-bar-fill');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const target = entry.target;
+          const width = target.style.width;
+          target.style.width = '0%';
+          requestAnimationFrame(() => {
+            setTimeout(() => { target.style.width = width; }, 100);
+          });
+          observer.unobserve(target);
+        }
+      });
+    }, { threshold: 0.5 });
+
+    bars.forEach(bar => observer.observe(bar));
+  })();
+</script>
+{% endblock %}

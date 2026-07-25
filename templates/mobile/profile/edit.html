@@ -1,0 +1,961 @@
+{% extends "mobile/base.html" %}
+
+{% block title %}Edit Profile | Paswan Resume{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* ── Profile Edit Page ── */
+  .edit-page {
+    padding-bottom: calc(var(--nav-height) + env(safe-area-inset-bottom) + 120px);
+  }
+
+  /* ── Avatar Section ── */
+  .avatar-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 0 24px;
+  }
+
+  .avatar-wrapper {
+    position: relative;
+    width: 120px;
+    height: 120px;
+  }
+
+  .avatar-circle {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-teal), #2dd4bf);
+    display: grid;
+    place-items: center;
+    color: white;
+    font-size: 2.5rem;
+    font-weight: 800;
+    box-shadow: 0 8px 32px rgba(20, 184, 166, 0.25);
+    border: 3px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .avatar-img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .avatar-badge {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-purple), #a78bfa);
+    border: 3px solid var(--bg-primary);
+    display: grid;
+    place-items: center;
+    color: white;
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.35);
+    cursor: pointer;
+    transition: transform 0.2s ease;
+  }
+
+  .avatar-badge:active {
+    transform: scale(0.9);
+  }
+
+  .avatar-badge svg {
+    width: 16px;
+    height: 16px;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
+    stroke: currentColor;
+    pointer-events: none;
+  }
+
+  /* ── Form Sections ── */
+  .form-section {
+    margin-bottom: 28px;
+  }
+
+  .section-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+    padding-left: 4px;
+  }
+
+  /* ── Floating Label Inputs ── */
+  .float-group {
+    position: relative;
+    margin-bottom: 16px;
+  }
+
+  .float-input {
+    width: 100%;
+    height: 56px;
+    padding: 20px 14px 8px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    background: #1e293b;
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 1rem; /* Prevents iOS zoom */
+    font-weight: 500;
+    transition: all 0.2s ease;
+    -webkit-appearance: none;
+    outline: none;
+  }
+
+  .float-input:focus {
+    border-color: var(--accent-teal);
+    box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.15);
+  }
+
+  .float-input::placeholder {
+    color: transparent;
+  }
+
+  .float-label {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 1rem;
+    font-weight: 500;
+    pointer-events: none;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-origin: left top;
+  }
+
+  .float-input:focus ~ .float-label,
+  .float-input:not(:placeholder-shown) ~ .float-label {
+    top: 10px;
+    transform: translateY(0) scale(0.72);
+    color: var(--accent-teal);
+    font-weight: 700;
+  }
+
+  .float-input:invalid:not(:placeholder-shown) {
+    border-color: rgba(244, 63, 94, 0.5);
+  }
+
+  .float-input:invalid:not(:placeholder-shown) ~ .float-label {
+    color: var(--accent-rose);
+  }
+
+  /* ── Phone Input ── */
+  .phone-wrap {
+    display: flex;
+    align-items: stretch;
+    height: 56px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    background: #1e293b;
+    overflow: hidden;
+    transition: all 0.2s ease;
+  }
+
+  .phone-wrap:focus-within {
+    border-color: var(--accent-teal);
+    box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.15);
+  }
+
+  .phone-prefix {
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    color: var(--text-secondary);
+    font-weight: 700;
+    font-size: 0.95rem;
+    border-right: 1px solid var(--border);
+    background: rgba(15, 23, 42, 0.4);
+    user-select: none;
+  }
+
+  .phone-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 500;
+    padding: 0 14px;
+    outline: none;
+    -webkit-appearance: none;
+  }
+
+  .phone-input::placeholder {
+    color: var(--text-muted);
+  }
+
+  /* ── Textarea ── */
+  .textarea-wrap {
+    position: relative;
+  }
+
+  .float-textarea {
+    width: 100%;
+    min-height: 120px;
+    padding: 28px 14px 28px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    background: #1e293b;
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 500;
+    line-height: 1.6;
+    resize: none;
+    transition: all 0.2s ease;
+    -webkit-appearance: none;
+    outline: none;
+  }
+
+  .float-textarea:focus {
+    border-color: var(--accent-teal);
+    box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.15);
+  }
+
+  .float-textarea::placeholder {
+    color: transparent;
+  }
+
+  .textarea-wrap .float-label {
+    top: 18px;
+    transform: none;
+  }
+
+  .float-textarea:focus ~ .float-label,
+  .float-textarea:not(:placeholder-shown) ~ .float-label {
+    top: 8px;
+    transform: scale(0.72);
+    color: var(--accent-teal);
+    font-weight: 700;
+  }
+
+  .char-counter {
+    position: absolute;
+    bottom: 10px;
+    right: 14px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    pointer-events: none;
+  }
+
+  .char-counter.warning {
+    color: var(--accent-amber);
+  }
+
+  .char-counter.danger {
+    color: var(--accent-rose);
+  }
+
+  /* ── Link Inputs ── */
+  .link-row {
+    display: flex;
+    align-items: stretch;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .link-icon {
+    width: 48px;
+    height: 56px;
+    min-width: 48px;
+    border-radius: 14px;
+    background: #1e293b;
+    border: 1px solid var(--border);
+    display: grid;
+    place-items: center;
+    color: var(--text-secondary);
+  }
+
+  .link-icon svg {
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
+  }
+
+  .link-input {
+    flex: 1;
+    height: 56px;
+    padding: 0 14px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    background: #1e293b;
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    -webkit-appearance: none;
+    outline: none;
+  }
+
+  .link-input:focus {
+    border-color: var(--accent-teal);
+    box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.15);
+  }
+
+  .link-input::placeholder {
+    color: var(--text-muted);
+  }
+
+  /* ── Skills ── */
+  .skills-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 14px;
+    min-height: 36px;
+  }
+
+  .skill-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    background: linear-gradient(135deg, rgba(20, 184, 166, 0.12), rgba(139, 92, 246, 0.08));
+    color: var(--accent-teal-light);
+    border: 1px solid rgba(20, 184, 166, 0.2);
+    transition: all 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .skill-chip:active {
+    transform: scale(0.95);
+  }
+
+  .skill-chip .remove {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: rgba(255, 255, 255, 0.1);
+    color: inherit;
+    font-size: 0.7rem;
+    cursor: pointer;
+    border: none;
+    padding: 0;
+    margin-left: 2px;
+  }
+
+  .skill-chip .remove:active {
+    background: rgba(244, 63, 94, 0.3);
+    color: var(--accent-rose);
+  }
+
+  .skill-add-row {
+    display: flex;
+    gap: 10px;
+  }
+
+  .skill-add-input {
+    flex: 1;
+    height: 48px;
+    padding: 0 14px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: #1e293b;
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 500;
+    outline: none;
+    -webkit-appearance: none;
+  }
+
+  .skill-add-input:focus {
+    border-color: var(--accent-purple);
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.12);
+  }
+
+  .skill-add-input::placeholder {
+    color: var(--text-muted);
+  }
+
+  .btn-add-skill {
+    height: 48px;
+    padding: 0 18px;
+    border-radius: 12px;
+    border: 1px solid var(--accent-purple);
+    background: rgba(139, 92, 246, 0.1);
+    color: var(--accent-purple-light);
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+  }
+
+  .btn-add-skill:active {
+    transform: scale(0.95);
+    background: rgba(139, 92, 246, 0.2);
+  }
+
+  /* ── Visibility Toggle ── */
+  .visibility-card {
+    background: var(--surface-solid);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .visibility-info h4 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+  }
+
+  .visibility-info p {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+  }
+
+  .toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 52px;
+    height: 30px;
+    flex-shrink: 0;
+  }
+
+  .toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(100, 116, 139, 0.25);
+    border-radius: 30px;
+    transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .toggle-slider::before {
+    content: '';
+    position: absolute;
+    height: 26px;
+    width: 26px;
+    left: 2px;
+    bottom: 2px;
+    background: white;
+    border-radius: 50%;
+    transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  }
+
+  input:checked + .toggle-slider {
+    background: linear-gradient(135deg, var(--accent-purple), var(--accent-teal));
+  }
+
+  input:checked + .toggle-slider::before {
+    transform: translateX(22px);
+  }
+
+  /* ── Preview Card ── */
+  .preview-card {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(20, 184, 166, 0.04));
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .preview-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-teal), #2dd4bf);
+    display: grid;
+    place-items: center;
+    color: white;
+    font-weight: 700;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+
+  .preview-details h4 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 2px;
+  }
+
+  .preview-details p {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+  }
+
+  .preview-tags {
+    display: flex;
+    gap: 6px;
+    margin-top: 6px;
+    flex-wrap: wrap;
+  }
+
+  .preview-tag {
+    font-size: 0.7rem;
+    padding: 3px 8px;
+    border-radius: 10px;
+    background: rgba(20, 184, 166, 0.1);
+    color: var(--accent-teal-light);
+    font-weight: 600;
+  }
+
+  /* ── Sticky Bottom Actions ── */
+  .sticky-actions {
+    position: fixed;
+    bottom: calc(var(--nav-height) + env(safe-area-inset-bottom));
+    left: 0;
+    right: 0;
+    z-index: 90;
+    padding: 12px 16px calc(8px + env(safe-area-inset-bottom));
+    background: linear-gradient(to top, var(--bg-primary) 70%, transparent);
+    display: flex;
+    gap: 12px;
+    backdrop-filter: blur(4px);
+  }
+
+  .btn-save {
+    flex: 1;
+    height: 56px;
+    border-radius: 16px;
+    border: none;
+    background: linear-gradient(135deg, var(--accent-teal), #2dd4bf);
+    color: white;
+    font-family: inherit;
+    font-size: 1.05rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 4px 20px rgba(20, 184, 166, 0.3);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .btn-save:active {
+    transform: scale(0.96);
+    box-shadow: 0 2px 10px rgba(20, 184, 166, 0.2);
+  }
+
+  .btn-cancel {
+    height: 56px;
+    padding: 0 24px;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    background: var(--surface-solid);
+    color: var(--text-secondary);
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .btn-cancel:active {
+    background: var(--border);
+    transform: scale(0.96);
+  }
+
+  /* ── Animations ── */
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .animate-in {
+    animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .delay-1 { animation-delay: 0.05s; opacity: 0; }
+  .delay-2 { animation-delay: 0.1s; opacity: 0; }
+  .delay-3 { animation-delay: 0.15s; opacity: 0; }
+  .delay-4 { animation-delay: 0.2s; opacity: 0; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="edit-page">
+
+  <!-- ═══════ Avatar ═══════ -->
+  <div class="avatar-section animate-in delay-1">
+    <div class="avatar-wrapper" onclick="document.getElementById('avatarInput').click()">
+      {% if user.avatar_path %}
+        <img src="{{ user.avatar_path }}" alt="Avatar" class="avatar-img" id="avatarPreview">
+      {% else %}
+        <div class="avatar-circle" id="avatarPlaceholder">
+          {{ (user.first_name or user.username or 'U')[0] }}
+        </div>
+      {% endif %}
+      <div class="avatar-badge">
+        <svg viewBox="0 0 24 24">
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+          <circle cx="12" cy="13" r="4"/>
+        </svg>
+      </div>
+      <input type="file" id="avatarInput" style="display:none;" accept="image/*" onchange="handleAvatar(this)">
+    </div>
+  </div>
+
+  <form id="profileForm" method="POST" action="{{ url_for('profile.edit') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <!-- ═══════ Personal Info ═══════ -->
+    <div class="form-section animate-in delay-1">
+      <div class="section-title">Personal Info</div>
+
+      <div class="float-group">
+        <input type="text" class="float-input" name="first_name" id="first_name"
+               value="{{ user.first_name or '' }}" placeholder="First Name" required>
+        <label class="float-label">First Name</label>
+      </div>
+
+      <div class="float-group">
+        <input type="text" class="float-input" name="last_name" id="last_name"
+               value="{{ user.last_name or '' }}" placeholder="Last Name" required>
+        <label class="float-label">Last Name</label>
+      </div>
+
+      <div class="phone-wrap">
+        <span class="phone-prefix">+91</span>
+        <input type="tel" class="phone-input" name="phone" id="phone"
+               value="{{ user.phone or '' }}" placeholder="Phone number" maxlength="15">
+      </div>
+
+      <div class="float-group" style="margin-top: 16px;">
+        <input type="text" class="float-input" name="location" id="location"
+               value="{{ user.location or '' }}" placeholder="Location">
+        <label class="float-label">Location</label>
+      </div>
+    </div>
+
+    <!-- ═══════ Professional ═══════ -->
+    <div class="form-section animate-in delay-2">
+      <div class="section-title">Professional</div>
+
+      <div class="float-group">
+        <input type="text" class="float-input" name="headline" id="headline"
+               value="{{ user.headline or '' }}" placeholder="Target Job Role / Headline">
+        <label class="float-label">Target Job Role / Headline</label>
+      </div>
+
+      <div class="textarea-wrap">
+        <textarea class="float-textarea" name="bio" id="bio" placeholder="Bio"
+                  maxlength="500" oninput="handleBio(this)">{{ user.bio or '' }}</textarea>
+        <label class="float-label">Bio</label>
+        <span class="char-counter" id="bioCounter">0/500</span>
+      </div>
+    </div>
+
+    <!-- ═══════ Links ═══════ -->
+    <div class="form-section animate-in delay-3">
+      <div class="section-title">Links</div>
+
+      <div class="link-row">
+        <div class="link-icon">
+          <svg viewBox="0 0 24 24"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+        </div>
+        <input type="url" class="link-input" name="linkedin_url" id="linkedin_url"
+               value="{{ profile_data.get('linkedin_url', '') }}" placeholder="LinkedIn URL">
+      </div>
+
+      <div class="link-row">
+        <div class="link-icon">
+          <svg viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+        </div>
+        <input type="url" class="link-input" name="github_url" id="github_url"
+               value="{{ profile_data.get('github_url', '') }}" placeholder="GitHub URL">
+      </div>
+    </div>
+
+    <!-- ═══════ Skills ═══════ -->
+    <div class="form-section animate-in delay-3">
+      <div class="section-title">Skills</div>
+      <div class="skills-chips" id="skillsContainer">
+        {% for skill in skills %}
+        <span class="skill-chip" data-skill="{{ skill }}">
+          {{ skill }}
+          <button type="button" class="remove" onclick="removeSkill('{{ skill }}')">&times;</button>
+        </span>
+        {% endfor %}
+      </div>
+      <div class="skill-add-row">
+        <input type="text" class="skill-add-input" id="skillInput" placeholder="Add a skill (e.g. Python)">
+        <button type="button" class="btn-add-skill" onclick="addSkill()">+ Add</button>
+      </div>
+      <input type="hidden" name="skills" id="skillsHidden" value="{{ skills | join(',') }}">
+    </div>
+
+    <!-- ═══════ Profile Visibility ═══════ -->
+    <div class="form-section animate-in delay-4">
+      <div class="section-title">Profile Visibility</div>
+
+      <div class="visibility-card">
+        <div class="visibility-info">
+          <h4 id="visibilityTitle">Private Profile</h4>
+          <p id="visibilityDesc">Only you can see your profile details</p>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="visibilityToggle"
+                 {% if user.profile_visibility == 'public' %}checked{% endif %}
+                 onchange="toggleVisibility()">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <input type="hidden" name="profile_visibility" id="visibilityInput"
+             value="{{ user.profile_visibility or 'private' }}">
+
+      <div class="preview-card">
+        <div class="preview-avatar" id="previewAvatar">{{ (user.first_name or 'U')[0] }}</div>
+        <div class="preview-details">
+          <h4 id="previewName">{{ user.first_name or 'Your Name' }} {{ user.last_name or '' }}</h4>
+          <p id="previewHeadline">{{ user.headline or 'Your headline will appear here' }}</p>
+          <div class="preview-tags" id="previewTags">
+            {% for skill in skills[:3] %}
+            <span class="preview-tag">{{ skill }}</span>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Spacer for sticky bar -->
+    <div style="height: 80px;"></div>
+  </form>
+
+</div>
+
+<!-- ═══════ Sticky Bottom Actions ═══════ -->
+<div class="sticky-actions">
+  <button type="button" class="btn-cancel" onclick="history.back()">Cancel</button>
+  <button type="button" class="btn-save" onclick="submitProfile()">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+      <polyline points="17 21 17 13 7 13 7 21"/>
+      <polyline points="7 3 7 8 15 8"/>
+    </svg>
+    Save Changes
+  </button>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  /* ── Skills State ── */
+  let skills = {{ skills | tojson }};
+
+  function renderSkills() {
+    const container = document.getElementById('skillsContainer');
+    container.innerHTML = skills.map(s => `
+      <span class="skill-chip" data-skill="${escapeHtml(s)}">
+        ${escapeHtml(s)}
+        <button type="button" class="remove" onclick="removeSkill('${escapeHtml(s)}')">&times;</button>
+      </span>
+    `).join('');
+    document.getElementById('skillsHidden').value = skills.join(',');
+    updatePreview();
+  }
+
+  function addSkill() {
+    const input = document.getElementById('skillInput');
+    const val = input.value.trim();
+    if (!val) return;
+    if (skills.includes(val)) {
+      showToast('Skill already added');
+      input.value = '';
+      return;
+    }
+    skills.push(val);
+    input.value = '';
+    renderSkills();
+  }
+
+  function removeSkill(skill) {
+    skills = skills.filter(s => s !== skill);
+    renderSkills();
+  }
+
+  document.getElementById('skillInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      addSkill();
+    }
+  });
+
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  /* ── Bio Handling ── */
+  function handleBio(textarea) {
+    // Auto-expand
+    textarea.style.height = 'auto';
+    textarea.style.height = Math.max(120, textarea.scrollHeight) + 'px';
+
+    // Char counter
+    const len = textarea.value.length;
+    const counter = document.getElementById('bioCounter');
+    counter.textContent = len + '/500';
+    counter.className = 'char-counter' + (len > 450 ? ' danger' : len > 350 ? ' warning' : '');
+  }
+
+  // Init bio height
+  (function() {
+    const bio = document.getElementById('bio');
+    if (bio && bio.value) handleBio(bio);
+  })();
+
+  /* ── Visibility Toggle ── */
+  function toggleVisibility() {
+    const checkbox = document.getElementById('visibilityToggle');
+    const input = document.getElementById('visibilityInput');
+    const title = document.getElementById('visibilityTitle');
+    const desc = document.getElementById('visibilityDesc');
+
+    const isPublic = checkbox.checked;
+    input.value = isPublic ? 'public' : 'private';
+    title.textContent = isPublic ? 'Public Profile' : 'Private Profile';
+    desc.textContent = isPublic
+      ? 'Recruiters can find and view your profile'
+      : 'Only you can see your profile details';
+  }
+
+  /* ── Live Preview Updates ── */
+  function updatePreview() {
+    const firstName = document.getElementById('first_name').value || 'Your Name';
+    const lastName = document.getElementById('last_name').value || '';
+    const headline = document.getElementById('headline').value || 'Your headline will appear here';
+
+    document.getElementById('previewName').textContent = (firstName + ' ' + lastName).trim();
+    document.getElementById('previewHeadline').textContent = headline;
+    document.getElementById('previewAvatar').textContent = (firstName[0] || 'U').toUpperCase();
+
+    const tagsContainer = document.getElementById('previewTags');
+    tagsContainer.innerHTML = skills.slice(0, 3).map(s =>
+      `<span class="preview-tag">${escapeHtml(s)}</span>`
+    ).join('');
+  }
+
+  // Attach live listeners
+  ['first_name', 'last_name', 'headline'].forEach(id => {
+    document.getElementById(id).addEventListener('input', updatePreview);
+  });
+
+  /* ── Avatar Preview ── */
+  function handleAvatar(input) {
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const wrapper = document.querySelector('.avatar-wrapper');
+        const existing = wrapper.querySelector('.avatar-img');
+        const placeholder = document.getElementById('avatarPlaceholder');
+        if (existing) {
+          existing.src = e.target.result;
+        } else if (placeholder) {
+          placeholder.outerHTML = `<img src="${e.target.result}" alt="Avatar" class="avatar-img" id="avatarPreview">`;
+        }
+        showToast('Photo selected. Save to upload.');
+      };
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
+
+  /* ── Form Submit ── */
+  async function submitProfile() {
+    const btn = document.querySelector('.btn-save');
+    btn.style.opacity = '0.7';
+    btn.style.pointerEvents = 'none';
+
+    const data = {
+      first_name: document.getElementById('first_name').value,
+      last_name: document.getElementById('last_name').value,
+      phone: document.getElementById('phone').value,
+      location: document.getElementById('location').value,
+      headline: document.getElementById('headline').value,
+      bio: document.getElementById('bio').value,
+      linkedin_url: document.getElementById('linkedin_url').value,
+      github_url: document.getElementById('github_url').value,
+      skills: skills,
+      profile_visibility: document.getElementById('visibilityInput').value
+    };
+
+    try {
+      const res = await fetch('{{ url_for("profile.edit") }}', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCsrfToken()
+        },
+        body: JSON.stringify(data)
+      });
+      const result = await res.json();
+      if (result.success) {
+        showToast(result.message || 'Profile saved!');
+        setTimeout(() => window.location.href = '{{ url_for("profile.edit") }}', 600);
+      } else {
+        showToast(result.message || 'Failed to save', 'error');
+      }
+    } catch (err) {
+      // Fallback to normal form submit
+      document.getElementById('profileForm').submit();
+    } finally {
+      btn.style.opacity = '';
+      btn.style.pointerEvents = '';
+    }
+  }
+
+  /* ── Toast ── */
+  function showToast(message, type = 'success') {
+    const existing = document.querySelector('.mobile-toast');
+    if (existing) existing.remove();
+
+    const toast = document.createElement('div');
+    toast.className = 'mobile-toast';
+    const icon = type === 'success'
+      ? '<svg class="toast-icon toast-success" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>'
+      : '<svg class="toast-icon toast-error" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+
+    toast.innerHTML = icon + '<span>' + message + '</span>';
+    document.body.appendChild(toast);
+
+    requestAnimationFrame(() => toast.classList.add('show'));
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(() => toast.remove(), 300);
+    }, 2500);
+  }
+</script>
+{% endblock %}

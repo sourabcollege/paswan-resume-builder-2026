@@ -8,6 +8,7 @@ from werkzeug.exceptions import HTTPException, RequestEntityTooLarge
 from flask_limiter.errors import RateLimitExceeded
 from jinja2 import TemplateNotFound
 
+from app import is_mobile
 from app.extensions import db, limiter
 from app.logging_config import get_security_logger
 from app.models.activity import ActivityLog
@@ -49,16 +50,44 @@ def dashboard():
         .all()
     )
     recommendations_result = JobService().preview_top_recommendations(current_user._get_current_object())
-    return render_template(
-        "dashboard.html",
-        resume_count=len(resumes),
-        latest_ats_score=latest_score.overall_score if latest_score else None,
-        recent_activity=recent_activity,
-        resumes=resumes[:5],
-        recommendations=recommendations_result.data.get("recommendations", []),
-        resume_context=recommendations_result.data.get("resume_context"),
-        subscription=subscription,
-    )
+
+    # Calculate profile completeness
+    profile_data = current_user.profile_data or {}
+    skills = profile_data.get("skills", [])
+    fields = [
+        current_user.first_name,
+        current_user.last_name,
+        current_user.phone,
+        current_user.location,
+        current_user.headline,
+        current_user.bio,
+        profile_data.get("linkedin_url"),
+        profile_data.get("github_url"),
+        skills,
+    ]
+    completeness = sum(11 for f in fields if f)
+    completeness = min(100, completeness + 10)
+
+    recommendations = recommendations_result.data.get("recommendations", [])
+    job_matches = len(recommendations)
+
+    context = {
+        "resume_count": len(resumes),
+        "latest_ats_score": latest_score.overall_score if latest_score else None,
+        "recent_activity": recent_activity,
+        "resumes": resumes[:5],
+        "recommendations": recommendations,
+        "resume_context": recommendations_result.data.get("resume_context"),
+        "subscription": subscription,
+        "job_matches": job_matches,
+        "completeness": completeness,
+    }
+    if is_mobile():
+        try:
+            return render_template("mobile/dashboard.html", **context)
+        except TemplateNotFound:
+            pass
+    return render_template("dashboard.html", **context)
 
 
 @bp.get("/health")

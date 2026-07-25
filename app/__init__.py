@@ -1,8 +1,16 @@
 import os
 from pathlib import Path
 
-from flask import Flask
+from flask import Flask, request
 from app.extensions import db, migrate, login_manager, csrf, limiter, mail, oauth
+
+
+def is_mobile():
+    """Return True if the request user-agent is a mobile device."""
+    ua = request.headers.get("User-Agent", "")
+    ua = ua.lower()
+    return any(device in ua for device in ("iphone", "android", "ipad", "mobile", "windows phone"))
+
 
 from app.profile import bp as profile_bp
 

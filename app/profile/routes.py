@@ -4,6 +4,9 @@ from app.profile import bp
 from app.extensions import db
 import re
 
+from app import is_mobile
+from jinja2 import TemplateNotFound
+
 
 @bp.route('/edit', methods=['GET', 'POST'])
 @login_required
@@ -52,13 +55,18 @@ def edit():
             completion += 11
     completion = min(100, completion + 10)
 
-    return render_template(
-        'profile/edit.html',
-        user=current_user,
-        profile_data=profile_data,
-        skills=skills,
-        completion=completion,
-    )
+    context = {
+        'user': current_user,
+        'profile_data': profile_data,
+        'skills': skills,
+        'completion': completion,
+    }
+    if is_mobile():
+        try:
+            return render_template('mobile/profile/edit.html', **context)
+        except TemplateNotFound:
+            pass
+    return render_template('profile/edit.html', **context)
 
 
 @bp.route('/settings', methods=['GET', 'POST'])
@@ -73,6 +81,11 @@ def settings():
         elif action == 'update_settings':
             return _handle_update_settings(data)
 
+    if is_mobile():
+        try:
+            return render_template('mobile/profile/settings.html', user=current_user)
+        except TemplateNotFound:
+            pass
     return render_template('profile/settings.html', user=current_user)
 
 

@@ -1,16 +1,8 @@
-paswan-resume-builder-main/
+paswan-resume-builder-2026-main/
 │
 ├── .github/
 │   └── workflows/
 │       └── ci.yml
-├── .pytest_cache/
-│   ├── v/
-│   │   └── cache/
-│   │       ├── lastfailed
-│   │       └── nodeids
-│   ├── .gitignore
-│   ├── CACHEDIR.TAG
-│   └── README.md
 ├── app/
 │   ├── admin/
 │   │   ├── __init__.py
@@ -27,14 +19,10 @@ paswan-resume-builder-main/
 │   │   ├── forms.py
 │   │   ├── routes.py
 │   │   └── utils.py
-│   ├── generated_resumes/
-│   ├── instance/
-│   │   └── paswan_resume_builder_dev.sqlite3
 │   ├── jobs/
 │   │   ├── __init__.py
 │   │   ├── forms.py
 │   │   └── routes.py
-│   ├── logs/
 │   ├── main/
 │   │   ├── __init__.py
 │   │   └── routes.py
@@ -79,10 +67,6 @@ paswan-resume-builder-main/
 │   │   ├── payment_service.py
 │   │   ├── recruiter_service.py
 │   │   └── resume_service.py
-│   ├── uploads/
-│   │   ├── avatars/
-│   │   └── resumes/
-│   │       └── Sourab_Paswan_Resume_19b63a28.docx
 │   ├── utils/
 │   │   ├── __init__.py
 │   │   ├── offline_engines.py
@@ -95,10 +79,6 @@ paswan-resume-builder-main/
 │   └── tasks.py
 ├── docs/
 │   └── ARCHITECTURE.md
-├── generated_resumes/
-├── instance/
-│   └── paswan_resume_builder_dev.sqlite3
-├── logs/
 ├── static/
 │   └── images/
 ├── templates/
@@ -147,11 +127,6 @@ paswan-resume-builder-main/
 │   ├── conftest.py
 │   ├── test_auth.py
 │   └── test_offline_engines.py
-├── uploads/
-│   ├── avatars/
-│   └── resumes/
-│       └── 1/
-├── .env
 ├── .env.example
 ├── .gitignore
 ├── Dockerfile

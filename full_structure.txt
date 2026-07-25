@@ -79,6 +79,10 @@ paswan-resume-builder-2026-main/
 │   └── tasks.py
 ├── docs/
 │   └── ARCHITECTURE.md
+├── generated_resumes/
+├── instance/
+│   └── paswan_resume_builder_dev.sqlite3
+├── logs/
 ├── static/
 │   └── images/
 ├── templates/
@@ -104,6 +108,12 @@ paswan-resume-builder-2026-main/
 │   │   ├── detail.html
 │   │   ├── list.html
 │   │   └── recommendations.html
+│   ├── mobile/
+│   │   ├── profile/
+│   │   │   ├── edit.html
+│   │   │   └── settings.html
+│   │   ├── base.html
+│   │   └── dashboard.html
 │   ├── payment/
 │   │   └── checkout.html
 │   ├── profile/
@@ -127,6 +137,9 @@ paswan-resume-builder-2026-main/
 │   ├── conftest.py
 │   ├── test_auth.py
 │   └── test_offline_engines.py
+├── uploads/
+│   ├── avatars/
+│   └── resumes/
 ├── .env.example
 ├── .gitignore
 ├── Dockerfile

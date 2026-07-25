@@ -52,6 +52,7 @@
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+    html { overflow-x: hidden; width: 100%; }
     body { background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; transition: background 0.3s, color 0.3s; }
 
     .app-container { display: flex; min-height: 100vh; }
@@ -393,10 +394,22 @@
       .sidebar.open { transform: translateX(0); }
       .main-wrapper { margin-left: 0; }
       .mobile-toggle { display: flex; }
-      .top-header { padding: 0 16px 0 60px; }
+      .top-header {
+        flex-wrap: wrap;
+        height: auto;
+        padding: 14px 16px 14px 60px;
+        row-gap: 12px;
+      }
+      .header-greeting { width: 100%; }
+      .header-actions {
+        width: 100%;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
       .dashboard-content { padding: 20px 16px; }
       .form-row { grid-template-columns: 1fr; }
       .header-greeting h1 { font-size: 1.1rem; }
+      .btn-new { padding: 8px 14px; font-size: 0.8rem; }
     }
   </style>
 </head>
